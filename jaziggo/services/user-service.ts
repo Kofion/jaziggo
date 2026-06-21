@@ -281,3 +281,24 @@ export async function deactivateUser(userId: string): Promise<void> {
     throw error
   }
 }
+
+export async function getUserById(userId: string): Promise<UserDto> {
+  await requirePermission(PERMISSION.MANAGE_USERS)
+
+  const parsedUserId = userIdSchema.safeParse(userId)
+
+  if (!parsedUserId.success) {
+    throw UserServiceError.validation()
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: parsedUserId.data },
+    select: USER_DTO_SELECT,
+  })
+
+  if (!user) {
+    throw UserServiceError.notFound()
+  }
+
+  return toUserDto(user)
+}
