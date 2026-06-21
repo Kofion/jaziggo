@@ -996,7 +996,7 @@ components:
       required: [id, name, email, role, status]
       properties:
         id: { type: string, format: uuid }
-        name: { type: string }
+        name: { type: string, minLength: 1 }
         email: { type: string, format: email }
         role:
           $ref: '#/components/schemas/UserRole'
@@ -1038,8 +1038,8 @@ components:
       required: [id, internalCode, fullName, historicalDataIncomplete]
       properties:
         id: { type: string, format: uuid }
-        internalCode: { type: string }
-        fullName: { type: string }
+        internalCode: { type: string, minLength: 1 }
+        fullName: { type: string, minLength: 1 }
         documentMasked: { type: string, description: Only the final four characters may be visible. }
         deathDate: { type: string, format: date }
         burialDate: { type: string, format: date }
@@ -1275,8 +1275,8 @@ components:
         - status
       properties:
         deceasedId: { type: string, format: uuid }
-        internalCode: { type: string }
-        deceasedName: { type: string }
+        internalCode: { type: string, minLength: 1 }
+        deceasedName: { type: string, minLength: 1 }
         deceasedDocumentMasked: { type: string }
         deathDate: { type: string, format: date }
         burialDate: { type: string, format: date }
@@ -1286,7 +1286,7 @@ components:
         burialSpaceId: { type: string, format: uuid }
         burialSpaceType:
           $ref: '#/components/schemas/BurialSpaceType'
-        locationDescription: { type: string }
+        locationDescription: { type: string, minLength: 1 }
         status:
           $ref: '#/components/schemas/BurialSpaceStatus'
     LocationPageResponse:
@@ -1305,7 +1305,7 @@ components:
         - type: object
           required: [title, generatedAt, filters, data]
           properties:
-            title: { type: string }
+            title: { type: string, minLength: 1 }
             generatedAt: { type: string, format: date-time }
             filters: { type: object, additionalProperties: true }
             data:
@@ -1467,7 +1467,7 @@ components:
               required: [format, content]
               properties:
                 format: { type: string, const: prometheus }
-                content: { type: string }
+                content: { type: string, minLength: 1 }
     ErrorResponse:
       type: object
       required: [success, error, requestId]
@@ -1477,12 +1477,12 @@ components:
           type: object
           required: [code, message]
           properties:
-            code: { type: string }
-            message: { type: string }
+            code: { type: string, minLength: 1 }
+            message: { type: string, minLength: 1 }
             fieldErrors:
               type: object
               additionalProperties:
                 type: array
                 items: { type: string }
-        requestId: { type: string }
+        requestId: { type: string, minLength: 1 }
 
