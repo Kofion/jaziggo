@@ -19,6 +19,7 @@ import {
   USER_ROLE,
   USER_STATUS,
   type CreateUserInput,
+  type UpdateUserInput,
   type UserDto,
   type UserRole,
   type UserStatus,
@@ -43,6 +44,24 @@ const createUserSchema = z
   })
   .strict()
 
+const updateUserSchema = z
+  .object({
+    name: z.string().trim().min(1).optional(),
+    email: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .pipe(z.email())
+      .optional(),
+    role: userRoleSchema.optional(),
+  })
+  .strict()
+  .refine((value) => Object.keys(value).length > 0, {
+    message: "Provide at least one field to update",
+  })
+
+const userIdSchema = z.uuid()
+
 const listUsersSchema = paginationSchema
   .extend({
     role: userRoleSchema.optional(),
@@ -61,10 +80,12 @@ const USER_DTO_SELECT = {
 type UserServiceErrorCode =
   | typeof DOMAIN_ERROR_CODE.VALIDATION_ERROR
   | typeof DOMAIN_ERROR_CODE.CONFLICT
+  | typeof DOMAIN_ERROR_CODE.NOT_FOUND
 
 type UserServiceErrorStatus =
   | typeof HTTP_STATUS.UNPROCESSABLE_ENTITY
   | typeof HTTP_STATUS.CONFLICT
+  | typeof HTTP_STATUS.NOT_FOUND
 
 export class UserServiceError extends Error {
   readonly code: UserServiceErrorCode
@@ -96,6 +117,14 @@ export class UserServiceError extends Error {
       "User already exists",
     )
   }
+
+  static notFound(): UserServiceError {
+    return new UserServiceError(
+      DOMAIN_ERROR_CODE.NOT_FOUND,
+      HTTP_STATUS.NOT_FOUND,
+      "User not found",
+    )
+  }
 }
 
 export interface ListUsersInput extends PaginationParams {
@@ -107,6 +136,13 @@ function isUniqueConstraintError(error: unknown): boolean {
   return (
     error instanceof Prisma.PrismaClientKnownRequestError &&
     error.code === "P2002"
+  )
+}
+
+function isRecordNotFoundError(error: unknown): boolean {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2025"
   )
 }
 
@@ -185,5 +221,63 @@ export async function listUsers(
       totalRecords,
       totalPages: Math.ceil(totalRecords / pageSize),
     },
+  }
+}
+
+export async function updateUser(
+  userId: string,
+  input: UpdateUserInput,
+): Promise<UserDto> {
+  await requirePermission(PERMISSION.MANAGE_USERS)
+
+  const parsedUserId = userIdSchema.safeParse(userId)
+  const parsedInput = updateUserSchema.safeParse(input)
+
+  if (!parsedUserId.success || !parsedInput.success) {
+    throw UserServiceError.validation()
+  }
+
+  try {
+    const user = await prisma.user.update({
+      where: { id: parsedUserId.data },
+      data: parsedInput.data,
+      select: USER_DTO_SELECT,
+    })
+
+    return toUserDto(user)
+  } catch (error) {
+    if (isUniqueConstraintError(error)) {
+      throw UserServiceError.conflict()
+    }
+
+    if (isRecordNotFoundError(error)) {
+      throw UserServiceError.notFound()
+    }
+
+    throw error
+  }
+}
+
+export async function deactivateUser(userId: string): Promise<void> {
+  await requirePermission(PERMISSION.MANAGE_USERS)
+
+  const parsedUserId = userIdSchema.safeParse(userId)
+
+  if (!parsedUserId.success) {
+    throw UserServiceError.validation()
+  }
+
+  try {
+    await prisma.user.update({
+      where: { id: parsedUserId.data },
+      data: { status: USER_STATUS.INACTIVE },
+      select: { id: true },
+    })
+  } catch (error) {
+    if (isRecordNotFoundError(error)) {
+      throw UserServiceError.notFound()
+    }
+
+    throw error
   }
 }
