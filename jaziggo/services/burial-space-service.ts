@@ -4,11 +4,14 @@ import { Prisma } from "@prisma/client"
 
 import { requirePermission } from "../lib/auth/permissions"
 import { prisma } from "../lib/db/prisma"
+import { withSerializableTransaction } from "../lib/db/transaction"
 import { toBurialSpaceDto } from "../lib/dto/burial-space"
 import {
   burialSpaceListFiltersSchema,
   createBurialSpaceSchema,
   type BurialSpaceListFiltersInput,
+  type UpdateBurialSpaceStatusInput,
+  updateBurialSpaceStatusSchema,
 } from "../lib/validation/burial-space"
 import { uuidSchema } from "../lib/validation/common"
 import {
@@ -89,6 +92,14 @@ export class BurialSpaceServiceError extends Error {
       DOMAIN_ERROR_CODE.NOT_FOUND,
       HTTP_STATUS.NOT_FOUND,
       "Burial space not found",
+    )
+  }
+
+  static statusConflict(): BurialSpaceServiceError {
+    return new BurialSpaceServiceError(
+      DOMAIN_ERROR_CODE.CONFLICT,
+      HTTP_STATUS.CONFLICT,
+      "Burial space status conflicts with active links",
     )
   }
 }
@@ -226,5 +237,49 @@ export async function getBurialSpaceById(
   return toBurialSpaceDto({
     ...space,
     activeLinkCount: space._count.burialLinks,
+  })
+}
+
+export async function updateBurialSpaceStatus(
+  burialSpaceId: string,
+  input: UpdateBurialSpaceStatusInput,
+): Promise<BurialSpaceListItemDto> {
+  await requirePermission(PERMISSION.MANAGE_OPERATIONAL_RECORDS)
+
+  const parsedId = uuidSchema.safeParse(burialSpaceId)
+  const parsedInput = updateBurialSpaceStatusSchema.safeParse(input)
+
+  if (!parsedId.success || !parsedInput.success) {
+    throw BurialSpaceServiceError.validation()
+  }
+
+  if (parsedInput.data.status === "OCCUPIED") {
+    throw BurialSpaceServiceError.statusConflict()
+  }
+
+  return withSerializableTransaction(async (transaction) => {
+    const currentSpace = await transaction.burialSpace.findUnique({
+      where: { id: parsedId.data },
+      select: BURIAL_SPACE_DTO_SELECT,
+    })
+
+    if (!currentSpace) {
+      throw BurialSpaceServiceError.notFound()
+    }
+
+    if (currentSpace._count.burialLinks > 0) {
+      throw BurialSpaceServiceError.statusConflict()
+    }
+
+    const updatedSpace = await transaction.burialSpace.update({
+      where: { id: parsedId.data },
+      data: { status: parsedInput.data.status },
+      select: BURIAL_SPACE_DTO_SELECT,
+    })
+
+    return toBurialSpaceDto({
+      ...updatedSpace,
+      activeLinkCount: updatedSpace._count.burialLinks,
+    })
   })
 }
