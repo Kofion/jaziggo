@@ -120,7 +120,7 @@ serviço ou contrato permanecem sequenciais.
 - [X] T054 [P] [US3] Fase 6 — Implementar handlers de coleção de espaços | Arquivos: `jaziggo/app/api/v1/burial-spaces/route.ts` | Dependências: T053 | Conclusão: GET/POST cumprem filtros, DTO e erros do contrato | Paralelo: sim | Docs Next.js: consultar guia local de Route Handlers antes
 - [X] T055 [P] [US3] Fase 6 — Implementar handlers de detalhe e edição de espaço | Arquivos: `jaziggo/app/api/v1/burial-spaces/[id]/route.ts` | Dependências: T053 | Conclusão: GET/PUT revalidam capacidade/localização e preservam histórico | Paralelo: sim | Docs Next.js: consultar guia local de Route Handlers e parâmetros dinâmicos antes
 - [X] T056 [P] [US3] Fase 6 — Implementar handler de alteração de status | Arquivos: `jaziggo/app/api/v1/burial-spaces/[id]/status/route.ts` | Dependências: T053 | Conclusão: PATCH exige confirmação e retorna 409 quando há vínculo ativo incompatível | Paralelo: sim | Docs Next.js: consultar guia local de Route Handlers antes
-- [ ] T057 [US3] Fase 6 — Criar fixtures de sepultura e jazigos em todos os estados/capacidades | Arquivos: `jaziggo/tests/fixtures/burial-spaces.ts` | Dependências: T053 | Conclusão: inclui sepultura capacidade 1 e jazigo capacidade 2 | Paralelo: não | Docs Next.js: consultar `jaziggo/node_modules/next/dist/docs/` antes da implementação
+- [X] T057 [US3] Fase 6 — Criar fixtures de sepultura e jazigos em todos os estados/capacidades | Arquivos: `jaziggo/tests/fixtures/burial-spaces.ts` | Dependências: T053 | Conclusão: inclui sepultura capacidade 1 e jazigo capacidade 2 | Paralelo: não | Docs Next.js: consultar `jaziggo/node_modules/next/dist/docs/` antes da implementação
 
 ---
 
