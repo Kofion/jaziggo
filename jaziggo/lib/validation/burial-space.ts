@@ -84,31 +84,29 @@ export const createBurialSpaceSchema = z
   }))
 
 export const updateBurialSpaceSchema = z
-  .object({
-    type: burialSpaceTypeSchema.optional(),
-    identifier: optionalTrimmedStringSchema,
-    capacity: z.number().int().positive().safe().optional(),
-    ...burialSpaceLocationFields,
-  })
-  .strict()
-  .superRefine((value, context) => {
-    if (Object.keys(value).length === 0) {
-      context.addIssue({
-        code: "custom",
-        message: "Provide at least one field to update",
+  .discriminatedUnion("type", [
+    z
+      .object({
+        type: z.literal("SEPULTURA"),
+        identifier: requiredTrimmedStringSchema,
+        capacity: z.literal(1),
+        ...burialSpaceLocationFields,
       })
-    }
-
-    if (value.type === "SEPULTURA" && value.capacity !== undefined) {
-      if (value.capacity !== 1) {
-        context.addIssue({
-          code: "custom",
-          message: "SEPULTURA capacity must be 1",
-          path: ["capacity"],
-        })
-      }
-    }
-  })
+      .strict(),
+    z
+      .object({
+        type: z.literal("JAZIGO"),
+        identifier: requiredTrimmedStringSchema,
+        capacity: z.number().int().positive().safe(),
+        ...burialSpaceLocationFields,
+      })
+      .strict(),
+  ])
+  .superRefine(requireLocation)
+  .transform((value) => ({
+    ...value,
+    locationKey: generateLocationKey(value),
+  }))
 
 export const updateBurialSpaceStatusSchema = z
   .object({

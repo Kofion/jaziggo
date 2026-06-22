@@ -10,6 +10,7 @@ import {
   burialSpaceListFiltersSchema,
   createBurialSpaceSchema,
   type BurialSpaceListFiltersInput,
+  updateBurialSpaceSchema,
   type UpdateBurialSpaceStatusInput,
   updateBurialSpaceStatusSchema,
 } from "../lib/validation/burial-space"
@@ -23,6 +24,7 @@ import { PERMISSION } from "../types/auth"
 import type {
   BurialSpaceListItemDto,
   CreateBurialSpaceInput,
+  UpdateBurialSpaceInput,
 } from "../types/burial-space"
 
 const BURIAL_SPACE_DTO_SELECT = {
@@ -100,6 +102,14 @@ export class BurialSpaceServiceError extends Error {
       DOMAIN_ERROR_CODE.CONFLICT,
       HTTP_STATUS.CONFLICT,
       "Burial space status conflicts with active links",
+    )
+  }
+
+  static capacityConflict(): BurialSpaceServiceError {
+    return new BurialSpaceServiceError(
+      DOMAIN_ERROR_CODE.CONFLICT,
+      HTTP_STATUS.CONFLICT,
+      "Burial space capacity conflicts with active links",
     )
   }
 }
@@ -238,6 +248,71 @@ export async function getBurialSpaceById(
     ...space,
     activeLinkCount: space._count.burialLinks,
   })
+}
+
+export async function updateBurialSpace(
+  burialSpaceId: string,
+  input: UpdateBurialSpaceInput,
+): Promise<BurialSpaceListItemDto> {
+  await requirePermission(PERMISSION.MANAGE_OPERATIONAL_RECORDS)
+
+  const parsedId = uuidSchema.safeParse(burialSpaceId)
+  const parsedInput = updateBurialSpaceSchema.safeParse(input)
+
+  if (!parsedId.success || !parsedInput.success) {
+    throw BurialSpaceServiceError.validation()
+  }
+
+  try {
+    return await withSerializableTransaction(async (transaction) => {
+      const currentSpace = await transaction.burialSpace.findUnique({
+        where: { id: parsedId.data },
+        select: BURIAL_SPACE_DTO_SELECT,
+      })
+
+      if (!currentSpace) {
+        throw BurialSpaceServiceError.notFound()
+      }
+
+      if (parsedInput.data.capacity < currentSpace._count.burialLinks) {
+        throw BurialSpaceServiceError.capacityConflict()
+      }
+
+      const {
+        sector,
+        block,
+        street,
+        row,
+        number,
+        complement,
+        ...requiredData
+      } = parsedInput.data
+      const updatedSpace = await transaction.burialSpace.update({
+        where: { id: parsedId.data },
+        data: {
+          ...requiredData,
+          sector: sector ?? null,
+          block: block ?? null,
+          street: street ?? null,
+          row: row ?? null,
+          number: number ?? null,
+          complement: complement ?? null,
+        },
+        select: BURIAL_SPACE_DTO_SELECT,
+      })
+
+      return toBurialSpaceDto({
+        ...updatedSpace,
+        activeLinkCount: updatedSpace._count.burialLinks,
+      })
+    })
+  } catch (error) {
+    if (isUniqueConstraintError(error)) {
+      throw BurialSpaceServiceError.conflict()
+    }
+
+    throw error
+  }
 }
 
 export async function updateBurialSpaceStatus(
