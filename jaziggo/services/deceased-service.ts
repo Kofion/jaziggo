@@ -5,7 +5,10 @@ import { Prisma } from "@prisma/client"
 import { requirePermission } from "../lib/auth/permissions"
 import { prisma } from "../lib/db/prisma"
 import { generateUniqueInternalCode } from "../lib/deceased/internal-code"
-import { toDeceasedDetailDto } from "../lib/dto/deceased"
+import {
+  toDeceasedDetailDto,
+  toDeceasedDuplicateCandidateDto,
+} from "../lib/dto/deceased"
 import { uuidSchema } from "../lib/validation/common"
 import {
   createDeceasedSchema,
@@ -16,7 +19,23 @@ import {
 import { normalizeSearchName } from "../lib/validation/normalize"
 import { DOMAIN_ERROR_CODE, HTTP_STATUS } from "../types/api"
 import { PERMISSION } from "../types/auth"
-import type { DeceasedDetailDto } from "../types/deceased"
+import type {
+  DeceasedDetailDto,
+  DeceasedDuplicateCandidateDto,
+} from "../types/deceased"
+
+const MAX_DUPLICATE_CANDIDATES = 25
+
+const DECEASED_DUPLICATE_DTO_SELECT = {
+  id: true,
+  internalCode: true,
+  fullName: true,
+  document: true,
+  birthDate: true,
+  deathDate: true,
+  burialDate: true,
+  historicalDataIncomplete: true,
+} as const satisfies Prisma.DeceasedSelect
 
 const DECEASED_DETAIL_DTO_SELECT = {
   id: true,
@@ -85,6 +104,78 @@ function calculateHistoricalDataIncomplete(
   datesUnknown: boolean | undefined,
 ): boolean {
   return document === undefined || datesUnknown === true
+}
+
+function toDateFilter(value: string): Date {
+  return new Date(`${value}T00:00:00.000Z`)
+}
+
+function buildDuplicateMatchFilters(input: {
+  document?: string
+  birthDate?: string
+  deathDate?: string
+  burialDate?: string
+}): Prisma.DeceasedWhereInput[] {
+  const filters: Prisma.DeceasedWhereInput[] = []
+
+  if (input.document !== undefined) {
+    filters.push({ document: input.document })
+  }
+
+  if (input.birthDate !== undefined) {
+    filters.push({ birthDate: toDateFilter(input.birthDate) })
+  }
+
+  if (input.deathDate !== undefined) {
+    filters.push({ deathDate: toDateFilter(input.deathDate) })
+  }
+
+  if (input.burialDate !== undefined) {
+    filters.push({ burialDate: toDateFilter(input.burialDate) })
+  }
+
+  return filters
+}
+
+export interface CheckDeceasedDuplicatesOptions {
+  excludeDeceasedId?: string
+}
+
+export async function checkDeceasedDuplicates(
+  input: CreateDeceasedInput,
+  options: CheckDeceasedDuplicatesOptions = {},
+): Promise<DeceasedDuplicateCandidateDto[]> {
+  await requirePermission(PERMISSION.MANAGE_OPERATIONAL_RECORDS)
+
+  const parsedInput = createDeceasedSchema.safeParse(input)
+  const parsedExcludedId =
+    options.excludeDeceasedId === undefined
+      ? undefined
+      : uuidSchema.safeParse(options.excludeDeceasedId)
+
+  if (
+    !parsedInput.success ||
+    (parsedExcludedId !== undefined && !parsedExcludedId.success)
+  ) {
+    throw DeceasedServiceError.validation()
+  }
+
+  const matchFilters = buildDuplicateMatchFilters(parsedInput.data)
+  const candidates = await prisma.deceased.findMany({
+    where: {
+      searchName: normalizeSearchName(parsedInput.data.fullName),
+      id:
+        parsedExcludedId === undefined
+          ? undefined
+          : { not: parsedExcludedId.data },
+      ...(matchFilters.length === 0 ? {} : { OR: matchFilters }),
+    },
+    select: DECEASED_DUPLICATE_DTO_SELECT,
+    orderBy: [{ historicalDataIncomplete: "asc" }, { createdAt: "asc" }],
+    take: MAX_DUPLICATE_CANDIDATES,
+  })
+
+  return candidates.map(toDeceasedDuplicateCandidateDto)
 }
 
 export async function createDeceased(
