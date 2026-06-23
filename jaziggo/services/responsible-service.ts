@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client"
 
 import { requirePermission } from "../lib/auth/permissions"
 import { prisma } from "../lib/db/prisma"
+import { withSerializableTransaction } from "../lib/db/transaction"
 import {
   toResponsibleDetailDto,
   toResponsibleListItemDto,
@@ -25,6 +26,8 @@ import {
 } from "../types/api"
 import { PERMISSION } from "../types/auth"
 import type {
+  CreateResponsibleLinkCommand,
+  ResponsibleLinkTarget,
   ResponsibleDetailDto,
   ResponsibleLinkDto,
   ResponsibleListItemDto,
@@ -69,10 +72,12 @@ type ResponsibleLinkDtoSource = Prisma.ResponsibleLinkGetPayload<{
 
 type ResponsibleServiceErrorCode =
   | typeof DOMAIN_ERROR_CODE.VALIDATION_ERROR
+  | typeof DOMAIN_ERROR_CODE.CONFLICT
   | typeof DOMAIN_ERROR_CODE.NOT_FOUND
 
 type ResponsibleServiceErrorStatus =
   | typeof HTTP_STATUS.UNPROCESSABLE_ENTITY
+  | typeof HTTP_STATUS.CONFLICT
   | typeof HTTP_STATUS.NOT_FOUND
 
 export class ResponsibleServiceError extends Error {
@@ -103,6 +108,14 @@ export class ResponsibleServiceError extends Error {
       DOMAIN_ERROR_CODE.NOT_FOUND,
       HTTP_STATUS.NOT_FOUND,
       "Responsible not found",
+    )
+  }
+
+  static conflict(): ResponsibleServiceError {
+    return new ResponsibleServiceError(
+      DOMAIN_ERROR_CODE.CONFLICT,
+      HTTP_STATUS.CONFLICT,
+      "Responsible link already exists",
     )
   }
 }
@@ -183,6 +196,99 @@ function toResponsibleLinkDto(
     status: "ENDED",
     endedAt: link.endedAt.toISOString(),
     endReason: link.endReason,
+  }
+}
+
+function parseResponsibleLinkTarget(
+  input: CreateResponsibleLinkCommand,
+): ResponsibleLinkTarget | null {
+  if (input.linkType === "DECEASED") {
+    const parsedDeceasedId = uuidSchema.safeParse(input.deceasedId)
+
+    if (
+      !parsedDeceasedId.success ||
+      input.burialSpaceId !== undefined
+    ) {
+      return null
+    }
+
+    return {
+      linkType: "DECEASED",
+      deceasedId: parsedDeceasedId.data,
+    }
+  }
+
+  if (input.linkType === "BURIAL_SPACE") {
+    const parsedBurialSpaceId = uuidSchema.safeParse(
+      input.burialSpaceId,
+    )
+
+    if (
+      !parsedBurialSpaceId.success ||
+      input.deceasedId !== undefined
+    ) {
+      return null
+    }
+
+    return {
+      linkType: "BURIAL_SPACE",
+      burialSpaceId: parsedBurialSpaceId.data,
+    }
+  }
+
+  return null
+}
+
+async function assertResponsibleLinkTargetExists(
+  transaction: Prisma.TransactionClient,
+  target: ResponsibleLinkTarget,
+): Promise<void> {
+  const targetExists =
+    target.linkType === "DECEASED"
+      ? await transaction.deceased.findUnique({
+          where: { id: target.deceasedId },
+          select: { id: true },
+        })
+      : await transaction.burialSpace.findUnique({
+          where: { id: target.burialSpaceId },
+          select: { id: true },
+        })
+
+  if (!targetExists) {
+    throw ResponsibleServiceError.notFound()
+  }
+}
+
+function buildResponsibleLinkWhere(
+  responsibleId: string,
+  target: ResponsibleLinkTarget,
+): Prisma.ResponsibleLinkWhereInput {
+  return {
+    responsibleId,
+    status: "ACTIVE",
+    linkType: target.linkType,
+    deceasedId:
+      target.linkType === "DECEASED" ? target.deceasedId : null,
+    burialSpaceId:
+      target.linkType === "BURIAL_SPACE"
+        ? target.burialSpaceId
+        : null,
+  }
+}
+
+function buildResponsibleLinkCreateData(
+  responsibleId: string,
+  target: ResponsibleLinkTarget,
+): Prisma.ResponsibleLinkUncheckedCreateInput {
+  return {
+    responsibleId,
+    linkType: target.linkType,
+    deceasedId:
+      target.linkType === "DECEASED" ? target.deceasedId : null,
+    burialSpaceId:
+      target.linkType === "BURIAL_SPACE"
+        ? target.burialSpaceId
+        : null,
   }
 }
 
@@ -315,4 +421,88 @@ export async function getResponsibleById(
     ...responsible,
     links: responsible.links.map(toResponsibleLinkDto),
   })
+}
+
+export async function createResponsibleLink(
+  input: CreateResponsibleLinkCommand,
+): Promise<ResponsibleLinkDto> {
+  await requirePermission(PERMISSION.MANAGE_OPERATIONAL_RECORDS)
+
+  const parsedResponsibleId = uuidSchema.safeParse(
+    input.responsibleId,
+  )
+  const target = parseResponsibleLinkTarget(input)
+
+  if (!parsedResponsibleId.success || target === null) {
+    throw ResponsibleServiceError.validation()
+  }
+
+  return withSerializableTransaction(async (transaction) => {
+    const responsible = await transaction.responsible.findUnique({
+      where: { id: parsedResponsibleId.data },
+      select: { id: true },
+    })
+
+    if (!responsible) {
+      throw ResponsibleServiceError.notFound()
+    }
+
+    await assertResponsibleLinkTargetExists(transaction, target)
+
+    const duplicateActiveLink =
+      await transaction.responsibleLink.findFirst({
+        where: buildResponsibleLinkWhere(
+          parsedResponsibleId.data,
+          target,
+        ),
+        select: { id: true },
+      })
+
+    if (duplicateActiveLink) {
+      throw ResponsibleServiceError.conflict()
+    }
+
+    const link = await transaction.responsibleLink.create({
+      data: buildResponsibleLinkCreateData(
+        parsedResponsibleId.data,
+        target,
+      ),
+      select: RESPONSIBLE_LINK_DTO_SELECT,
+    })
+
+    return toResponsibleLinkDto(link)
+  })
+}
+
+export async function listResponsibleLinks(
+  responsibleId: string,
+): Promise<ResponsibleLinkDto[]> {
+  await requirePermission(PERMISSION.MANAGE_OPERATIONAL_RECORDS)
+
+  const parsedResponsibleId = uuidSchema.safeParse(responsibleId)
+
+  if (!parsedResponsibleId.success) {
+    throw ResponsibleServiceError.validation()
+  }
+
+  const responsible = await prisma.responsible.findUnique({
+    where: { id: parsedResponsibleId.data },
+    select: {
+      id: true,
+      links: {
+        select: RESPONSIBLE_LINK_DTO_SELECT,
+        orderBy: [
+          { status: "asc" },
+          { createdAt: "desc" },
+          { id: "asc" },
+        ],
+      },
+    },
+  })
+
+  if (!responsible) {
+    throw ResponsibleServiceError.notFound()
+  }
+
+  return responsible.links.map(toResponsibleLinkDto)
 }
