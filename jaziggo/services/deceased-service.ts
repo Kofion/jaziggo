@@ -8,23 +8,43 @@ import { generateUniqueInternalCode } from "../lib/deceased/internal-code"
 import {
   toDeceasedDetailDto,
   toDeceasedDuplicateCandidateDto,
+  toDeceasedListItemDto,
 } from "../lib/dto/deceased"
 import { uuidSchema } from "../lib/validation/common"
 import {
   createDeceasedSchema,
   type CreateDeceasedInput,
+  deceasedExactDocumentSearchSchema,
+  type DeceasedExactDocumentSearchInput,
+  deceasedListFiltersSchema,
+  type DeceasedListFiltersInput,
   type UpdateDeceasedInput,
   updateDeceasedSchema,
 } from "../lib/validation/deceased"
 import { normalizeSearchName } from "../lib/validation/normalize"
-import { DOMAIN_ERROR_CODE, HTTP_STATUS } from "../types/api"
+import {
+  DOMAIN_ERROR_CODE,
+  HTTP_STATUS,
+  type PaginatedData,
+} from "../types/api"
 import { PERMISSION } from "../types/auth"
 import type {
   DeceasedDetailDto,
   DeceasedDuplicateCandidateDto,
+  DeceasedListItemDto,
 } from "../types/deceased"
 
 const MAX_DUPLICATE_CANDIDATES = 25
+
+const DECEASED_LIST_DTO_SELECT = {
+  id: true,
+  internalCode: true,
+  fullName: true,
+  document: true,
+  deathDate: true,
+  burialDate: true,
+  historicalDataIncomplete: true,
+} as const satisfies Prisma.DeceasedSelect
 
 const DECEASED_DUPLICATE_DTO_SELECT = {
   id: true,
@@ -178,6 +198,89 @@ export async function checkDeceasedDuplicates(
   return candidates.map(toDeceasedDuplicateCandidateDto)
 }
 
+async function findDeceasedPage(
+  where: Prisma.DeceasedWhereInput,
+  page: number,
+  pageSize: number,
+): Promise<PaginatedData<DeceasedListItemDto>> {
+  const skip = (page - 1) * pageSize
+
+  if (!Number.isSafeInteger(skip)) {
+    throw DeceasedServiceError.validation()
+  }
+
+  const [deceasedRecords, totalRecords] = await prisma.$transaction([
+    prisma.deceased.findMany({
+      where,
+      select: DECEASED_LIST_DTO_SELECT,
+      orderBy: [{ searchName: "asc" }, { internalCode: "asc" }],
+      skip,
+      take: pageSize,
+    }),
+    prisma.deceased.count({ where }),
+  ])
+
+  return {
+    items: deceasedRecords.map(toDeceasedListItemDto),
+    pagination: {
+      page,
+      pageSize,
+      totalRecords,
+      totalPages: Math.ceil(totalRecords / pageSize),
+    },
+  }
+}
+
+export async function listDeceased(
+  input: DeceasedListFiltersInput = {},
+): Promise<PaginatedData<DeceasedListItemDto>> {
+  await requirePermission(PERMISSION.SEARCH_RECORDS)
+
+  const parsedInput = deceasedListFiltersSchema.safeParse(input)
+
+  if (!parsedInput.success) {
+    throw DeceasedServiceError.validation()
+  }
+
+  const {
+    page,
+    pageSize,
+    name,
+    internalCode,
+    deathDate,
+    burialDate,
+    burialSpaceId,
+  } = parsedInput.data
+  const where: Prisma.DeceasedWhereInput = {
+    searchName: name === undefined ? undefined : { contains: name },
+    internalCode,
+    deathDate: deathDate === undefined ? undefined : toDateFilter(deathDate),
+    burialDate:
+      burialDate === undefined ? undefined : toDateFilter(burialDate),
+    burialLinks:
+      burialSpaceId === undefined
+        ? undefined
+        : { some: { burialSpaceId } },
+  }
+
+  return findDeceasedPage(where, page, pageSize)
+}
+
+export async function searchDeceasedByDocument(
+  input: DeceasedExactDocumentSearchInput,
+): Promise<PaginatedData<DeceasedListItemDto>> {
+  await requirePermission(PERMISSION.SEARCH_RECORDS)
+
+  const parsedInput = deceasedExactDocumentSearchSchema.safeParse(input)
+
+  if (!parsedInput.success) {
+    throw DeceasedServiceError.validation()
+  }
+
+  const { document, page, pageSize } = parsedInput.data
+
+  return findDeceasedPage({ document }, page, pageSize)
+}
 export async function createDeceased(
   input: CreateDeceasedInput,
 ): Promise<DeceasedDetailDto> {
