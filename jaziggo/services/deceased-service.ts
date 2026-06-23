@@ -281,6 +281,30 @@ export async function searchDeceasedByDocument(
 
   return findDeceasedPage({ document }, page, pageSize)
 }
+
+export async function getDeceasedById(
+  deceasedId: string,
+): Promise<DeceasedDetailDto> {
+  await requirePermission(PERMISSION.SEARCH_RECORDS)
+
+  const parsedId = uuidSchema.safeParse(deceasedId)
+
+  if (!parsedId.success) {
+    throw DeceasedServiceError.validation()
+  }
+
+  const deceased = await prisma.deceased.findUnique({
+    where: { id: parsedId.data },
+    select: DECEASED_DETAIL_DTO_SELECT,
+  })
+
+  if (!deceased) {
+    throw DeceasedServiceError.notFound()
+  }
+
+  return toDeceasedDetailDto(deceased)
+}
+
 export async function createDeceased(
   input: CreateDeceasedInput,
 ): Promise<DeceasedDetailDto> {
