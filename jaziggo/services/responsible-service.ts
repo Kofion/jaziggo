@@ -27,6 +27,7 @@ import {
 import { PERMISSION } from "../types/auth"
 import type {
   CreateResponsibleLinkCommand,
+  EndResponsibleLinkCommand,
   ResponsibleLinkTarget,
   ResponsibleDetailDto,
   ResponsibleLinkDto,
@@ -111,11 +112,27 @@ export class ResponsibleServiceError extends Error {
     )
   }
 
+  static linkNotFound(): ResponsibleServiceError {
+    return new ResponsibleServiceError(
+      DOMAIN_ERROR_CODE.NOT_FOUND,
+      HTTP_STATUS.NOT_FOUND,
+      "Responsible link not found",
+    )
+  }
+
   static conflict(): ResponsibleServiceError {
     return new ResponsibleServiceError(
       DOMAIN_ERROR_CODE.CONFLICT,
       HTTP_STATUS.CONFLICT,
       "Responsible link already exists",
+    )
+  }
+
+  static linkAlreadyEnded(): ResponsibleServiceError {
+    return new ResponsibleServiceError(
+      DOMAIN_ERROR_CODE.CONFLICT,
+      HTTP_STATUS.CONFLICT,
+      "Responsible link already ended",
     )
   }
 }
@@ -289,6 +306,36 @@ function buildResponsibleLinkCreateData(
       target.linkType === "BURIAL_SPACE"
         ? target.burialSpaceId
         : null,
+  }
+}
+
+function parseEndResponsibleLinkCommand(input: EndResponsibleLinkCommand): {
+  responsibleLinkId: string
+  endedAt: Date
+  endReason: string
+} | null {
+  const parsedResponsibleLinkId = uuidSchema.safeParse(
+    input.responsibleLinkId,
+  )
+  const endReason =
+    typeof input.endReason === "string" ? input.endReason.trim() : ""
+  const endedAt =
+    typeof input.endedAt === "string" ? new Date(input.endedAt) : null
+
+  if (
+    !parsedResponsibleLinkId.success ||
+    input.confirmation !== true ||
+    endReason.length === 0 ||
+    endedAt === null ||
+    Number.isNaN(endedAt.getTime())
+  ) {
+    return null
+  }
+
+  return {
+    responsibleLinkId: parsedResponsibleLinkId.data,
+    endedAt,
+    endReason,
   }
 }
 
@@ -471,6 +518,46 @@ export async function createResponsibleLink(
     })
 
     return toResponsibleLinkDto(link)
+  })
+}
+
+export async function endResponsibleLink(
+  input: EndResponsibleLinkCommand,
+): Promise<ResponsibleLinkDto> {
+  await requirePermission(PERMISSION.MANAGE_OPERATIONAL_RECORDS)
+
+  const parsedInput = parseEndResponsibleLinkCommand(input)
+
+  if (parsedInput === null) {
+    throw ResponsibleServiceError.validation()
+  }
+
+  return withSerializableTransaction(async (transaction) => {
+    const responsibleLink = await transaction.responsibleLink.findUnique({
+      where: { id: parsedInput.responsibleLinkId },
+      select: RESPONSIBLE_LINK_DTO_SELECT,
+    })
+
+    if (responsibleLink === null) {
+      throw ResponsibleServiceError.linkNotFound()
+    }
+
+    if (responsibleLink.status === "ENDED") {
+      throw ResponsibleServiceError.linkAlreadyEnded()
+    }
+
+    const updatedResponsibleLink =
+      await transaction.responsibleLink.update({
+        where: { id: parsedInput.responsibleLinkId },
+        data: {
+          status: "ENDED",
+          endedAt: parsedInput.endedAt,
+          endReason: parsedInput.endReason,
+        },
+        select: RESPONSIBLE_LINK_DTO_SELECT,
+      })
+
+    return toResponsibleLinkDto(updatedResponsibleLink)
   })
 }
 
