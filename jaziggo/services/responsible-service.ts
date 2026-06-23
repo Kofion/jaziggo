@@ -4,7 +4,10 @@ import { Prisma } from "@prisma/client"
 
 import { requirePermission } from "../lib/auth/permissions"
 import { prisma } from "../lib/db/prisma"
-import { toResponsibleListItemDto } from "../lib/dto/responsible"
+import {
+  toResponsibleDetailDto,
+  toResponsibleListItemDto,
+} from "../lib/dto/responsible"
 import { uuidSchema } from "../lib/validation/common"
 import { normalizeSearchName } from "../lib/validation/normalize"
 import {
@@ -21,13 +24,48 @@ import {
   type PaginatedData,
 } from "../types/api"
 import { PERMISSION } from "../types/auth"
-import type { ResponsibleListItemDto } from "../types/responsible"
+import type {
+  ResponsibleDetailDto,
+  ResponsibleLinkDto,
+  ResponsibleListItemDto,
+} from "../types/responsible"
 
 const RESPONSIBLE_LIST_DTO_SELECT = {
   id: true,
   fullName: true,
   document: true,
 } as const satisfies Prisma.ResponsibleSelect
+
+const RESPONSIBLE_LINK_DTO_SELECT = {
+  id: true,
+  responsibleId: true,
+  linkType: true,
+  deceasedId: true,
+  burialSpaceId: true,
+  status: true,
+  endedAt: true,
+  endReason: true,
+  createdAt: true,
+} as const satisfies Prisma.ResponsibleLinkSelect
+
+const RESPONSIBLE_DETAIL_DTO_SELECT = {
+  ...RESPONSIBLE_LIST_DTO_SELECT,
+  phone: true,
+  email: true,
+  address: true,
+  links: {
+    select: RESPONSIBLE_LINK_DTO_SELECT,
+    orderBy: [
+      { status: "asc" },
+      { createdAt: "desc" },
+      { id: "asc" },
+    ],
+  },
+} as const satisfies Prisma.ResponsibleSelect
+
+type ResponsibleLinkDtoSource = Prisma.ResponsibleLinkGetPayload<{
+  select: typeof RESPONSIBLE_LINK_DTO_SELECT
+}>
 
 type ResponsibleServiceErrorCode =
   | typeof DOMAIN_ERROR_CODE.VALIDATION_ERROR
@@ -74,6 +112,78 @@ function isRecordNotFoundError(error: unknown): boolean {
     error instanceof Prisma.PrismaClientKnownRequestError &&
     error.code === "P2025"
   )
+}
+
+function toResponsibleLinkDto(
+  link: ResponsibleLinkDtoSource,
+): ResponsibleLinkDto {
+  const base = {
+    id: link.id,
+    responsibleId: link.responsibleId,
+    createdAt: link.createdAt.toISOString(),
+  }
+
+  if (link.linkType === "DECEASED") {
+    if (link.deceasedId === null || link.burialSpaceId !== null) {
+      throw new Error("Invalid responsible link target")
+    }
+
+    if (link.status === "ACTIVE") {
+      if (link.endedAt !== null || link.endReason !== null) {
+        throw new Error("Invalid active responsible link lifecycle")
+      }
+
+      return {
+        ...base,
+        linkType: "DECEASED",
+        deceasedId: link.deceasedId,
+        status: "ACTIVE",
+      }
+    }
+
+    if (link.endedAt === null || link.endReason === null) {
+      throw new Error("Invalid ended responsible link lifecycle")
+    }
+
+    return {
+      ...base,
+      linkType: "DECEASED",
+      deceasedId: link.deceasedId,
+      status: "ENDED",
+      endedAt: link.endedAt.toISOString(),
+      endReason: link.endReason,
+    }
+  }
+
+  if (link.burialSpaceId === null || link.deceasedId !== null) {
+    throw new Error("Invalid responsible link target")
+  }
+
+  if (link.status === "ACTIVE") {
+    if (link.endedAt !== null || link.endReason !== null) {
+      throw new Error("Invalid active responsible link lifecycle")
+    }
+
+    return {
+      ...base,
+      linkType: "BURIAL_SPACE",
+      burialSpaceId: link.burialSpaceId,
+      status: "ACTIVE",
+    }
+  }
+
+  if (link.endedAt === null || link.endReason === null) {
+    throw new Error("Invalid ended responsible link lifecycle")
+  }
+
+  return {
+    ...base,
+    linkType: "BURIAL_SPACE",
+    burialSpaceId: link.burialSpaceId,
+    status: "ENDED",
+    endedAt: link.endedAt.toISOString(),
+    endReason: link.endReason,
+  }
 }
 
 export async function createResponsible(
@@ -179,4 +289,30 @@ export async function listResponsibles(
       totalPages: Math.ceil(totalRecords / pageSize),
     },
   }
+}
+
+export async function getResponsibleById(
+  responsibleId: string,
+): Promise<ResponsibleDetailDto> {
+  await requirePermission(PERMISSION.MANAGE_OPERATIONAL_RECORDS)
+
+  const parsedId = uuidSchema.safeParse(responsibleId)
+
+  if (!parsedId.success) {
+    throw ResponsibleServiceError.validation()
+  }
+
+  const responsible = await prisma.responsible.findUnique({
+    where: { id: parsedId.data },
+    select: RESPONSIBLE_DETAIL_DTO_SELECT,
+  })
+
+  if (!responsible) {
+    throw ResponsibleServiceError.notFound()
+  }
+
+  return toResponsibleDetailDto({
+    ...responsible,
+    links: responsible.links.map(toResponsibleLinkDto),
+  })
 }
