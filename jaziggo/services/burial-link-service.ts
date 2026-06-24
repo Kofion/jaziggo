@@ -24,6 +24,7 @@ export const BURIAL_LINK_BLOCK_REASON = {
   SPACE_RESERVED: "SPACE_RESERVED",
   SPACE_INACTIVE: "SPACE_INACTIVE",
   SEPULTURA_OCCUPIED: "SEPULTURA_OCCUPIED",
+  JAZIGO_CAPACITY_REACHED: "JAZIGO_CAPACITY_REACHED",
   SPACE_CAPACITY_REACHED: "SPACE_CAPACITY_REACHED",
   DECEASED_ALREADY_LINKED: "DECEASED_ALREADY_LINKED",
 } as const
@@ -247,6 +248,16 @@ export async function readBurialLinkAvailabilityInTransaction(
     return blockedAvailability(
       availabilityBase,
       BURIAL_LINK_BLOCK_REASON.SEPULTURA_OCCUPIED,
+    )
+  }
+
+  if (
+    burialSpace.type === "JAZIGO" &&
+    availabilityBase.activeLinkCount >= availabilityBase.capacity
+  ) {
+    return blockedAvailability(
+      availabilityBase,
+      BURIAL_LINK_BLOCK_REASON.JAZIGO_CAPACITY_REACHED,
     )
   }
 
