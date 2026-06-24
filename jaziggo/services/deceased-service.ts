@@ -6,6 +6,10 @@ import { requirePermission } from "../lib/auth/permissions"
 import { prisma } from "../lib/db/prisma"
 import { generateUniqueInternalCode } from "../lib/deceased/internal-code"
 import {
+  toBurialLinkDto,
+  type BurialLinkDto,
+} from "../lib/dto/burial-link"
+import {
   toDeceasedDetailDto,
   toDeceasedDuplicateCandidateDto,
   toDeceasedListItemDto,
@@ -33,6 +37,7 @@ import type {
   DeceasedDuplicateCandidateDto,
   DeceasedListItemDto,
 } from "../types/deceased"
+import { listBurialLinksByDeceased } from "./burial-link-service"
 
 const MAX_DUPLICATE_CANDIDATES = 25
 
@@ -161,6 +166,10 @@ export interface CheckDeceasedDuplicatesOptions {
   excludeDeceasedId?: string
 }
 
+export type DeceasedDetailWithBurialLinksDto = DeceasedDetailDto & {
+  links: BurialLinkDto[]
+}
+
 export async function checkDeceasedDuplicates(
   input: CreateDeceasedInput,
   options: CheckDeceasedDuplicatesOptions = {},
@@ -284,7 +293,7 @@ export async function searchDeceasedByDocument(
 
 export async function getDeceasedById(
   deceasedId: string,
-): Promise<DeceasedDetailDto> {
+): Promise<DeceasedDetailWithBurialLinksDto> {
   await requirePermission(PERMISSION.SEARCH_RECORDS)
 
   const parsedId = uuidSchema.safeParse(deceasedId)
@@ -302,7 +311,12 @@ export async function getDeceasedById(
     throw DeceasedServiceError.notFound()
   }
 
-  return toDeceasedDetailDto(deceased)
+  const burialLinks = await listBurialLinksByDeceased(parsedId.data)
+
+  return {
+    ...toDeceasedDetailDto(deceased),
+    links: burialLinks.map(toBurialLinkDto),
+  }
 }
 
 export async function createDeceased(

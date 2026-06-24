@@ -46,11 +46,11 @@ function errorResponse(
   })
 }
 
-function successResponse(
-  deceased: DeceasedDetailDto,
+function successResponse<TDeceased extends DeceasedDetailDto>(
+  deceased: TDeceased,
   requestId: string,
 ) {
-  const body: SuccessEnvelope<DeceasedDetailDto> = {
+  const body: SuccessEnvelope<TDeceased> = {
     success: true,
     data: deceased,
     requestId,
