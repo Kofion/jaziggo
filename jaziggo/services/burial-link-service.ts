@@ -7,6 +7,7 @@ import { withSerializableTransaction } from "../lib/db/transaction"
 import {
   createBurialLinkSchema,
   type CreateBurialLinkInput,
+  endBurialLinkSchema,
 } from "../lib/validation/burial-link"
 import { uuidSchema } from "../lib/validation/common"
 import {
@@ -14,7 +15,11 @@ import {
   HTTP_STATUS,
 } from "../types/api"
 import { PERMISSION } from "../types/auth"
-import type { ActiveBurialLink } from "../types/burial-link"
+import type {
+  ActiveBurialLink,
+  EndBurialLinkCommand,
+  EndedBurialLink,
+} from "../types/burial-link"
 import type {
   BurialSpaceStatus,
   BurialSpaceType,
@@ -111,6 +116,22 @@ export class BurialLinkServiceError extends Error {
     )
   }
 
+  static linkNotFound(): BurialLinkServiceError {
+    return new BurialLinkServiceError(
+      DOMAIN_ERROR_CODE.NOT_FOUND,
+      HTTP_STATUS.NOT_FOUND,
+      "Burial link not found",
+    )
+  }
+
+  static linkAlreadyEnded(): BurialLinkServiceError {
+    return new BurialLinkServiceError(
+      DOMAIN_ERROR_CODE.CONFLICT,
+      HTTP_STATUS.CONFLICT,
+      "Burial link already ended",
+    )
+  }
+
   static conflict(
     reasonCode: BurialLinkBlockReason,
   ): BurialLinkServiceError {
@@ -159,6 +180,36 @@ function toActiveBurialLink(link: {
     status: link.status,
     endedAt: null,
     endReason: null,
+    createdAt: link.createdAt.toISOString(),
+    updatedAt: link.updatedAt.toISOString(),
+    ...(link.responsibleId
+      ? { responsibleId: link.responsibleId }
+      : {}),
+    ...(burialDate ? { burialDate } : {}),
+  }
+}
+
+function toEndedBurialLink(link: {
+  id: string
+  deceasedId: string
+  burialSpaceId: string
+  responsibleId: string | null
+  burialDate: Date | null
+  status: "ENDED"
+  endedAt: Date
+  endReason: string
+  createdAt: Date
+  updatedAt: Date
+}): EndedBurialLink {
+  const burialDate = toIsoDate(link.burialDate)
+
+  return {
+    id: link.id,
+    deceasedId: link.deceasedId,
+    burialSpaceId: link.burialSpaceId,
+    status: link.status,
+    endedAt: link.endedAt.toISOString(),
+    endReason: link.endReason,
     createdAt: link.createdAt.toISOString(),
     updatedAt: link.updatedAt.toISOString(),
     ...(link.responsibleId
@@ -360,6 +411,102 @@ export async function createBurialLink(
     return toActiveBurialLink({
       ...burialLink,
       status: "ACTIVE",
+    })
+  })
+}
+
+export async function endBurialLink(
+  input: EndBurialLinkCommand,
+): Promise<EndedBurialLink> {
+  await requirePermission(PERMISSION.MANAGE_OPERATIONAL_RECORDS)
+
+  const parsedBurialLinkId = uuidSchema.safeParse(input.burialLinkId)
+  const parsedInput = endBurialLinkSchema.safeParse({
+    endedAt: input.endedAt,
+    endReason: input.endReason,
+    confirmation: input.confirmation,
+  })
+
+  if (!parsedBurialLinkId.success || !parsedInput.success) {
+    throw BurialLinkServiceError.validation()
+  }
+
+  return withSerializableTransaction(async (transaction) => {
+    const burialLink = await transaction.burialLink.findUnique({
+      where: { id: parsedBurialLinkId.data },
+      select: {
+        id: true,
+        status: true,
+        burialSpaceId: true,
+        burialSpace: {
+          select: { status: true },
+        },
+      },
+    })
+
+    if (!burialLink) {
+      throw BurialLinkServiceError.linkNotFound()
+    }
+
+    if (burialLink.status === "ENDED") {
+      throw BurialLinkServiceError.linkAlreadyEnded()
+    }
+
+    const endedBurialLink = await transaction.burialLink.update({
+      where: { id: burialLink.id },
+      data: {
+        status: "ENDED",
+        endedAt: new Date(parsedInput.data.endedAt),
+        endReason: parsedInput.data.endReason,
+      },
+      select: {
+        id: true,
+        deceasedId: true,
+        burialSpaceId: true,
+        responsibleId: true,
+        burialDate: true,
+        status: true,
+        endedAt: true,
+        endReason: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    })
+
+    const remainingActiveLinks = await transaction.burialLink.count({
+      where: {
+        burialSpaceId: burialLink.burialSpaceId,
+        status: "ACTIVE",
+      },
+    })
+
+    const nextBurialSpaceStatus =
+      remainingActiveLinks > 0
+        ? "OCCUPIED"
+        : burialLink.burialSpace.status === "RESERVED" ||
+            burialLink.burialSpace.status === "INACTIVE"
+          ? burialLink.burialSpace.status
+          : "AVAILABLE"
+
+    await transaction.burialSpace.update({
+      where: { id: burialLink.burialSpaceId },
+      data: { status: nextBurialSpaceStatus },
+      select: { id: true },
+    })
+
+    if (
+      endedBurialLink.status !== "ENDED" ||
+      endedBurialLink.endedAt === null ||
+      endedBurialLink.endReason === null
+    ) {
+      throw new Error("Invalid ended burial link lifecycle")
+    }
+
+    return toEndedBurialLink({
+      ...endedBurialLink,
+      status: "ENDED",
+      endedAt: endedBurialLink.endedAt,
+      endReason: endedBurialLink.endReason,
     })
   })
 }
