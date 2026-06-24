@@ -3,6 +3,7 @@ import "server-only"
 import type { Prisma } from "@prisma/client"
 
 import { requirePermission } from "../lib/auth/permissions"
+import { prisma } from "../lib/db/prisma"
 import { withSerializableTransaction } from "../lib/db/transaction"
 import {
   createBurialLinkSchema,
@@ -17,6 +18,7 @@ import {
 import { PERMISSION } from "../types/auth"
 import type {
   ActiveBurialLink,
+  BurialLink,
   EndBurialLinkCommand,
   EndedBurialLink,
 } from "../types/burial-link"
@@ -55,6 +57,29 @@ export type BurialLinkAvailability =
       canLink: false
       reasonCode: BurialLinkBlockReason
     })
+
+const BURIAL_LINK_SELECT = {
+  id: true,
+  deceasedId: true,
+  burialSpaceId: true,
+  responsibleId: true,
+  burialDate: true,
+  status: true,
+  endedAt: true,
+  endReason: true,
+  createdAt: true,
+  updatedAt: true,
+} as const satisfies Prisma.BurialLinkSelect
+
+const BURIAL_LINK_HISTORY_ORDER = [
+  { status: "asc" },
+  { createdAt: "desc" },
+  { id: "asc" },
+] satisfies Prisma.BurialLinkOrderByWithRelationInput[]
+
+type BurialLinkSource = Prisma.BurialLinkGetPayload<{
+  select: typeof BURIAL_LINK_SELECT
+}>
 
 type BurialLinkServiceErrorCode =
   | typeof DOMAIN_ERROR_CODE.VALIDATION_ERROR
@@ -217,6 +242,30 @@ function toEndedBurialLink(link: {
       : {}),
     ...(burialDate ? { burialDate } : {}),
   }
+}
+
+function toBurialLink(link: BurialLinkSource): BurialLink {
+  if (link.status === "ACTIVE") {
+    if (link.endedAt !== null || link.endReason !== null) {
+      throw new Error("Invalid active burial link lifecycle")
+    }
+
+    return toActiveBurialLink({
+      ...link,
+      status: "ACTIVE",
+    })
+  }
+
+  if (link.endedAt === null || link.endReason === null) {
+    throw new Error("Invalid ended burial link lifecycle")
+  }
+
+  return toEndedBurialLink({
+    ...link,
+    status: "ENDED",
+    endedAt: link.endedAt,
+    endReason: link.endReason,
+  })
 }
 
 export async function readBurialLinkAvailabilityInTransaction(
@@ -509,4 +558,62 @@ export async function endBurialLink(
       endReason: endedBurialLink.endReason,
     })
   })
+}
+
+export async function listBurialLinksBySpace(
+  burialSpaceId: string,
+): Promise<BurialLink[]> {
+  await requirePermission(PERMISSION.MANAGE_OPERATIONAL_RECORDS)
+
+  const parsedBurialSpaceId = uuidSchema.safeParse(burialSpaceId)
+
+  if (!parsedBurialSpaceId.success) {
+    throw BurialLinkServiceError.validation()
+  }
+
+  const burialSpace = await prisma.burialSpace.findUnique({
+    where: { id: parsedBurialSpaceId.data },
+    select: {
+      id: true,
+      burialLinks: {
+        select: BURIAL_LINK_SELECT,
+        orderBy: BURIAL_LINK_HISTORY_ORDER,
+      },
+    },
+  })
+
+  if (!burialSpace) {
+    throw BurialLinkServiceError.burialSpaceNotFound()
+  }
+
+  return burialSpace.burialLinks.map(toBurialLink)
+}
+
+export async function listBurialLinksByDeceased(
+  deceasedId: string,
+): Promise<BurialLink[]> {
+  await requirePermission(PERMISSION.MANAGE_OPERATIONAL_RECORDS)
+
+  const parsedDeceasedId = uuidSchema.safeParse(deceasedId)
+
+  if (!parsedDeceasedId.success) {
+    throw BurialLinkServiceError.validation()
+  }
+
+  const deceased = await prisma.deceased.findUnique({
+    where: { id: parsedDeceasedId.data },
+    select: {
+      id: true,
+      burialLinks: {
+        select: BURIAL_LINK_SELECT,
+        orderBy: BURIAL_LINK_HISTORY_ORDER,
+      },
+    },
+  })
+
+  if (!deceased) {
+    throw BurialLinkServiceError.deceasedNotFound()
+  }
+
+  return deceased.burialLinks.map(toBurialLink)
 }
