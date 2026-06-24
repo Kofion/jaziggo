@@ -15,11 +15,15 @@ import {
 } from "../types/api"
 import { PERMISSION } from "../types/auth"
 import type { ActiveBurialLink } from "../types/burial-link"
-import type { BurialSpaceStatus } from "../types/burial-space"
+import type {
+  BurialSpaceStatus,
+  BurialSpaceType,
+} from "../types/burial-space"
 
 export const BURIAL_LINK_BLOCK_REASON = {
   SPACE_RESERVED: "SPACE_RESERVED",
   SPACE_INACTIVE: "SPACE_INACTIVE",
+  SEPULTURA_OCCUPIED: "SEPULTURA_OCCUPIED",
   SPACE_CAPACITY_REACHED: "SPACE_CAPACITY_REACHED",
   DECEASED_ALREADY_LINKED: "DECEASED_ALREADY_LINKED",
 } as const
@@ -30,6 +34,7 @@ export type BurialLinkBlockReason =
 interface BurialLinkAvailabilityBase {
   burialSpaceId: string
   deceasedId: string
+  type: BurialSpaceType
   status: BurialSpaceStatus
   capacity: number
   activeLinkCount: number
@@ -183,6 +188,7 @@ export async function readBurialLinkAvailabilityInTransaction(
       where: { id: burialSpaceId },
       select: {
         id: true,
+        type: true,
         status: true,
         capacity: true,
         _count: {
@@ -207,6 +213,7 @@ export async function readBurialLinkAvailabilityInTransaction(
   const availabilityBase: BurialLinkAvailabilityBase = {
     burialSpaceId: burialSpace.id,
     deceasedId: deceased.id,
+    type: burialSpace.type,
     status: burialSpace.status,
     capacity: burialSpace.capacity,
     activeLinkCount: burialSpace._count.burialLinks,
@@ -230,6 +237,16 @@ export async function readBurialLinkAvailabilityInTransaction(
     return blockedAvailability(
       availabilityBase,
       BURIAL_LINK_BLOCK_REASON.DECEASED_ALREADY_LINKED,
+    )
+  }
+
+  if (
+    burialSpace.type === "SEPULTURA" &&
+    availabilityBase.activeLinkCount > 0
+  ) {
+    return blockedAvailability(
+      availabilityBase,
+      BURIAL_LINK_BLOCK_REASON.SEPULTURA_OCCUPIED,
     )
   }
 
