@@ -7,7 +7,7 @@ import type {
   IsoDateString,
   IsoDateTimeString,
 } from "../../types/deceased"
-import { maskDocument } from "../privacy/mask"
+import { maskDocument } from "../privacy/mask-document"
 
 type DateLike = Date | string
 

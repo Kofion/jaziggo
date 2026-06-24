@@ -1,6 +1,6 @@
 import "server-only"
 
-import { maskDocument } from "../privacy/mask"
+import { maskDocument } from "../privacy/mask-document"
 import type {
   ResponsibleDetailDto,
   ResponsibleLinkDto,
