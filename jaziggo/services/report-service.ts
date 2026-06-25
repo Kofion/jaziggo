@@ -8,12 +8,17 @@ import {
   toBurialByPeriodReportItemDto,
   toDeceasedReportItemDto,
   toPaginatedReportDto,
+  toSpaceOccupationReportItemDto,
+  toSpaceStatusReportItemDto,
 } from "../lib/dto/report"
 import {
   burialsByPeriodReportFiltersSchema,
   deceasedReportFiltersSchema,
+  spaceOccupationReportFiltersSchema,
+  spaceStatusReportFiltersSchema,
   type BurialsByPeriodReportFiltersInput,
   type DeceasedReportFiltersInput,
+  type SpaceReportFiltersInput,
 } from "../lib/validation/report"
 import {
   DOMAIN_ERROR_CODE,
@@ -26,6 +31,9 @@ import type {
   BurialsByPeriodReportFilters,
   DeceasedReportDto,
   DeceasedReportFilters,
+  SpaceOccupationReportDto,
+  SpaceReportFilters,
+  SpaceStatusReportDto,
 } from "../types/report"
 
 const DECEASED_REPORT_TITLE = "Falecidos cadastrados"
@@ -34,6 +42,12 @@ const DECEASED_REPORT_EMPTY_MESSAGE =
 const BURIALS_BY_PERIOD_REPORT_TITLE = "Sepultamentos por período"
 const BURIALS_BY_PERIOD_REPORT_EMPTY_MESSAGE =
   "Nenhum sepultamento encontrado para os filtros selecionados."
+const SPACE_OCCUPATION_REPORT_TITLE = "Ocupação dos espaços"
+const SPACE_OCCUPATION_REPORT_EMPTY_MESSAGE =
+  "Nenhum espaço encontrado para os filtros selecionados."
+const SPACE_STATUS_REPORT_TITLE = "Espaços por status"
+const SPACE_STATUS_REPORT_EMPTY_MESSAGE =
+  "Nenhum espaço encontrado para os filtros selecionados."
 
 const DECEASED_REPORT_SELECT = {
   id: true,
@@ -73,6 +87,27 @@ const BURIALS_BY_PERIOD_REPORT_SELECT = {
     },
   },
 } as const satisfies Prisma.BurialLinkSelect
+
+const SPACE_REPORT_SELECT = {
+  id: true,
+  type: true,
+  identifier: true,
+  sector: true,
+  block: true,
+  street: true,
+  row: true,
+  number: true,
+  complement: true,
+  status: true,
+  capacity: true,
+  _count: {
+    select: {
+      burialLinks: {
+        where: { status: "ACTIVE" },
+      },
+    },
+  },
+} as const satisfies Prisma.BurialSpaceSelect
 
 type ReportServiceErrorCode =
   typeof DOMAIN_ERROR_CODE.VALIDATION_ERROR
@@ -154,6 +189,59 @@ function calculateSkip(page: number, pageSize: number): number {
   }
 
   return skip
+}
+
+function buildSpaceReportFilters(
+  input: {
+    status?: SpaceReportFilters["status"]
+    type?: SpaceReportFilters["type"]
+    sector?: string
+    linkStatus?: SpaceReportFilters["linkStatus"]
+  },
+): SpaceReportFilters {
+  return {
+    ...(input.status === undefined ? {} : { status: input.status }),
+    ...(input.type === undefined ? {} : { type: input.type }),
+    ...(input.sector === undefined ? {} : { sector: input.sector }),
+    ...(input.linkStatus === undefined
+      ? {}
+      : { linkStatus: input.linkStatus }),
+  }
+}
+
+function buildSpaceWhere(
+  filters: SpaceReportFilters,
+): Prisma.BurialSpaceWhereInput {
+  return {
+    status: filters.status,
+    type: filters.type,
+    sector: filters.sector,
+    burialLinks:
+      filters.linkStatus === undefined
+        ? undefined
+        : { some: { status: filters.linkStatus } },
+  }
+}
+
+function toSpaceReportSource(
+  space: Prisma.BurialSpaceGetPayload<{
+    select: typeof SPACE_REPORT_SELECT
+  }>,
+) {
+  return {
+    id: space.id,
+    type: space.type,
+    identifier: space.identifier,
+    status: space.status,
+    capacity: space.capacity,
+    activeLinkCount: space._count.burialLinks,
+    sector: space.sector ?? undefined,
+    block: space.block ?? undefined,
+    street: space.street ?? undefined,
+    row: space.row ?? undefined,
+    number: space.number ?? undefined,
+    complement: space.complement ?? undefined,
+  }
 }
 
 export async function generateDeceasedReport(
@@ -263,5 +351,107 @@ export async function generateBurialsByPeriodReport(
     items,
     pagination: calculatePagination(page, pageSize, totalRecords),
     emptyMessage: BURIALS_BY_PERIOD_REPORT_EMPTY_MESSAGE,
+  })
+}
+
+export async function generateSpaceOccupationReport(
+  input: SpaceReportFiltersInput = {},
+): Promise<SpaceOccupationReportDto> {
+  await requirePermission(PERMISSION.VIEW_REPORTS)
+
+  const parsedInput =
+    spaceOccupationReportFiltersSchema.safeParse(input)
+
+  if (!parsedInput.success) {
+    throw ReportServiceError.validation()
+  }
+
+  const { page, pageSize, status, type, sector, linkStatus } =
+    parsedInput.data
+  const filters = buildSpaceReportFilters({
+    status,
+    type,
+    sector,
+    linkStatus,
+  })
+  const where = buildSpaceWhere(filters)
+  const skip = calculateSkip(page, pageSize)
+  const [spaces, totalRecords] = await prisma.$transaction([
+    prisma.burialSpace.findMany({
+      where,
+      select: SPACE_REPORT_SELECT,
+      orderBy: [
+        { type: "asc" },
+        { identifier: "asc" },
+        { locationKey: "asc" },
+        { id: "asc" },
+      ],
+      skip,
+      take: pageSize,
+    }),
+    prisma.burialSpace.count({ where }),
+  ])
+  const items = spaces.map((space) =>
+    toSpaceOccupationReportItemDto(toSpaceReportSource(space)),
+  )
+
+  return toPaginatedReportDto({
+    title: SPACE_OCCUPATION_REPORT_TITLE,
+    generatedAt: new Date(),
+    filters,
+    items,
+    pagination: calculatePagination(page, pageSize, totalRecords),
+    emptyMessage: SPACE_OCCUPATION_REPORT_EMPTY_MESSAGE,
+  })
+}
+
+export async function generateSpaceStatusReport(
+  input: SpaceReportFiltersInput = {},
+): Promise<SpaceStatusReportDto> {
+  await requirePermission(PERMISSION.VIEW_REPORTS)
+
+  const parsedInput = spaceStatusReportFiltersSchema.safeParse(input)
+
+  if (!parsedInput.success) {
+    throw ReportServiceError.validation()
+  }
+
+  const { page, pageSize, status, type, sector, linkStatus } =
+    parsedInput.data
+  const filters = buildSpaceReportFilters({
+    status,
+    type,
+    sector,
+    linkStatus,
+  })
+  const where = buildSpaceWhere(filters)
+  const skip = calculateSkip(page, pageSize)
+  const [spaces, totalRecords] = await prisma.$transaction([
+    prisma.burialSpace.findMany({
+      where,
+      select: SPACE_REPORT_SELECT,
+      orderBy: [
+        { status: "asc" },
+        { type: "asc" },
+        { identifier: "asc" },
+        { locationKey: "asc" },
+        { id: "asc" },
+      ],
+      skip,
+      take: pageSize,
+    }),
+    prisma.burialSpace.count({ where }),
+  ])
+  const items = spaces.map((space) =>
+    toSpaceStatusReportItemDto(toSpaceReportSource(space)),
+  )
+
+  return toPaginatedReportDto({
+    title: SPACE_STATUS_REPORT_TITLE,
+    generatedAt: new Date(),
+    filters,
+    items,
+    pagination: calculatePagination(page, pageSize, totalRecords),
+    emptyMessage: SPACE_STATUS_REPORT_EMPTY_MESSAGE,
   })
 }
