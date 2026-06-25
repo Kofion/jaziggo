@@ -9,6 +9,13 @@ import {
   type LocationSearchItemDto,
 } from "../lib/dto/location-search"
 import { formatLocation } from "../lib/location/format-location"
+import {
+  LOCATION_SEARCH_OPERATION,
+  LOCATION_SEARCH_RESULT,
+  recordLocationSearchObservation,
+  type LocationSearchOperation,
+  type LocationSearchResult,
+} from "../lib/observability/metrics"
 import { uuidSchema } from "../lib/validation/common"
 import {
   locationDocumentSearchSchema,
@@ -70,6 +77,11 @@ type LocationSearchServiceErrorStatus =
   | typeof HTTP_STATUS.UNPROCESSABLE_ENTITY
   | typeof HTTP_STATUS.NOT_FOUND
 
+interface LocationSearchOutcome {
+  result: LocationSearchResult
+  resultCount?: number
+}
+
 export class LocationSearchServiceError extends Error {
   readonly code: LocationSearchServiceErrorCode
   readonly status: LocationSearchServiceErrorStatus
@@ -99,6 +111,50 @@ export class LocationSearchServiceError extends Error {
       HTTP_STATUS.NOT_FOUND,
       "Location not found",
     )
+  }
+}
+
+async function observeLocationSearch<T>(
+  operation: LocationSearchOperation,
+  execute: () => Promise<T>,
+  classify: (value: T) => LocationSearchOutcome,
+): Promise<T> {
+  const startedAt = performance.now()
+  let userId: string | undefined
+
+  try {
+    const user = await requirePermission(PERMISSION.VIEW_LOCATIONS)
+    userId = user.id
+
+    const value = await execute()
+    const outcome = classify(value)
+
+    recordLocationSearchObservation({
+      operation,
+      result: outcome.result,
+      resultCount: outcome.resultCount,
+      durationMs: performance.now() - startedAt,
+      userId,
+    })
+
+    return value
+  } catch (error) {
+    const result =
+      error instanceof LocationSearchServiceError &&
+      error.code === DOMAIN_ERROR_CODE.NOT_FOUND
+        ? LOCATION_SEARCH_RESULT.EMPTY
+        : LOCATION_SEARCH_RESULT.ERROR
+
+    recordLocationSearchObservation({
+      operation,
+      result,
+      resultCount:
+        result === LOCATION_SEARCH_RESULT.EMPTY ? 0 : undefined,
+      durationMs: performance.now() - startedAt,
+      userId,
+    })
+
+    throw error
   }
 }
 
@@ -188,143 +244,170 @@ async function findLocationPage(
 export async function searchLocations(
   input: LocationSearchFiltersInput = {},
 ): Promise<PaginatedData<LocationSearchItemDto>> {
-  await requirePermission(PERMISSION.VIEW_LOCATIONS)
+  return observeLocationSearch(
+    LOCATION_SEARCH_OPERATION.SEARCH,
+    async () => {
+      const parsedInput = locationSearchFiltersSchema.safeParse(input)
 
-  const parsedInput = locationSearchFiltersSchema.safeParse(input)
+      if (!parsedInput.success) {
+        throw LocationSearchServiceError.validation()
+      }
 
-  if (!parsedInput.success) {
-    throw LocationSearchServiceError.validation()
-  }
+      const {
+        page,
+        pageSize,
+        deceasedName,
+        responsibleName,
+        deathDate,
+        burialDate,
+        burialSpaceIdentifier,
+        sector,
+        block,
+        street,
+        row,
+        number,
+        complement,
+      } = parsedInput.data
 
-  const {
-    page,
-    pageSize,
-    deceasedName,
-    responsibleName,
-    deathDate,
-    burialDate,
-    burialSpaceIdentifier,
-    sector,
-    block,
-    street,
-    row,
-    number,
-    complement,
-  } = parsedInput.data
-
-  const burialSpaceFilters: Prisma.BurialSpaceWhereInput[] = [
-    ...(sector ? [locationKeyFilter("sector", sector)] : []),
-    ...(block ? [locationKeyFilter("block", block)] : []),
-    ...(street ? [locationKeyFilter("street", street)] : []),
-    ...(row ? [locationKeyFilter("row", row)] : []),
-    ...(number ? [locationKeyFilter("number", number)] : []),
-    ...(complement
-      ? [locationKeyFilter("complement", complement)]
-      : []),
-  ]
-  const where: Prisma.BurialLinkWhereInput = {
-    status: "ACTIVE",
-    deceased: {
-      is: {
-        searchName:
-          deceasedName === undefined
-            ? undefined
-            : { contains: deceasedName },
-        deathDate:
-          deathDate === undefined
-            ? undefined
-            : toDateFilter(deathDate),
-      },
-    },
-    responsible:
-      responsibleName === undefined
-        ? undefined
-        : {
-            is: {
-              searchName: { contains: responsibleName },
-            },
+      const burialSpaceFilters: Prisma.BurialSpaceWhereInput[] = [
+        ...(sector ? [locationKeyFilter("sector", sector)] : []),
+        ...(block ? [locationKeyFilter("block", block)] : []),
+        ...(street ? [locationKeyFilter("street", street)] : []),
+        ...(row ? [locationKeyFilter("row", row)] : []),
+        ...(number ? [locationKeyFilter("number", number)] : []),
+        ...(complement
+          ? [locationKeyFilter("complement", complement)]
+          : []),
+      ]
+      const where: Prisma.BurialLinkWhereInput = {
+        status: "ACTIVE",
+        deceased: {
+          is: {
+            searchName:
+              deceasedName === undefined
+                ? undefined
+                : { contains: deceasedName },
+            deathDate:
+              deathDate === undefined
+                ? undefined
+                : toDateFilter(deathDate),
           },
-    burialSpace: {
-      is: {
-        identifier: burialSpaceIdentifier,
-        AND:
-          burialSpaceFilters.length === 0
+        },
+        responsible:
+          responsibleName === undefined
             ? undefined
-            : burialSpaceFilters,
-      },
-    },
-    OR:
-      burialDate === undefined
-        ? undefined
-        : [
-            { burialDate: toDateFilter(burialDate) },
-            {
-              deceased: {
-                is: { burialDate: toDateFilter(burialDate) },
+            : {
+                is: {
+                  searchName: { contains: responsibleName },
+                },
               },
-            },
-          ],
-  }
+        burialSpace: {
+          is: {
+            identifier: burialSpaceIdentifier,
+            AND:
+              burialSpaceFilters.length === 0
+                ? undefined
+                : burialSpaceFilters,
+          },
+        },
+        OR:
+          burialDate === undefined
+            ? undefined
+            : [
+                { burialDate: toDateFilter(burialDate) },
+                {
+                  deceased: {
+                    is: { burialDate: toDateFilter(burialDate) },
+                  },
+                },
+              ],
+      }
 
-  return findLocationPage(where, page, pageSize)
+      return findLocationPage(where, page, pageSize)
+    },
+    (page) => ({
+      result:
+        page.items.length === 0
+          ? LOCATION_SEARCH_RESULT.EMPTY
+          : LOCATION_SEARCH_RESULT.FOUND,
+      resultCount: page.items.length,
+    }),
+  )
 }
 
 export async function searchLocationsByDocument(
   input: LocationDocumentSearchInput,
 ): Promise<PaginatedData<LocationSearchItemDto>> {
-  await requirePermission(PERMISSION.VIEW_LOCATIONS)
+  return observeLocationSearch(
+    LOCATION_SEARCH_OPERATION.SEARCH_BY_DOCUMENT,
+    async () => {
+      const parsedInput = locationDocumentSearchSchema.safeParse(input)
 
-  const parsedInput = locationDocumentSearchSchema.safeParse(input)
+      if (!parsedInput.success) {
+        throw LocationSearchServiceError.validation()
+      }
 
-  if (!parsedInput.success) {
-    throw LocationSearchServiceError.validation()
-  }
+      const { page, pageSize } = parsedInput.data
+      const where: Prisma.BurialLinkWhereInput = {
+        status: "ACTIVE",
+        ...(parsedInput.data.deceasedDocument !== undefined
+          ? {
+              deceased: {
+                is: {
+                  document: parsedInput.data.deceasedDocument,
+                },
+              },
+            }
+          : {
+              responsible: {
+                is: {
+                  document: parsedInput.data.responsibleDocument,
+                },
+              },
+            }),
+      }
 
-  const { page, pageSize } = parsedInput.data
-  const where: Prisma.BurialLinkWhereInput = {
-    status: "ACTIVE",
-    ...(parsedInput.data.deceasedDocument !== undefined
-      ? {
-          deceased: {
-            is: {
-              document: parsedInput.data.deceasedDocument,
-            },
-          },
-        }
-      : {
-          responsible: {
-            is: {
-              document: parsedInput.data.responsibleDocument,
-            },
-          },
-        }),
-  }
-
-  return findLocationPage(where, page, pageSize)
+      return findLocationPage(where, page, pageSize)
+    },
+    (page) => ({
+      result:
+        page.items.length === 0
+          ? LOCATION_SEARCH_RESULT.EMPTY
+          : LOCATION_SEARCH_RESULT.FOUND,
+      resultCount: page.items.length,
+    }),
+  )
 }
 
 export async function getLocationDetail(
   deceasedId: string,
 ): Promise<LocationSearchItemDto> {
-  await requirePermission(PERMISSION.VIEW_LOCATIONS)
+  return observeLocationSearch(
+    LOCATION_SEARCH_OPERATION.DETAIL,
+    async () => {
+      const parsedDeceasedId = uuidSchema.safeParse(deceasedId)
 
-  const parsedDeceasedId = uuidSchema.safeParse(deceasedId)
+      if (!parsedDeceasedId.success) {
+        throw LocationSearchServiceError.validation()
+      }
 
-  if (!parsedDeceasedId.success) {
-    throw LocationSearchServiceError.validation()
-  }
+      const link = await prisma.burialLink.findFirst({
+        where: {
+          deceasedId: parsedDeceasedId.data,
+          status: "ACTIVE",
+        },
+        select: LOCATION_SEARCH_SELECT,
+      })
 
-  const link = await prisma.burialLink.findFirst({
-    where: {
-      deceasedId: parsedDeceasedId.data,
-      status: "ACTIVE",
+      if (!link) {
+        throw LocationSearchServiceError.notFound()
+      }
+
+      return toLocationSearchDto(link)
     },
-    select: LOCATION_SEARCH_SELECT,
-  })
-
-  if (!link) {
-    throw LocationSearchServiceError.notFound()
-  }
-
-  return toLocationSearchDto(link)
+    () => ({
+      result: LOCATION_SEARCH_RESULT.FOUND,
+      resultCount: 1,
+    }),
+  )
 }
