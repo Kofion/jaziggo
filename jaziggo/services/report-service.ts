@@ -12,6 +12,12 @@ import {
   toSpaceStatusReportItemDto,
 } from "../lib/dto/report"
 import {
+  REPORT_RESULT,
+  REPORT_TYPE,
+  recordReportObservation,
+  type ReportType,
+} from "../lib/observability/metrics"
+import {
   burialsByPeriodReportFiltersSchema,
   deceasedReportFiltersSchema,
   spaceOccupationReportFiltersSchema,
@@ -244,11 +250,47 @@ function toSpaceReportSource(
   }
 }
 
-export async function generateDeceasedReport(
+async function observeReport<T extends { data: readonly unknown[] }>(
+  type: ReportType,
+  execute: () => Promise<T>,
+): Promise<T> {
+  const startedAt = performance.now()
+  let userId: string | undefined
+
+  try {
+    const user = await requirePermission(PERMISSION.VIEW_REPORTS)
+    userId = user.id
+
+    const report = await execute()
+    const result =
+      report.data.length === 0
+        ? REPORT_RESULT.EMPTY
+        : REPORT_RESULT.FOUND
+
+    recordReportObservation({
+      type,
+      result,
+      durationMs: performance.now() - startedAt,
+      userId,
+      resultCount: report.data.length,
+    })
+
+    return report
+  } catch (error) {
+    recordReportObservation({
+      type,
+      result: REPORT_RESULT.ERROR,
+      durationMs: performance.now() - startedAt,
+      userId,
+    })
+
+    throw error
+  }
+}
+
+async function buildDeceasedReport(
   input: DeceasedReportFiltersInput = {},
 ): Promise<DeceasedReportDto> {
-  await requirePermission(PERMISSION.VIEW_REPORTS)
-
   const parsedInput = deceasedReportFiltersSchema.safeParse(input)
 
   if (!parsedInput.success) {
@@ -286,11 +328,9 @@ export async function generateDeceasedReport(
   })
 }
 
-export async function generateBurialsByPeriodReport(
+async function buildBurialsByPeriodReport(
   input: BurialsByPeriodReportFiltersInput = {},
 ): Promise<BurialsByPeriodReportDto> {
-  await requirePermission(PERMISSION.VIEW_REPORTS)
-
   const parsedInput =
     burialsByPeriodReportFiltersSchema.safeParse(input)
 
@@ -354,11 +394,9 @@ export async function generateBurialsByPeriodReport(
   })
 }
 
-export async function generateSpaceOccupationReport(
+async function buildSpaceOccupationReport(
   input: SpaceReportFiltersInput = {},
 ): Promise<SpaceOccupationReportDto> {
-  await requirePermission(PERMISSION.VIEW_REPORTS)
-
   const parsedInput =
     spaceOccupationReportFiltersSchema.safeParse(input)
 
@@ -405,11 +443,9 @@ export async function generateSpaceOccupationReport(
   })
 }
 
-export async function generateSpaceStatusReport(
+async function buildSpaceStatusReport(
   input: SpaceReportFiltersInput = {},
 ): Promise<SpaceStatusReportDto> {
-  await requirePermission(PERMISSION.VIEW_REPORTS)
-
   const parsedInput = spaceStatusReportFiltersSchema.safeParse(input)
 
   if (!parsedInput.success) {
@@ -454,4 +490,36 @@ export async function generateSpaceStatusReport(
     pagination: calculatePagination(page, pageSize, totalRecords),
     emptyMessage: SPACE_STATUS_REPORT_EMPTY_MESSAGE,
   })
+}
+
+export function generateDeceasedReport(
+  input: DeceasedReportFiltersInput = {},
+): Promise<DeceasedReportDto> {
+  return observeReport(REPORT_TYPE.DECEASED, () =>
+    buildDeceasedReport(input),
+  )
+}
+
+export function generateBurialsByPeriodReport(
+  input: BurialsByPeriodReportFiltersInput = {},
+): Promise<BurialsByPeriodReportDto> {
+  return observeReport(REPORT_TYPE.BURIALS_BY_PERIOD, () =>
+    buildBurialsByPeriodReport(input),
+  )
+}
+
+export function generateSpaceOccupationReport(
+  input: SpaceReportFiltersInput = {},
+): Promise<SpaceOccupationReportDto> {
+  return observeReport(REPORT_TYPE.SPACE_OCCUPATION, () =>
+    buildSpaceOccupationReport(input),
+  )
+}
+
+export function generateSpaceStatusReport(
+  input: SpaceReportFiltersInput = {},
+): Promise<SpaceStatusReportDto> {
+  return observeReport(REPORT_TYPE.SPACE_STATUS, () =>
+    buildSpaceStatusReport(input),
+  )
 }
