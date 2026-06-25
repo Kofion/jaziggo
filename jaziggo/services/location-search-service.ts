@@ -9,6 +9,7 @@ import {
   type LocationSearchItemDto,
 } from "../lib/dto/location-search"
 import { formatLocation } from "../lib/location/format-location"
+import { uuidSchema } from "../lib/validation/common"
 import {
   locationDocumentSearchSchema,
   locationSearchFiltersSchema,
@@ -62,10 +63,12 @@ type LocationSearchRecord = Prisma.BurialLinkGetPayload<{
 }>
 
 type LocationSearchServiceErrorCode =
-  typeof DOMAIN_ERROR_CODE.VALIDATION_ERROR
+  | typeof DOMAIN_ERROR_CODE.VALIDATION_ERROR
+  | typeof DOMAIN_ERROR_CODE.NOT_FOUND
 
 type LocationSearchServiceErrorStatus =
-  typeof HTTP_STATUS.UNPROCESSABLE_ENTITY
+  | typeof HTTP_STATUS.UNPROCESSABLE_ENTITY
+  | typeof HTTP_STATUS.NOT_FOUND
 
 export class LocationSearchServiceError extends Error {
   readonly code: LocationSearchServiceErrorCode
@@ -87,6 +90,14 @@ export class LocationSearchServiceError extends Error {
       DOMAIN_ERROR_CODE.VALIDATION_ERROR,
       HTTP_STATUS.UNPROCESSABLE_ENTITY,
       "Invalid location search filters",
+    )
+  }
+
+  static notFound(): LocationSearchServiceError {
+    return new LocationSearchServiceError(
+      DOMAIN_ERROR_CODE.NOT_FOUND,
+      HTTP_STATUS.NOT_FOUND,
+      "Location not found",
     )
   }
 }
@@ -290,4 +301,30 @@ export async function searchLocationsByDocument(
   }
 
   return findLocationPage(where, page, pageSize)
+}
+
+export async function getLocationDetail(
+  deceasedId: string,
+): Promise<LocationSearchItemDto> {
+  await requirePermission(PERMISSION.VIEW_LOCATIONS)
+
+  const parsedDeceasedId = uuidSchema.safeParse(deceasedId)
+
+  if (!parsedDeceasedId.success) {
+    throw LocationSearchServiceError.validation()
+  }
+
+  const link = await prisma.burialLink.findFirst({
+    where: {
+      deceasedId: parsedDeceasedId.data,
+      status: "ACTIVE",
+    },
+    select: LOCATION_SEARCH_SELECT,
+  })
+
+  if (!link) {
+    throw LocationSearchServiceError.notFound()
+  }
+
+  return toLocationSearchDto(link)
 }
