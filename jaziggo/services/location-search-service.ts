@@ -10,7 +10,9 @@ import {
 } from "../lib/dto/location-search"
 import { formatLocation } from "../lib/location/format-location"
 import {
+  locationDocumentSearchSchema,
   locationSearchFiltersSchema,
+  type LocationDocumentSearchInput,
   type LocationSearchFiltersInput,
 } from "../lib/validation/search"
 import {
@@ -54,6 +56,10 @@ const LOCATION_SEARCH_SELECT = {
     },
   },
 } as const satisfies Prisma.BurialLinkSelect
+
+type LocationSearchRecord = Prisma.BurialLinkGetPayload<{
+  select: typeof LOCATION_SEARCH_SELECT
+}>
 
 type LocationSearchServiceErrorCode =
   typeof DOMAIN_ERROR_CODE.VALIDATION_ERROR
@@ -103,6 +109,71 @@ function locationKeyFilter(
   }
 }
 
+function toLocationSearchDto(
+  link: LocationSearchRecord,
+): LocationSearchItemDto {
+  return toLocationSearchItemDto({
+    deceasedId: link.deceased.id,
+    internalCode: link.deceased.internalCode,
+    deceasedName: link.deceased.fullName,
+    deceasedDocument: link.deceased.document,
+    deathDate: link.deceased.deathDate,
+    burialDate: link.deceased.burialDate ?? link.burialDate,
+    historicalDataIncomplete:
+      link.deceased.historicalDataIncomplete,
+    responsibleName: link.responsible?.fullName ?? null,
+    responsibleDocument: link.responsible?.document ?? null,
+    burialSpaceId: link.burialSpace.id,
+    burialSpaceType: link.burialSpace.type,
+    locationDescription: formatLocation({
+      sector: link.burialSpace.sector ?? undefined,
+      block: link.burialSpace.block ?? undefined,
+      street: link.burialSpace.street ?? undefined,
+      row: link.burialSpace.row ?? undefined,
+      number: link.burialSpace.number ?? undefined,
+      complement: link.burialSpace.complement ?? undefined,
+    }),
+    status: link.burialSpace.status,
+  })
+}
+
+async function findLocationPage(
+  where: Prisma.BurialLinkWhereInput,
+  page: number,
+  pageSize: number,
+): Promise<PaginatedData<LocationSearchItemDto>> {
+  const skip = (page - 1) * pageSize
+
+  if (!Number.isSafeInteger(skip)) {
+    throw LocationSearchServiceError.validation()
+  }
+
+  const [links, totalRecords] = await prisma.$transaction([
+    prisma.burialLink.findMany({
+      where,
+      select: LOCATION_SEARCH_SELECT,
+      orderBy: [
+        { deceased: { searchName: "asc" } },
+        { deceased: { internalCode: "asc" } },
+        { id: "asc" },
+      ],
+      skip,
+      take: pageSize,
+    }),
+    prisma.burialLink.count({ where }),
+  ])
+
+  return {
+    items: links.map(toLocationSearchDto),
+    pagination: {
+      page,
+      pageSize,
+      totalRecords,
+      totalPages: Math.ceil(totalRecords / pageSize),
+    },
+  }
+}
+
 export async function searchLocations(
   input: LocationSearchFiltersInput = {},
 ): Promise<PaginatedData<LocationSearchItemDto>> {
@@ -129,11 +200,6 @@ export async function searchLocations(
     number,
     complement,
   } = parsedInput.data
-  const skip = (page - 1) * pageSize
-
-  if (!Number.isSafeInteger(skip)) {
-    throw LocationSearchServiceError.validation()
-  }
 
   const burialSpaceFilters: Prisma.BurialSpaceWhereInput[] = [
     ...(sector ? [locationKeyFilter("sector", sector)] : []),
@@ -189,54 +255,39 @@ export async function searchLocations(
           ],
   }
 
-  const [links, totalRecords] = await prisma.$transaction([
-    prisma.burialLink.findMany({
-      where,
-      select: LOCATION_SEARCH_SELECT,
-      orderBy: [
-        { deceased: { searchName: "asc" } },
-        { deceased: { internalCode: "asc" } },
-        { id: "asc" },
-      ],
-      skip,
-      take: pageSize,
-    }),
-    prisma.burialLink.count({ where }),
-  ])
+  return findLocationPage(where, page, pageSize)
+}
 
-  return {
-    items: links.map((link) =>
-      toLocationSearchItemDto({
-        deceasedId: link.deceased.id,
-        internalCode: link.deceased.internalCode,
-        deceasedName: link.deceased.fullName,
-        deceasedDocument: link.deceased.document,
-        deathDate: link.deceased.deathDate,
-        burialDate:
-          link.deceased.burialDate ?? link.burialDate,
-        historicalDataIncomplete:
-          link.deceased.historicalDataIncomplete,
-        responsibleName: link.responsible?.fullName ?? null,
-        responsibleDocument:
-          link.responsible?.document ?? null,
-        burialSpaceId: link.burialSpace.id,
-        burialSpaceType: link.burialSpace.type,
-        locationDescription: formatLocation({
-          sector: link.burialSpace.sector ?? undefined,
-          block: link.burialSpace.block ?? undefined,
-          street: link.burialSpace.street ?? undefined,
-          row: link.burialSpace.row ?? undefined,
-          number: link.burialSpace.number ?? undefined,
-          complement: link.burialSpace.complement ?? undefined,
-        }),
-        status: link.burialSpace.status,
-      }),
-    ),
-    pagination: {
-      page,
-      pageSize,
-      totalRecords,
-      totalPages: Math.ceil(totalRecords / pageSize),
-    },
+export async function searchLocationsByDocument(
+  input: LocationDocumentSearchInput,
+): Promise<PaginatedData<LocationSearchItemDto>> {
+  await requirePermission(PERMISSION.VIEW_LOCATIONS)
+
+  const parsedInput = locationDocumentSearchSchema.safeParse(input)
+
+  if (!parsedInput.success) {
+    throw LocationSearchServiceError.validation()
   }
+
+  const { page, pageSize } = parsedInput.data
+  const where: Prisma.BurialLinkWhereInput = {
+    status: "ACTIVE",
+    ...(parsedInput.data.deceasedDocument !== undefined
+      ? {
+          deceased: {
+            is: {
+              document: parsedInput.data.deceasedDocument,
+            },
+          },
+        }
+      : {
+          responsible: {
+            is: {
+              document: parsedInput.data.responsibleDocument,
+            },
+          },
+        }),
+  }
+
+  return findLocationPage(where, page, pageSize)
 }
