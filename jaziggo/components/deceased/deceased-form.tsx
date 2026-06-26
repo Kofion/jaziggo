@@ -1,0 +1,468 @@
+"use client"
+
+import { useId, useState, type FormEvent } from "react"
+
+import { DuplicateReview } from "@/components/deceased/duplicate-review"
+import { ErrorMessage } from "@/components/ui/error-message"
+import type { ApiEnvelope, PaginationMeta } from "@/types/api"
+import type {
+  CreateDeceasedInput,
+  DeceasedDetailDto,
+  DeceasedDuplicateCandidateDto,
+} from "@/types/deceased"
+
+type DeceasedFormMode = "create" | "edit"
+
+type DeceasedFormProps = Readonly<{
+  mode: DeceasedFormMode
+  deceased?: DeceasedDetailDto
+  onSuccess?: (deceased: DeceasedDetailDto) => void
+  className?: string
+}>
+
+type DeceasedFormPayload = {
+  fullName: string
+  document?: string
+  birthDate?: string
+  deathDate?: string
+  burialDate?: string
+  datesUnknown?: true
+  notes?: string
+}
+
+type DuplicatePageResponse = PaginationMeta & {
+  data: DeceasedDuplicateCandidateDto[]
+}
+
+const FORM_COPY = {
+  create: {
+    title: "Novo falecido",
+    description:
+      "Cadastre o falecido com nome, datas disponiveis e indicacao explicita quando as datas forem desconhecidas.",
+    submitLabel: "Criar falecido",
+    pendingLabel: "Criando...",
+    successMessage: "Falecido criado com sucesso.",
+    errorMessage:
+      "Nao foi possivel criar o falecido. Revise os dados e tente novamente.",
+  },
+  edit: {
+    title: "Editar falecido",
+    description:
+      "Atualize os dados administrativos do falecido preservando a indicacao historica quando aplicavel.",
+    submitLabel: "Salvar alteracoes",
+    pendingLabel: "Salvando...",
+    successMessage: "Falecido atualizado com sucesso.",
+    errorMessage:
+      "Nao foi possivel atualizar o falecido. Revise os dados e tente novamente.",
+  },
+} as const satisfies Record<
+  DeceasedFormMode,
+  {
+    title: string
+    description: string
+    submitLabel: string
+    pendingLabel: string
+    successMessage: string
+    errorMessage: string
+  }
+>
+
+function cx(...classes: Array<string | false | undefined>) {
+  return classes.filter(Boolean).join(" ")
+}
+
+function fieldValue(formData: FormData, field: string) {
+  const value = formData.get(field)
+
+  return typeof value === "string" ? value.trim() : ""
+}
+
+function optionalFieldValue(formData: FormData, field: string) {
+  const value = fieldValue(formData, field)
+
+  return value.length > 0 ? value : undefined
+}
+
+function checkboxValue(formData: FormData, field: string) {
+  return formData.get(field) === "on"
+}
+
+function deceasedEndpoint(mode: DeceasedFormMode, deceased?: DeceasedDetailDto) {
+  if (mode === "create") {
+    return "/api/v1/deceased"
+  }
+
+  if (!deceased) {
+    return null
+  }
+
+  return `/api/v1/deceased/${encodeURIComponent(deceased.id)}`
+}
+
+function buildPayload(formData: FormData): DeceasedFormPayload {
+  const datesUnknown = checkboxValue(formData, "datesUnknown")
+  const payload: DeceasedFormPayload = {
+    fullName: fieldValue(formData, "fullName"),
+    document: optionalFieldValue(formData, "document"),
+    birthDate: optionalFieldValue(formData, "birthDate"),
+    notes: optionalFieldValue(formData, "notes"),
+  }
+
+  if (datesUnknown) {
+    return {
+      ...payload,
+      datesUnknown: true,
+    }
+  }
+
+  return {
+    ...payload,
+    deathDate: optionalFieldValue(formData, "deathDate"),
+    burialDate: optionalFieldValue(formData, "burialDate"),
+  }
+}
+
+function validatePayload(payload: DeceasedFormPayload) {
+  if (payload.fullName.length === 0) {
+    return "Informe o nome completo do falecido."
+  }
+
+  if (payload.datesUnknown === true) {
+    return null
+  }
+
+  if (!payload.deathDate && !payload.burialDate) {
+    return "Informe uma data de falecimento, uma data de sepultamento ou marque datas desconhecidas."
+  }
+
+  if (payload.birthDate && payload.deathDate && payload.birthDate > payload.deathDate) {
+    return "A data de nascimento nao pode ser posterior ao falecimento."
+  }
+
+  if (payload.birthDate && payload.burialDate && payload.birthDate > payload.burialDate) {
+    return "A data de nascimento nao pode ser posterior ao sepultamento."
+  }
+
+  if (payload.deathDate && payload.burialDate && payload.burialDate < payload.deathDate) {
+    return "A data de sepultamento nao pode ser anterior ao falecimento."
+  }
+
+  return null
+}
+
+async function readJsonEnvelope<TData>(response: Response) {
+  return (await response.json().catch(() => null)) as ApiEnvelope<TData> | null
+}
+
+export function DeceasedForm({
+  mode,
+  deceased,
+  onSuccess,
+  className,
+}: DeceasedFormProps) {
+  const copy = FORM_COPY[mode]
+  const formId = useId()
+  const errorId = useId()
+  const successId = useId()
+  const [datesUnknown, setDatesUnknown] = useState(deceased?.datesUnknown ?? false)
+  const [pending, setPending] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [pendingPayload, setPendingPayload] = useState<CreateDeceasedInput | null>(null)
+  const [duplicateCandidates, setDuplicateCandidates] = useState<
+    DeceasedDuplicateCandidateDto[]
+  >([])
+  const describedBy = [
+    errorMessage ? errorId : undefined,
+    successMessage ? successId : undefined,
+  ]
+    .filter(Boolean)
+    .join(" ")
+
+  function resetDuplicateReview() {
+    setPendingPayload(null)
+    setDuplicateCandidates([])
+  }
+
+  function resetCreateState(form: HTMLFormElement) {
+    form.reset()
+    setDatesUnknown(false)
+    resetDuplicateReview()
+  }
+
+  async function submitPayload(payload: CreateDeceasedInput, form?: HTMLFormElement) {
+    const endpoint = deceasedEndpoint(mode, deceased)
+
+    if (!endpoint) {
+      setSuccessMessage(null)
+      setErrorMessage("Selecione um falecido valido antes de editar.")
+      return
+    }
+
+    setPending(true)
+    setErrorMessage(null)
+    setSuccessMessage(null)
+
+    try {
+      const response = await fetch(endpoint, {
+        method: mode === "create" ? "POST" : "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "same-origin",
+        body: JSON.stringify(payload),
+      })
+      const body = await readJsonEnvelope<DeceasedDetailDto>(response)
+
+      if (!response.ok || !body?.success) {
+        setErrorMessage(copy.errorMessage)
+        return
+      }
+
+      setSuccessMessage(copy.successMessage)
+      resetDuplicateReview()
+      onSuccess?.(body.data)
+
+      if (mode === "create" && form) {
+        resetCreateState(form)
+      }
+    } catch {
+      setErrorMessage(copy.errorMessage)
+    } finally {
+      setPending(false)
+    }
+  }
+
+  async function checkDuplicates(payload: CreateDeceasedInput) {
+    const response = await fetch("/api/v1/deceased/check-duplicates", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "same-origin",
+      body: JSON.stringify(payload),
+    })
+    const body = await readJsonEnvelope<DuplicatePageResponse>(response)
+
+    if (!response.ok || !body?.success) {
+      throw new Error("Unable to check duplicates")
+    }
+
+    const candidates = body.data.data.filter((candidate) => candidate.id !== deceased?.id)
+
+    return candidates
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    const form = event.currentTarget
+    const payload = buildPayload(new FormData(form))
+    const validationMessage = validatePayload(payload)
+
+    if (validationMessage) {
+      setSuccessMessage(null)
+      setErrorMessage(validationMessage)
+      resetDuplicateReview()
+      return
+    }
+
+    setPending(true)
+    setErrorMessage(null)
+    setSuccessMessage(null)
+    resetDuplicateReview()
+
+    try {
+      const candidates = await checkDuplicates(payload as CreateDeceasedInput)
+
+      if (candidates.length > 0) {
+        setPendingPayload(payload as CreateDeceasedInput)
+        setDuplicateCandidates(candidates)
+        return
+      }
+
+      await submitPayload(payload as CreateDeceasedInput, form)
+    } catch {
+      setErrorMessage("Nao foi possivel revisar duplicidades. Tente novamente.")
+    } finally {
+      setPending(false)
+    }
+  }
+
+  return (
+    <form
+      aria-busy={pending}
+      aria-describedby={describedBy || undefined}
+      className={cx("space-y-5 rounded-md border border-zinc-200 bg-white p-4", className)}
+      onSubmit={handleSubmit}
+    >
+      <div className="space-y-1">
+        <h2 className="text-base font-semibold text-zinc-950">{copy.title}</h2>
+        <p className="text-sm leading-6 text-zinc-600">{copy.description}</p>
+      </div>
+
+      {errorMessage ? (
+        <ErrorMessage id={errorId} message={errorMessage} title="Acao nao concluida" />
+      ) : null}
+
+      {successMessage ? (
+        <div
+          aria-atomic="true"
+          aria-live="polite"
+          className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900"
+          id={successId}
+          role="status"
+        >
+          {successMessage}
+        </div>
+      ) : null}
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="sm:col-span-2">
+          <label
+            className="mb-2 block text-sm font-medium text-zinc-800"
+            htmlFor={`${formId}-fullName`}
+          >
+            Nome completo
+          </label>
+          <input
+            autoComplete="off"
+            className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
+            defaultValue={deceased?.fullName ?? ""}
+            id={`${formId}-fullName`}
+            maxLength={160}
+            name="fullName"
+            required
+            type="text"
+          />
+        </div>
+
+        <div>
+          <label
+            className="mb-2 block text-sm font-medium text-zinc-800"
+            htmlFor={`${formId}-document`}
+          >
+            Documento
+          </label>
+          <input
+            autoComplete="off"
+            className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
+            id={`${formId}-document`}
+            maxLength={40}
+            name="document"
+            placeholder={mode === "edit" ? "Informar novo documento" : undefined}
+            type="text"
+          />
+          {mode === "edit" ? (
+            <p className="mt-1 text-xs text-zinc-600">
+              Documento atual: {deceased?.documentMasked ?? "Nao informado"}
+            </p>
+          ) : null}
+        </div>
+
+        <div>
+          <label
+            className="mb-2 block text-sm font-medium text-zinc-800"
+            htmlFor={`${formId}-birthDate`}
+          >
+            Nascimento
+          </label>
+          <input
+            className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
+            defaultValue={deceased?.birthDate ?? ""}
+            id={`${formId}-birthDate`}
+            name="birthDate"
+            type="date"
+          />
+        </div>
+
+        <div>
+          <label
+            className="mb-2 block text-sm font-medium text-zinc-800"
+            htmlFor={`${formId}-deathDate`}
+          >
+            Falecimento
+          </label>
+          <input
+            className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20 disabled:bg-zinc-100 disabled:text-zinc-500"
+            defaultValue={deceased?.deathDate ?? ""}
+            disabled={datesUnknown}
+            id={`${formId}-deathDate`}
+            name="deathDate"
+            type="date"
+          />
+        </div>
+
+        <div>
+          <label
+            className="mb-2 block text-sm font-medium text-zinc-800"
+            htmlFor={`${formId}-burialDate`}
+          >
+            Sepultamento
+          </label>
+          <input
+            className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20 disabled:bg-zinc-100 disabled:text-zinc-500"
+            defaultValue={deceased?.burialDate ?? ""}
+            disabled={datesUnknown}
+            id={`${formId}-burialDate`}
+            name="burialDate"
+            type="date"
+          />
+        </div>
+      </div>
+
+      <label className="flex gap-3 rounded-md border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-800">
+        <input
+          checked={datesUnknown}
+          className="mt-1 h-4 w-4 rounded border-zinc-300 text-zinc-950 focus:ring-zinc-950"
+          name="datesUnknown"
+          onChange={(event) => {
+            setDatesUnknown(event.currentTarget.checked)
+          }}
+          type="checkbox"
+        />
+        <span>
+          Datas de falecimento e sepultamento desconhecidas para registro historico.
+        </span>
+      </label>
+
+      <div>
+        <label
+          className="mb-2 block text-sm font-medium text-zinc-800"
+          htmlFor={`${formId}-notes`}
+        >
+          Observacoes
+        </label>
+        <textarea
+          className="min-h-28 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
+          defaultValue={deceased?.notes ?? ""}
+          id={`${formId}-notes`}
+          maxLength={2000}
+          name="notes"
+        />
+      </div>
+
+      <DuplicateReview
+        candidates={duplicateCandidates}
+        onCancel={resetDuplicateReview}
+        onProceed={() => {
+          if (pendingPayload) {
+            void submitPayload(pendingPayload)
+          }
+        }}
+        pending={pending}
+      />
+
+      <div className="flex justify-end">
+        <button
+          aria-busy={pending}
+          className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-zinc-950 px-4 text-sm font-semibold text-white hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 disabled:cursor-not-allowed disabled:bg-zinc-400 sm:w-auto"
+          disabled={pending || duplicateCandidates.length > 0}
+          type="submit"
+        >
+          {pending ? copy.pendingLabel : copy.submitLabel}
+        </button>
+      </div>
+    </form>
+  )
+}
