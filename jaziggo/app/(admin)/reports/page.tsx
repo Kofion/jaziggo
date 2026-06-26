@@ -3,6 +3,12 @@ import { redirect } from "next/navigation"
 import { z } from "zod"
 
 import {
+  BurialsPeriodReportTable,
+} from "@/components/reports/burials-period-report-table"
+import {
+  DeceasedReportTable,
+} from "@/components/reports/deceased-report-table"
+import {
   ReportFilters,
   REPORT_TYPE,
   reportTypeLabel,
@@ -150,6 +156,37 @@ function selectedFilterSummary(query: z.output<typeof reportPageQuerySchema>) {
   return filters.length > 0 ? filters.join(" | ") : "Sem filtros adicionais"
 }
 
+function ReportResults(query: z.output<typeof reportPageQuerySchema>) {
+  if (query.reportType === REPORT_TYPE.DECEASED) {
+    return (
+      <DeceasedReportTable
+        endDate={query.endDate}
+        page={query.page}
+        pageSize={query.pageSize}
+        startDate={query.startDate}
+      />
+    )
+  }
+
+  if (query.reportType === REPORT_TYPE.BURIALS_BY_PERIOD) {
+    return (
+      <BurialsPeriodReportTable
+        endDate={query.endDate}
+        page={query.page}
+        pageSize={query.pageSize}
+        startDate={query.startDate}
+      />
+    )
+  }
+
+  return (
+    <EmptyState
+      title="Visualizacao do relatorio pendente"
+      description="Os filtros da pagina administrativa estao prontos para a renderizacao dos relatorios de espacos nas proximas etapas."
+    />
+  )
+}
+
 export default async function ReportsPage({ searchParams }: ReportsPageProps) {
   const currentUser = await getCurrentActiveUser()
 
@@ -199,10 +236,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
             </div>
           </section>
 
-          <EmptyState
-            title="Visualizacao do relatorio pendente"
-            description="Os filtros da pagina administrativa estao prontos para a renderizacao dos resultados nas proximas etapas."
-          />
+          <ReportResults {...parsedQuery.data} />
         </>
       ) : (
         <ErrorMessage
