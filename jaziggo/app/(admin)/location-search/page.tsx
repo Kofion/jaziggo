@@ -1,14 +1,21 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
+import { Suspense } from "react"
+import { z } from "zod"
 
 import {
-  LocationSearchForm,
+  LocationResults,
   type LocationSearchFilterValues,
-} from "@/components/location/location-search-form"
-import { EmptyState } from "@/components/ui/empty-state"
+  type LocationSearchPageData,
+} from "@/components/location/location-results"
 import { ErrorMessage } from "@/components/ui/error-message"
+import { LoadingState } from "@/components/ui/loading-state"
 import { getCurrentActiveUser } from "@/lib/auth/session"
 import { locationSearchFiltersSchema } from "@/lib/validation/search"
+import {
+  LocationSearchServiceError,
+  searchLocations,
+} from "@/services/location-search-service"
 
 export const metadata: Metadata = {
   title: "Busca e localizacao | Jaziggo",
@@ -85,6 +92,65 @@ function initialFilters(
   }
 }
 
+function hasSearchFilter(query: z.output<typeof locationSearchPageQuerySchema>) {
+  return Boolean(
+    query.deceasedName ||
+      query.responsibleName ||
+      query.deathDate ||
+      query.burialDate ||
+      query.sector ||
+      query.burialSpaceIdentifier,
+  )
+}
+
+function toLocationPageData(
+  result: Awaited<ReturnType<typeof searchLocations>>,
+): LocationSearchPageData {
+  return {
+    ...result.pagination,
+    data: result.items,
+  }
+}
+
+async function LocationSearchContent({
+  filters,
+  query,
+}: {
+  filters: LocationSearchFilterValues
+  query: z.output<typeof locationSearchPageQuerySchema>
+}) {
+  if (!hasSearchFilter(query)) {
+    return <LocationResults initialFilters={filters} initialMode="idle" />
+  }
+
+  let result: Awaited<ReturnType<typeof searchLocations>>
+
+  try {
+    result = await searchLocations(query)
+  } catch (error) {
+    const message =
+      error instanceof LocationSearchServiceError
+        ? "Nao foi possivel carregar os resultados com os filtros informados."
+        : "Tente novamente em instantes. Se o problema persistir, informe o suporte interno."
+
+    return (
+      <LocationResults
+        errorMessage={message}
+        initialFilters={filters}
+        initialMode="query"
+      />
+    )
+  }
+
+  return (
+    <LocationResults
+      initialFilters={filters}
+      initialMode="query"
+      initialResult={toLocationPageData(result)}
+    />
+  )
+}
+
 export default async function LocationSearchPage({
   searchParams,
 }: LocationSearchPageProps) {
@@ -116,13 +182,18 @@ export default async function LocationSearchPage({
         </p>
       </header>
 
-      <LocationSearchForm initialFilters={filters} />
-
       {parsedQuery.success ? (
-        <EmptyState
-          title="Nenhum resultado carregado"
-          description="Informe filtros de atendimento para preparar a busca de localizacao."
-        />
+        <Suspense
+          fallback={
+            <LoadingState
+              description="Os resultados de localizacao estao sendo consultados."
+              label="Carregando localizacoes"
+              rows={4}
+            />
+          }
+        >
+          <LocationSearchContent filters={filters} query={parsedQuery.data} />
+        </Suspense>
       ) : (
         <ErrorMessage
           message="Revise os filtros e remova parametros nao reconhecidos antes de tentar novamente."

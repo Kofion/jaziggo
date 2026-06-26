@@ -48,6 +48,8 @@ export type LocationSearchPageData = PaginationMeta & {
 type LocationSearchFormProps = Readonly<{
   initialFilters: LocationSearchFilterValues
   onDocumentSearch?: (result: LocationSearchPageData) => void
+  onDocumentSearchStart?: () => void
+  onDocumentSearchEnd?: () => void
   className?: string
 }>
 
@@ -95,6 +97,8 @@ async function readJsonEnvelope<TData>(response: Response) {
 export function LocationSearchForm({
   initialFilters,
   onDocumentSearch,
+  onDocumentSearchStart,
+  onDocumentSearchEnd,
   className,
 }: LocationSearchFormProps) {
   const formId = useId()
@@ -127,6 +131,7 @@ export function LocationSearchForm({
     setPendingDocumentSearch(true)
     setErrorMessage(null)
     setSuccessMessage(null)
+    onDocumentSearchStart?.()
 
     try {
       const response = await fetch("/api/v1/location-search/by-document", {
@@ -157,6 +162,7 @@ export function LocationSearchForm({
     } finally {
       setDocumentValue("")
       setPendingDocumentSearch(false)
+      onDocumentSearchEnd?.()
     }
   }
 
