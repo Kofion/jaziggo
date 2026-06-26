@@ -14,7 +14,12 @@ import {
   reportTypeLabel,
   type ReportFilterValues,
 } from "@/components/reports/report-filters"
-import { EmptyState } from "@/components/ui/empty-state"
+import {
+  SpaceOccupationReportTable,
+} from "@/components/reports/space-occupation-report-table"
+import {
+  SpaceStatusReportTable,
+} from "@/components/reports/space-status-report-table"
 import { ErrorMessage } from "@/components/ui/error-message"
 import { getCurrentActiveUser } from "@/lib/auth/session"
 import { paginationSchema } from "@/lib/validation/pagination"
@@ -179,10 +184,25 @@ function ReportResults(query: z.output<typeof reportPageQuerySchema>) {
     )
   }
 
+  if (query.reportType === REPORT_TYPE.SPACE_OCCUPATION) {
+    return (
+      <SpaceOccupationReportTable
+        page={query.page}
+        pageSize={query.pageSize}
+        sector={query.sector}
+        status={query.status}
+        type={query.type}
+      />
+    )
+  }
+
   return (
-    <EmptyState
-      title="Visualizacao do relatorio pendente"
-      description="Os filtros da pagina administrativa estao prontos para a renderizacao dos relatorios de espacos nas proximas etapas."
+    <SpaceStatusReportTable
+      page={query.page}
+      pageSize={query.pageSize}
+      sector={query.sector}
+      status={query.status}
+      type={query.type}
     />
   )
 }
