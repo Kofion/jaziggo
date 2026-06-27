@@ -135,6 +135,14 @@ function toDateFilter(value: string): Date {
   return new Date(`${value}T00:00:00.000Z`)
 }
 
+function toOptionalDate(value: string | undefined): Date | undefined {
+  return value === undefined ? undefined : toDateFilter(value)
+}
+
+function toNullableDate(value: string | undefined): Date | null {
+  return value === undefined ? null : toDateFilter(value)
+}
+
 function buildDuplicateMatchFilters(input: {
   document?: string
   birthDate?: string
@@ -340,6 +348,9 @@ export async function createDeceased(
   const deceased = await prisma.deceased.create({
     data: {
       ...parsedInput.data,
+      birthDate: toOptionalDate(parsedInput.data.birthDate),
+      deathDate: toOptionalDate(parsedInput.data.deathDate),
+      burialDate: toOptionalDate(parsedInput.data.burialDate),
       internalCode,
       searchName: normalizeSearchName(parsedInput.data.fullName),
       datesUnknown: parsedInput.data.datesUnknown === true,
@@ -374,9 +385,9 @@ export async function updateDeceased(
         fullName: parsedInput.data.fullName,
         searchName: normalizeSearchName(parsedInput.data.fullName),
         document: parsedInput.data.document ?? null,
-        birthDate: parsedInput.data.birthDate ?? null,
-        deathDate: parsedInput.data.deathDate ?? null,
-        burialDate: parsedInput.data.burialDate ?? null,
+        birthDate: toNullableDate(parsedInput.data.birthDate),
+        deathDate: toNullableDate(parsedInput.data.deathDate),
+        burialDate: toNullableDate(parsedInput.data.burialDate),
         datesUnknown: parsedInput.data.datesUnknown === true,
         historicalDataIncomplete: calculateHistoricalDataIncomplete(
           parsedInput.data.document,

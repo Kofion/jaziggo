@@ -166,9 +166,9 @@ describe("DeceasedService", () => {
       data: {
         fullName: "Jose da Silva",
         document: "12345678900",
-        birthDate: "1940-01-05",
-        deathDate: "2026-01-10",
-        burialDate: "2026-01-12",
+        birthDate: new Date("1940-01-05T00:00:00.000Z"),
+        deathDate: new Date("2026-01-10T00:00:00.000Z"),
+        burialDate: new Date("2026-01-12T00:00:00.000Z"),
         notes: "Registro administrativo",
         internalCode: generatedInternalCode,
         searchName: "jose da silva",
@@ -278,7 +278,7 @@ describe("DeceasedService", () => {
     ])
 
     const result = await listDeceased({
-      name: " José ",
+      name: " Jose ",
       internalCode: generatedInternalCode,
       deathDate: "2026-01-10",
       burialDate: "2026-01-12",
@@ -382,7 +382,7 @@ describe("DeceasedService", () => {
 
     const result = await checkDeceasedDuplicates(
       {
-        fullName: " José da Silva ",
+        fullName: " Jose da Silva ",
         document: "123.456.789-00",
         deathDate: "2026-01-10",
       },
