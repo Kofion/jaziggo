@@ -61,6 +61,17 @@ const LOCATION_SEARCH_DURATION_NAME =
 const REPORTS_GENERATED_TOTAL_NAME = "jaziggo_reports_generated_total"
 const REPORT_GENERATION_DURATION_NAME =
   "jaziggo_report_generation_duration_seconds"
+const DISABLED_METRICS_CONTENT = [
+  "# HELP jaziggo_metrics_endpoint_enabled Metrics endpoint enabled state",
+  "# TYPE jaziggo_metrics_endpoint_enabled gauge",
+  "jaziggo_metrics_endpoint_enabled 0",
+  "",
+].join("\n")
+
+export interface MetricsSnapshot {
+  format: "prometheus"
+  content: string
+}
 
 const locationSearchTotal =
   (register.getSingleMetric(
@@ -123,6 +134,27 @@ function normalizeResultCount(
   }
 
   return resultCount
+}
+
+export function areMetricsEnabled(): boolean {
+  return process.env.METRICS_ENABLED?.toLowerCase() === "true"
+}
+
+export async function collectMetricsSnapshot(): Promise<MetricsSnapshot> {
+  if (!areMetricsEnabled()) {
+    return {
+      format: "prometheus",
+      content: DISABLED_METRICS_CONTENT,
+    }
+  }
+
+  const content = await register.metrics()
+
+  return {
+    format: "prometheus",
+    content:
+      content.trim().length > 0 ? content : DISABLED_METRICS_CONTENT,
+  }
 }
 
 export function recordLocationSearchObservation(
