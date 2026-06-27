@@ -13,6 +13,8 @@
     "typecheck": "tsc --noEmit",
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration --fileParallelism=false",
+    "validate:openapi": "node scripts/validate-openapi.mjs",
+    "test:contract": "npm run validate:openapi",
     "test:e2e": "playwright test"
   },
   "prisma": {
