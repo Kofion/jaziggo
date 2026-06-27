@@ -1,0 +1,7 @@
+apis:
+  jaziggo-internal:
+    root: ../specs/001-cemetery-management/contracts/openapi.yaml
+
+rules:
+  struct: error
+  no-unresolved-refs: error
