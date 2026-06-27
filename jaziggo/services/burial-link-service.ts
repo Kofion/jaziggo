@@ -184,6 +184,12 @@ function toIsoDate(value: Date | null): string | undefined {
   return value?.toISOString().slice(0, 10)
 }
 
+function toOptionalDate(value: string | undefined): Date | undefined {
+  return value === undefined
+    ? undefined
+    : new Date(`${value}T00:00:00.000Z`)
+}
+
 function toActiveBurialLink(link: {
   id: string
   deceasedId: string
@@ -434,7 +440,7 @@ export async function createBurialLink(
         deceasedId: parsedInput.data.deceasedId,
         burialSpaceId: parsedInput.data.burialSpaceId,
         responsibleId: parsedInput.data.responsibleId,
-        burialDate: parsedInput.data.burialDate,
+        burialDate: toOptionalDate(parsedInput.data.burialDate),
         status: "ACTIVE",
       },
       select: {

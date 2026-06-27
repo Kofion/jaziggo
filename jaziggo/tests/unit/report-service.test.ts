@@ -271,7 +271,14 @@ describe("ReportService", () => {
         where: {
           status: BURIAL_SPACE_STATUS.OCCUPIED,
           type: BURIAL_SPACE_TYPE.JAZIGO,
-          sector: "a",
+          AND: [
+            {
+              OR: [
+                { locationKey: { contains: "sector=a|" } },
+                { locationKey: { endsWith: "sector=a" } },
+              ],
+            },
+          ],
           burialLinks: {
             some: {
               status: BURIAL_LINK_STATUS.ACTIVE,
@@ -324,7 +331,7 @@ describe("ReportService", () => {
         where: {
           status: BURIAL_SPACE_STATUS.OCCUPIED,
           type: undefined,
-          sector: undefined,
+          AND: undefined,
           burialLinks: undefined,
         },
       }),

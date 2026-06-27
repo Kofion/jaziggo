@@ -35,6 +35,11 @@ export const deceasedReportFiltersSchema = paginationSchema
   .strict()
   .superRefine(validateReportPeriod)
 
+export const burialsByPeriodReportQuerySchema = paginationSchema
+  .extend(reportPeriodFields)
+  .strict()
+  .superRefine(validateReportPeriod)
+
 export const burialsByPeriodReportFiltersSchema = paginationSchema
   .extend({
     ...reportPeriodFields,
@@ -54,6 +59,14 @@ export const spaceReportFiltersSchema = paginationSchema
     type: burialSpaceTypeSchema.optional(),
     sector: normalizedSectorFilterSchema,
     linkStatus: burialLinkStatusSchema.optional(),
+  })
+  .strict()
+
+export const spaceReportQuerySchema = paginationSchema
+  .extend({
+    status: burialSpaceStatusSchema.optional(),
+    type: burialSpaceTypeSchema.optional(),
+    sector: normalizedSectorFilterSchema,
   })
   .strict()
 

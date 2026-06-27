@@ -262,7 +262,7 @@ describe("BurialLinkService capacity and active-link rules", () => {
         deceasedId,
         burialSpaceId,
         responsibleId,
-        burialDate: "2026-01-12",
+        burialDate: new Date("2026-01-12T00:00:00.000Z"),
         status: BURIAL_LINK_STATUS.ACTIVE,
       },
       select: expect.objectContaining({
