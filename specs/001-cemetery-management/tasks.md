@@ -260,7 +260,7 @@ serviço ou contrato permanecem sequenciais.
 - [X] T135 [P] [US3] Fase 13 — Testar encerramento histórico e recálculo do status | Arquivos: `jaziggo/tests/unit/burial-link-history.test.ts` | Dependências: T092 | Conclusão: data/motivo obrigatórios e nenhum delete físico | Paralelo: sim | Docs Next.js: consultar `jaziggo/node_modules/next/dist/docs/` antes da implementação
 - [X] T136 [P] [US5] Fase 13 — Testar busca exata por documento, máscara, homônimos e formatação | Arquivos: `jaziggo/tests/unit/location-search-service.test.ts` | Dependências: T101 | Conclusão: respostas e logs não contêm documento completo | Paralelo: sim | Docs Next.js: consultar `jaziggo/node_modules/next/dist/docs/` antes da implementação
 - [X] T137 [P] [US6] Fase 13 — Testar filtros, totais, estados e empty state dos relatórios | Arquivos: `jaziggo/tests/unit/report-service.test.ts` | Dependências: T108 | Conclusão: quatro relatórios cobertos e EMPLOYEE rejeitado | Paralelo: sim | Docs Next.js: consultar `jaziggo/node_modules/next/dist/docs/` antes da implementação
-- [ ] T138 Fase 13 — Executar suíte unitária e corrigir apenas falhas dentro do escopo | Arquivos: `jaziggo/tests/unit/`, `jaziggo/vitest.config.mts` | Dependências: T127-T137 | Conclusão: `npm run test:unit` passa sem testes ignorados críticos | Paralelo: não | Docs Next.js: consultar guia local de testing antes
+- [X] T138 Fase 13 — Executar suíte unitária e corrigir apenas falhas dentro do escopo | Arquivos: `jaziggo/tests/unit/`, `jaziggo/vitest.config.mts` | Dependências: T127-T137 | Conclusão: `npm run test:unit` passa sem testes ignorados críticos | Paralelo: não | Docs Next.js: consultar guia local de testing antes
 
 ---
 
