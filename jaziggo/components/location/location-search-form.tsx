@@ -276,6 +276,7 @@ export function LocationSearchForm({
 
         <div className="flex items-end">
           <button
+            aria-label="Filtrar localizacoes"
             className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-zinc-950 px-4 text-sm font-semibold text-white hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 lg:w-auto"
             type="submit"
           >
@@ -336,6 +337,7 @@ export function LocationSearchForm({
 
         <div className="flex items-end">
           <button
+            aria-label="Buscar por documento"
             aria-busy={pendingDocumentSearch}
             className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-zinc-950 px-4 text-sm font-semibold text-zinc-950 hover:bg-zinc-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 disabled:cursor-not-allowed disabled:border-zinc-300 disabled:text-zinc-400 lg:w-auto"
             disabled={pendingDocumentSearch}

@@ -261,6 +261,7 @@ export default async function BurialSpacesPage({ searchParams }: BurialSpacesPag
 
         <div className="flex items-end">
           <button
+            aria-label="Filtrar sepulturas e jazigos"
             className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-zinc-950 px-4 text-sm font-semibold text-white hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 lg:w-auto"
             type="submit"
           >

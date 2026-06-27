@@ -280,6 +280,7 @@ export function LocationResults({
                         </td>
                         <td className="px-4 py-3 align-top">
                           <button
+                            aria-label={`Ver orientacao de ${item.internalCode}`}
                             aria-pressed={selected}
                             className="inline-flex min-h-10 items-center justify-center rounded-md border border-zinc-300 px-3 text-sm font-semibold text-zinc-700 hover:bg-zinc-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
                             onClick={() => {
