@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
 import { AuthorizationError } from "../../../../../lib/auth/permissions"
-import { burialsByPeriodReportFiltersSchema } from "../../../../../lib/validation/report"
+import { burialsByPeriodReportQuerySchema } from "../../../../../lib/validation/report"
 import {
   generateBurialsByPeriodReport,
   ReportServiceError,
@@ -23,13 +23,6 @@ const ALLOWED_QUERY_PARAMS = new Set([
   "startDate",
   "endDate",
 ])
-const burialsByPeriodQuerySchema =
-  burialsByPeriodReportFiltersSchema.pick({
-    page: true,
-    pageSize: true,
-    startDate: true,
-    endDate: true,
-  })
 
 function errorResponse(
   requestId: string,
@@ -97,7 +90,7 @@ export async function GET(request: NextRequest) {
   const query = Object.fromEntries(
     request.nextUrl.searchParams.entries(),
   )
-  const parsedQuery = burialsByPeriodQuerySchema.safeParse(query)
+  const parsedQuery = burialsByPeriodReportQuerySchema.safeParse(query)
 
   if (!parsedQuery.success) {
     return errorResponse(

@@ -215,13 +215,30 @@ function buildSpaceReportFilters(
   }
 }
 
+function locationKeyFilter(
+  key: string,
+  value: string,
+): Prisma.BurialSpaceWhereInput {
+  const token = `${key}=${encodeURIComponent(value)}`
+
+  return {
+    OR: [
+      { locationKey: { contains: `${token}|` } },
+      { locationKey: { endsWith: token } },
+    ],
+  }
+}
+
 function buildSpaceWhere(
   filters: SpaceReportFilters,
 ): Prisma.BurialSpaceWhereInput {
   return {
     status: filters.status,
     type: filters.type,
-    sector: filters.sector,
+    AND:
+      filters.sector === undefined
+        ? undefined
+        : [locationKeyFilter("sector", filters.sector)],
     burialLinks:
       filters.linkStatus === undefined
         ? undefined

@@ -1,4 +1,4 @@
-﻿# Tasks: Gestão Administrativa de Cemitérios do Jaziggo
+# Tasks: Gestão Administrativa de Cemitérios do Jaziggo
 
 **Input**: Design documents from `specs/001-cemetery-management/`
 
@@ -274,11 +274,11 @@ serviço ou contrato permanecem sequenciais.
 - [X] T142 [P] [US3] Fase 14 — Testar CRUD de espaços, `row`, capacidade e transições de status | Arquivos: `jaziggo/tests/integration/burial-spaces-api.test.ts` | Dependências: T139, T057 | Conclusão: constraints e respostas 409/422 são exercitadas | Paralelo: sim | Docs Next.js: consultar guia local de testing antes
 - [X] T143 [P] [US4] Fase 14 — Testar responsáveis, POST por documento e encerramento histórico de vínculos | Arquivos: `jaziggo/tests/integration/responsibles-api.test.ts` | Dependências: T139, T068, T067 | Conclusão: lista omite contatos, documento não aparece na URL e vínculo encerrado permanece no PostgreSQL | Paralelo: sim | Docs Next.js: consultar guia local de testing antes
 - [X] T144 [P] [US2] Fase 14 — Testar falecidos completos/históricos e alerta de duplicidade | Arquivos: `jaziggo/tests/integration/deceased-api.test.ts` | Dependências: T139, T079 | Conclusão: internalCode e regras de datas persistem corretamente | Paralelo: sim | Docs Next.js: consultar guia local de testing antes
-- [ ] T145 [US3] Fase 14 — Testar duas transações concorrentes pela última vaga do jazigo | Arquivos: `jaziggo/tests/integration/burial-link-concurrency.test.ts` | Dependências: T139, T092 | Conclusão: exatamente uma confirma e capacidade nunca é excedida | Paralelo: não | Docs Next.js: consultar guia local de testing antes
-- [ ] T146 [US3] Fase 14 — Testar encerramento histórico e recálculo com vínculos restantes/zero | Arquivos: `jaziggo/tests/integration/burial-link-history.test.ts` | Dependências: T145 | Conclusão: vínculo permanece e estados finais são consistentes | Paralelo: não | Docs Next.js: consultar guia local de testing antes
-- [ ] T147 [P] [US5] Fase 14 — Testar busca integrada, documento exato via POST, máscara e ausência de rota pública | Arquivos: `jaziggo/tests/integration/location-search-api.test.ts` | Dependências: T139, T101, T099 | Conclusão: documento completo não aparece em URL, resposta, logs, métricas ou erro | Paralelo: sim | Docs Next.js: consultar guia local de testing antes
-- [ ] T148 [P] [US6] Fase 14 — Testar relatórios contra fixtures e RBAC | Arquivos: `jaziggo/tests/integration/reports-api.test.ts` | Dependências: T139, T108 | Conclusão: totais/empty state batem com banco e EMPLOYEE recebe 403 | Paralelo: sim | Docs Next.js: consultar guia local de testing antes
-- [ ] T149 Fase 14 — Executar suíte de integração serializando testes que compartilham reset do banco | Arquivos: `jaziggo/vitest.config.mts`, `jaziggo/tests/integration/` | Dependências: T140-T148 | Conclusão: `npm run test:integration` passa repetidamente sem flakiness | Paralelo: não | Docs Next.js: consultar guia local de testing antes
+- [X] T145 [US3] Fase 14 — Testar duas transações concorrentes pela última vaga do jazigo | Arquivos: `jaziggo/tests/integration/burial-link-concurrency.test.ts` | Dependências: T139, T092 | Conclusão: exatamente uma confirma e capacidade nunca é excedida | Paralelo: não | Docs Next.js: consultar guia local de testing antes
+- [X] T146 [US3] Fase 14 — Testar encerramento histórico e recálculo com vínculos restantes/zero | Arquivos: `jaziggo/tests/integration/burial-link-history.test.ts` | Dependências: T145 | Conclusão: vínculo permanece e estados finais são consistentes | Paralelo: não | Docs Next.js: consultar guia local de testing antes
+- [X] T147 [P] [US5] Fase 14 — Testar busca integrada, documento exato via POST, máscara e ausência de rota pública | Arquivos: `jaziggo/tests/integration/location-search-api.test.ts` | Dependências: T139, T101, T099 | Conclusão: documento completo não aparece em URL, resposta, logs, métricas ou erro | Paralelo: sim | Docs Next.js: consultar guia local de testing antes
+- [X] T148 [P] [US6] Fase 14 — Testar relatórios contra fixtures e RBAC | Arquivos: `jaziggo/tests/integration/reports-api.test.ts` | Dependências: T139, T108 | Conclusão: totais/empty state batem com banco e EMPLOYEE recebe 403 | Paralelo: sim | Docs Next.js: consultar guia local de testing antes
+- [X] T149 Fase 14 — Executar suíte de integração serializando testes que compartilham reset do banco | Arquivos: `jaziggo/vitest.config.mts`, `jaziggo/tests/integration/` | Dependências: T140-T148 | Conclusão: `npm run test:integration` passa repetidamente sem flakiness | Paralelo: não | Docs Next.js: consultar guia local de testing antes
 
 ---
 
@@ -415,4 +415,3 @@ Não paralelizar T115/T116 entre si nem tasks que alterem o mesmo formulário/se
 - O contrato OpenAPI é fonte de verdade para paths, métodos, segurança e DTOs HTTP.
 - Falhas de RBAC, privacidade, capacidade concorrente ou perda histórica bloqueiam conclusão.
 - Nenhuma task inclui portal público, exportação, mapas, notificações ou integração externa obrigatória.
-

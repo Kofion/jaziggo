@@ -12,7 +12,7 @@
     "db:seed": "prisma db seed",
     "typecheck": "tsc --noEmit",
     "test:unit": "vitest run tests/unit",
-    "test:integration": "vitest run tests/integration",
+    "test:integration": "vitest run tests/integration --fileParallelism=false",
     "test:e2e": "playwright test"
   },
   "prisma": {

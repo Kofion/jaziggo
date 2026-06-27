@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
 import { AuthorizationError } from "../../../../../lib/auth/permissions"
-import { spaceOccupationReportFiltersSchema } from "../../../../../lib/validation/report"
+import { spaceReportQuerySchema } from "../../../../../lib/validation/report"
 import {
   generateSpaceOccupationReport,
   ReportServiceError,
@@ -24,14 +24,6 @@ const ALLOWED_QUERY_PARAMS = new Set([
   "type",
   "sector",
 ])
-const spaceOccupationQuerySchema =
-  spaceOccupationReportFiltersSchema.pick({
-    page: true,
-    pageSize: true,
-    status: true,
-    type: true,
-    sector: true,
-  })
 
 function errorResponse(
   requestId: string,
@@ -99,7 +91,7 @@ export async function GET(request: NextRequest) {
   const query = Object.fromEntries(
     request.nextUrl.searchParams.entries(),
   )
-  const parsedQuery = spaceOccupationQuerySchema.safeParse(query)
+  const parsedQuery = spaceReportQuerySchema.safeParse(query)
 
   if (!parsedQuery.success) {
     return errorResponse(
