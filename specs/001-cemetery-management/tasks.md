@@ -301,7 +301,7 @@ serviço ou contrato permanecem sequenciais.
 
 **Purpose**: Fechar qualidade transversal, observabilidade, desempenho e conformidade.
 
-- [ ] T158 Fase 16 — Criar testes E2E de login, navegação por perfil e ausência de acesso público | Arquivos: `jaziggo/e2e/auth-navigation.spec.ts` | Dependências: T113, T124 | Conclusão: ADMIN/EMPLOYEE veem menus corretos e visitantes não acessam áreas | Paralelo: não | Docs Next.js: consultar guia local de Playwright antes
+- [X] T158 Fase 16 — Criar testes E2E de login, navegação por perfil e ausência de acesso público | Arquivos: `jaziggo/e2e/auth-navigation.spec.ts` | Dependências: T113, T124 | Conclusão: ADMIN/EMPLOYEE veem menus corretos e visitantes não acessam áreas | Paralelo: não | Docs Next.js: consultar guia local de Playwright antes
 - [ ] T159 [P] Fase 16 — Criar testes E2E de cadastro, localização, máscara e homônimos | Arquivos: `jaziggo/e2e/location-workflow.spec.ts` | Dependências: T120-T123, T158 | Conclusão: fluxo do atendente EMPLOYEE termina sem documento completo no DOM | Paralelo: sim | Docs Next.js: consultar guia local de Playwright antes
 - [ ] T160 [P] Fase 16 — Criar testes E2E de ocupação, bloqueio de status e encerramento histórico | Arquivos: `jaziggo/e2e/occupancy-workflow.spec.ts` | Dependências: T115, T116, T121, T158 | Conclusão: UI exige encerramento antes de RESERVED/INACTIVE e mantém histórico | Paralelo: sim | Docs Next.js: consultar guia local de Playwright antes
 - [ ] T161 [P] Fase 16 — Criar testes E2E dos quatro relatórios e estados vazios | Arquivos: `jaziggo/e2e/reports-workflow.spec.ts` | Dependências: T126, T158 | Conclusão: ADMIN visualiza internamente e EMPLOYEE não acessa | Paralelo: sim | Docs Next.js: consultar guia local de Playwright antes
