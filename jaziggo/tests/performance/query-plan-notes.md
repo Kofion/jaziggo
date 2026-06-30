@@ -320,3 +320,29 @@ These are recommendations only. T167 does not apply any structural change.
 T167 documents the critical query-plan targets and decisions without executing real analysis in this
 workspace because no performance database URL is configured. T168 remains the task that may apply a
 minimal migration after real `EXPLAIN ANALYZE` evidence exists.
+
+## T168 Index Adjustment Decision
+
+T168 reviewed this analysis, the Prisma schema, and the existing initial migration. No new migration
+was created.
+
+Decision: do not alter indexes in T168.
+
+Rationale:
+
+- T167 did not capture real `EXPLAIN ANALYZE` output because `PERFORMANCE_DATABASE_URL` was not
+  configured in the workspace.
+- The current evidence is static: it identifies likely pressure points and candidate indexes, but it
+  does not prove a slow plan, high cost, excessive rows scanned, or benchmark failure.
+- The local T168 task allows an index migration only when justified; without measured query-plan
+  evidence, a structural database change would be speculative.
+- Existing indexes already cover exact document lookup, exact space identifier lookup,
+  detail-by-deceased lookup, active-link counts by space, date fields, and primary status/type
+  filters.
+
+Follow-up for T169/T168 replay:
+
+1. Run the T165 and T166 benchmarks only against the isolated performance database.
+2. Capture `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)` for any slow scenario using the templates above.
+3. Create a minimal T168-style migration only if the captured plan shows a concrete bottleneck and a
+   single index addresses it without changing data, rules, services, routes, or privacy behavior.
