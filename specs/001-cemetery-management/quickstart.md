@@ -174,6 +174,13 @@ Run a moderated validation with representative administrators and employees:
 4. Record participant count, elapsed times, completion results and satisfaction responses without
    collecting unnecessary personal data.
 
+Use the executable protocol and collection template in
+`jaziggo/tests/acceptance/human-validation.md`. Until the moderated validation is run with anonymous
+participants and synthetic data, SC-002, SC-004 and SC-010 remain pending and the human-validation
+release gate is blocked. Family members, visitors and responsible parties must not receive direct
+system access; any external service request is handled inside Jaziggo by an authenticated `ADMIN` or
+`EMPLOYEE`.
+
 ## Completion Criteria
 
 - All commands and scenarios above pass in an isolated environment.
