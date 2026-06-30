@@ -197,3 +197,51 @@ system access; any external service request is handled inside Jaziggo by an auth
 - No external business integration is required for the validated workflows.
 - Success responses contain `success=true`, typed `data` and `requestId`; errors contain
   `success=false`, safe `error` and `requestId`.
+
+## Final T174 Validation Record - 2026-06-30
+
+This record is sanitized. It contains only aggregate gate results and document references; no
+connection strings, passwords, tokens, complete documents, phones, emails, addresses or hostnames
+are recorded.
+
+### Constitution Check
+
+| Gate | Result | Evidence |
+|------|--------|----------|
+| Existing application only | PASS | Work remains in the existing `jaziggo/` Next.js application; no scaffold or second application was created. |
+| Internal administrative scope | PASS | Direct access remains limited to authenticated internal users; family members, visitors and responsible parties have no direct system access. |
+| Authentication required | PASS | Administrative pages and operations require authentication; `/` redirects to `/login` as the internal entry point. |
+| RBAC with `ADMIN` and `EMPLOYEE` | PASS | The implemented and tested role model remains limited to `ADMIN` and `EMPLOYEE`; no `ATTENDANT` profile was introduced. |
+| Privacy and masking | PASS | Document display remains masked in search/report surfaces; exact sensitive filters use protected request bodies and are not recorded here. |
+| Required stack | PASS | The implementation remains Next.js, TypeScript, PostgreSQL and Prisma. |
+| No mandatory external integration | PASS | No external business integration is required for the validated workflows. |
+| Reports inside application | PASS | Reports remain internal application views and no mandatory export action is required. |
+| No public access | PASS | Public/family/visitor search paths are not introduced; service requests are handled by authenticated `ADMIN` or `EMPLOYEE` users. |
+
+### T173 Gate Snapshot
+
+The final T173 gate run was completed immediately before this record and remained PASS:
+
+| Gate | Result |
+|------|--------|
+| `npm.cmd run lint` | PASS |
+| `npm.cmd run typecheck` | PASS |
+| `npm.cmd run test:unit` | PASS |
+| `npm.cmd run test:integration` | PASS |
+| `npm.cmd run test:contract` | PASS |
+| `npm.cmd run test:e2e` | PASS, 15/15 |
+| `npm.cmd run build` | PASS |
+| `git diff --check` | PASS |
+
+### Recovery And Human Validation Evidence
+
+| Area | Result | Evidence |
+|------|--------|----------|
+| Recovery rehearsal | PASS | `jaziggo/tests/recovery/restore-runbook.md` includes a sanitized 2026-06-30 restore record with aggregate counts and no secrets or personal data. |
+| Human validation | BLOCKED | `jaziggo/tests/acceptance/human-validation.md` contains the moderated protocol and collection template, but the execution record still shows `Pending` participants and a blocked release gate. |
+
+### T174 Decision
+
+T174 is blocked as of 2026-06-30 because the human validation execution gate remains pending in the
+recorded evidence. Do not mark T174 complete until anonymized aggregate results for SC-002, SC-004
+and SC-010 are recorded and meet the required thresholds without exposing personal data.
