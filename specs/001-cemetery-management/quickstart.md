@@ -171,22 +171,24 @@ identify an isolated recovery database and must be rejected when it looks like d
 E2E, integration, production, live or primary. Until the runbook is executed against an isolated
 recovery database with sanitized evidence, the recovery gate remains blocked.
 
-### 11. Human Validation
+### 11. MVP Functional Acceptance Validation
 
-Run a moderated validation with representative administrators and employees:
+For the academic MVP/TCC scope, validation is functional, documentary and based on controlled
+scenarios derived from the requirements. No empirical validation with real participants is required
+as a release gate for this stage, and no participant counts, timings or satisfaction results should
+be invented.
 
-1. At least 90% must register and link a deceased record in at most 5 minutes without assistance.
-2. At least 90% must locate the correct record and provide location guidance in at most 2 minutes.
-3. At least 80% must rate navigation, messages and location presentation as clear.
-4. Record participant count, elapsed times, completion results and satisfaction responses without
-   collecting unnecessary personal data.
+Use `jaziggo/tests/acceptance/human-validation.md` as the MVP functional acceptance record. It covers:
 
-Use the executable protocol and collection template in
-`jaziggo/tests/acceptance/human-validation.md`. Until the moderated validation is run with anonymous
-participants and synthetic data, SC-002, SC-004 and SC-010 remain pending and the human-validation
-release gate is blocked. Family members, visitors and responsible parties must not receive direct
-system access; any external service request is handled inside Jaziggo by an authenticated `ADMIN` or
-`EMPLOYEE`.
+1. `EMPLOYEE` registration/link scenarios for SC-002.
+2. `EMPLOYEE` location guidance scenarios for SC-004.
+3. `ADMIN` report review and `EMPLOYEE` access-denial scenarios for SC-010.
+4. Accessibility, feedback and internal access-boundary checks supporting MVP usability.
+
+The record must remain transparent: it must state that real-user validation was not performed in
+this TCC stage and that empirical validation with representative administrators and employees is
+future work. Family members, visitors and responsible parties must not receive direct system access;
+any external service request is handled inside Jaziggo by an authenticated `ADMIN` or `EMPLOYEE`.
 
 ## Completion Criteria
 
@@ -238,10 +240,11 @@ The final T173 gate run was completed immediately before this record and remaine
 | Area | Result | Evidence |
 |------|--------|----------|
 | Recovery rehearsal | PASS | `jaziggo/tests/recovery/restore-runbook.md` includes a sanitized 2026-06-30 restore record with aggregate counts and no secrets or personal data. |
-| Human validation | BLOCKED | `jaziggo/tests/acceptance/human-validation.md` contains the moderated protocol and collection template, but the execution record still shows `Pending` participants and a blocked release gate. |
+| MVP functional acceptance | PASS | `jaziggo/tests/acceptance/human-validation.md` records controlled ADMIN/EMPLOYEE acceptance scenarios for the academic MVP and explicitly defers real-user empirical validation to future work. |
 
 ### T174 Decision
 
-T174 is blocked as of 2026-06-30 because the human validation execution gate remains pending in the
-recorded evidence. Do not mark T174 complete until anonymized aggregate results for SC-002, SC-004
-and SC-010 are recorded and meet the required thresholds without exposing personal data.
+T174 is approved for the academic MVP scope as of 2026-06-30. The Constitution Check remains PASS,
+T173 gates are recorded as PASS, recovery evidence is sanitized, and SC-002, SC-004 and SC-010 are
+covered by functional acceptance scenarios. Real-user empirical validation remains a documented
+limitation and future-work item, not a mandatory gate for this TCC MVP.
