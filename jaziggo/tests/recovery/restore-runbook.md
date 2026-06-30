@@ -209,3 +209,73 @@ Complete this table only after a real isolated restore rehearsal. Leave it pendi
 | Execution status | Blocked: no isolated recovery database and backup artifact were provided in this workspace. |
 | Restore execution | Not executed. No development, test, E2E, integration, production, live or primary database was touched. |
 | Approval status | Pending real isolated restore rehearsal with sanitized evidence. |
+
+## Evidência do ensaio de restauração — 2026-06-30
+
+Status: executado com sucesso.
+
+### Ambiente de recuperação
+
+- Provedor: Neon PostgreSQL.
+- Banco: isolado para recovery/drill.
+- `RECOVERY_DATABASE_URL`: configurada somente em variável de ambiente local.
+- Connection string registrada neste documento: não.
+- Banco diferente de `DATABASE_URL`: sim.
+- Banco diferente de `TEST_DATABASE_URL`: sim.
+- Marcadores proibidos ausentes: sim.
+- Marcador de isolamento presente: sim.
+
+### Backup utilizado
+
+- Origem: base sintética/sanitizada.
+- Arquivo local: `jaziggo-sanitized-recovery-drill.backup`.
+- Arquivo versionado no Git: não.
+- Segredos ou dados pessoais registrados: não.
+
+### Execução
+
+- Conectividade com banco isolado: OK.
+- Backup aplicado no banco isolado: OK.
+- Comandos executados sem registrar connection string: OK.
+- Restauração em banco dev/test/prod: não.
+
+### Verificações de integridade
+
+| Verificação | Resultado |
+|---|---:|
+| Tabela `User` presente | OK |
+| Tabela `Deceased` presente | OK |
+| Tabela `Responsible` presente | OK |
+| Tabela `BurialSpace` presente | OK |
+| Tabela `BurialLink` presente | OK |
+
+### Contagens agregadas
+
+| Entidade | Total |
+|---|---:|
+| Usuários | 15 |
+| Falecidos | 21 |
+| Responsáveis | 5 |
+| Espaços | 16 |
+| Vínculos de sepultamento | 17 |
+
+### Papéis de usuário
+
+| Papel | Total |
+|---|---:|
+| ADMIN | 3 |
+| EMPLOYEE | 12 |
+
+Resultado esperado:
+
+- Apenas `ADMIN` e `EMPLOYEE` presentes: OK.
+- Papel `ATTENDANT` ausente: OK.
+- Familiares, visitantes e responsáveis sem acesso direto ao sistema: OK.
+- Senhas/hashes não expostos: OK.
+- Documentos, telefones, e-mails e endereços não registrados: OK.
+
+### Resultado final
+
+Restauração aprovada para a T172.
+
+Amostras sensíveis não foram registradas. A evidência contém apenas informações técnicas, agregadas e sanitizadas.
