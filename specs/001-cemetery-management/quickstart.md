@@ -33,6 +33,7 @@ especially authentication, Route Handlers, cookies, testing and instrumentation.
 | `INITIAL_ADMIN_PASSWORD` | One-time initial credential; must be rotated. | Initial setup |
 | `METRICS_ENABLED` | Enables the optional metrics endpoint. | No |
 | `METRICS_TOKEN` | Restricts readiness/metrics outside a private network. | When enabled |
+| `RECOVERY_DATABASE_URL` | Isolated disposable PostgreSQL target for restore rehearsals only; never development, test or production. | Recovery validation only |
 
 Secrets must not be committed, printed by scripts or written to application logs.
 
@@ -163,6 +164,12 @@ new isolated PostgreSQL database that cannot point to development or production.
 migrations safely, verify row counts and active/historical links, authenticate an administrator and
 run a read-only smoke test. Record timestamp, commands, duration and results without credentials or
 personal data. A failed or unverified restore blocks approval.
+
+Use `jaziggo/tests/recovery/restore-runbook.md` for the restore rehearsal. The rehearsal requires
+`RECOVERY_DATABASE_URL`, which must be different from `DATABASE_URL` and `TEST_DATABASE_URL`, must
+identify an isolated recovery database and must be rejected when it looks like development, test,
+E2E, integration, production, live or primary. Until the runbook is executed against an isolated
+recovery database with sanitized evidence, the recovery gate remains blocked.
 
 ### 11. Human Validation
 
