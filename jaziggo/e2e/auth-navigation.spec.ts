@@ -81,7 +81,7 @@ async function login(page: Page, email: string) {
 
   const loginResponse = await loginResponsePromise
   expect(loginResponse.status()).toBe(200)
-  await expect(page).toHaveURL(/\/login$/)
+  await expect(page).toHaveURL(/\/location-search$/)
 }
 
 test.beforeAll(async () => {

@@ -42,7 +42,7 @@ export function LoginForm() {
         return
       }
 
-      router.replace("/")
+      router.replace("/location-search")
     } catch {
       setErrorMessage(GENERIC_LOGIN_ERROR)
     } finally {
