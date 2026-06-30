@@ -178,8 +178,16 @@ async function loginAsEmployee(page: Page) {
   await page.goto("/login")
   await page.getByLabel("E-mail").fill(activeEmployeeUserFixture.email)
   await page.getByLabel("Senha").fill(TEST_USER_PASSWORD)
+  const loginResponsePromise = page.waitForResponse((response) =>
+    response.url().endsWith("/api/v1/auth/login") &&
+    response.request().method() === "POST",
+  )
+
   await page.getByRole("button", { name: "Entrar" }).click()
-  await expect(page).toHaveURL("/")
+
+  const loginResponse = await loginResponsePromise
+  expect(loginResponse.status()).toBe(200)
+  await expect(page).toHaveURL(/\/login$/)
 }
 
 async function expectNoCompleteDocument(page: Page) {
@@ -249,14 +257,14 @@ test("EMPLOYEE locates homonyms from synthetic registrations without exposing fu
   await expectNoCompleteDocument(page)
 
   await page.getByLabel("Busca exata").selectOption("deceasedDocument")
-  await page.getByLabel("Documento").fill(FIRST_DOCUMENT)
+  await page.getByRole("searchbox", { name: "Documento" }).fill(FIRST_DOCUMENT)
   await page.getByRole("button", { name: "Buscar" }).click()
   await expect(page.getByText("1 registro localizado por documento.")).toBeVisible()
   await expect(page.getByText("Resultado de busca exata por documento.")).toBeVisible()
   await expect(locationResultsTable.getByText("E2E-LOC-159-A", { exact: true })).toBeVisible()
   await expect(locationResultsTable.getByText("E2E-LOC-159-B", { exact: true })).toHaveCount(0)
   await expect(locationResultsTable.getByText(FIRST_MASKED_DOCUMENT, { exact: true })).toBeVisible()
-  await expect(page.getByLabel("Documento")).toHaveValue("")
+  await expect(page.getByRole("searchbox", { name: "Documento" })).toHaveValue("")
   await expect(page).toHaveURL(/\/location-search(?:\?.*)?$/)
   await expectNoCompleteDocument(page)
 })

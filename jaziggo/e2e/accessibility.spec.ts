@@ -221,8 +221,16 @@ async function loginWithKeyboard(page: Page, email: string) {
   await page.keyboard.press("Tab")
   await expect(submitButton).toBeFocused()
   await expectVisibleFocus(submitButton)
+  const loginResponsePromise = page.waitForResponse((response) =>
+    response.url().endsWith("/api/v1/auth/login") &&
+    response.request().method() === "POST",
+  )
+
   await page.keyboard.press("Enter")
-  await expect(page).toHaveURL("/")
+
+  const loginResponse = await loginResponsePromise
+  expect(loginResponse.status()).toBe(200)
+  await expect(page).toHaveURL(/\/login$/)
 }
 
 async function expectSinglePageHeading(page: Page, name: string) {

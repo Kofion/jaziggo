@@ -142,8 +142,16 @@ async function loginAsEmployee(page: Page) {
   await page.goto("/login")
   await page.getByLabel("E-mail").fill(activeEmployeeUserFixture.email)
   await page.getByLabel("Senha").fill(TEST_USER_PASSWORD)
+  const loginResponsePromise = page.waitForResponse((response) =>
+    response.url().endsWith("/api/v1/auth/login") &&
+    response.request().method() === "POST",
+  )
+
   await page.getByRole("button", { name: "Entrar" }).click()
-  await expect(page).toHaveURL("/")
+
+  const loginResponse = await loginResponsePromise
+  expect(loginResponse.status()).toBe(200)
+  await expect(page).toHaveURL(/\/login$/)
 }
 
 async function patchJson(

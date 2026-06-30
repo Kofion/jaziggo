@@ -72,8 +72,16 @@ async function login(page: Page, email: string) {
   await page.goto("/login")
   await page.getByLabel("E-mail").fill(email)
   await page.getByLabel("Senha").fill(TEST_USER_PASSWORD)
+  const loginResponsePromise = page.waitForResponse((response) =>
+    response.url().endsWith("/api/v1/auth/login") &&
+    response.request().method() === "POST",
+  )
+
   await page.getByRole("button", { name: "Entrar" }).click()
-  await expect(page).toHaveURL("/")
+
+  const loginResponse = await loginResponsePromise
+  expect(loginResponse.status()).toBe(200)
+  await expect(page).toHaveURL(/\/login$/)
 }
 
 test.beforeAll(async () => {
@@ -122,7 +130,7 @@ test("EMPLOYEE can use operational navigation but not ADMIN-only areas", async (
 })
 
 test("visitors have no public access to protected internal pages", async ({ page }) => {
-  for (const path of ["/location-search", "/users", "/reports"]) {
+  for (const path of ["/", "/location-search", "/users", "/reports"]) {
     await page.context().clearCookies()
     await page.goto(path)
 

@@ -1,6 +1,7 @@
 const TEST_DATABASE_MARKER = /(^|[_-])(test|testing|e2e|integration)($|[_-])/i;
 const PRODUCTION_MARKER = /(^|[._-])(prod|production|primary|live)($|[._-])/i;
 const POSTGRES_PROTOCOLS = new Set(["postgres:", "postgresql:"]);
+const initialDatabaseUrl = process.env.DATABASE_URL;
 
 export interface TestDatabaseUrls {
   testDatabaseUrl?: string;
@@ -54,17 +55,18 @@ function parseDatabaseUrl(rawUrl: string, variableName: string): ParsedDatabaseU
 
   const hostname = normalizeHostname(parsedUrl.hostname);
   const port = parsedUrl.port || "5432";
+  const protocol = parsedUrl.protocol === "postgresql:" ? "postgres:" : parsedUrl.protocol;
 
   return {
     databaseName,
     hostname,
-    identity: `${hostname}:${port}/${databaseName.toLowerCase()}`,
+    identity: `${protocol}//${hostname}:${port}/${databaseName}`,
   };
 }
 
 export function assertTestDatabaseUrl({
   testDatabaseUrl = process.env.TEST_DATABASE_URL,
-  databaseUrl = process.env.DATABASE_URL,
+  databaseUrl = initialDatabaseUrl ?? process.env.DATABASE_URL,
 }: TestDatabaseUrls = {}): string {
   const candidate = testDatabaseUrl?.trim();
 

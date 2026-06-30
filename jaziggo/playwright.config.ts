@@ -1,4 +1,7 @@
+import { loadEnvConfig } from "@next/env";
 import { defineConfig, devices } from "@playwright/test";
+
+loadEnvConfig(process.cwd());
 
 const port = 3100;
 const baseURL = `http://127.0.0.1:${port}`;
@@ -8,6 +11,7 @@ const testDatabaseURL =
 
 export default defineConfig({
   testDir: "./e2e",
+  workers: 1,
   use: {
     baseURL,
   },
