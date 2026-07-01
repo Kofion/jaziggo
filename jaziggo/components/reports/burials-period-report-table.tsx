@@ -1,5 +1,7 @@
 import Link from "next/link"
 
+import { ActionLink } from "@/components/ui/action-link"
+
 import { EmptyState } from "@/components/ui/empty-state"
 import { Pagination } from "@/components/ui/pagination"
 import { generateBurialsByPeriodReport } from "@/services/report-service"
@@ -98,6 +100,14 @@ function BurialsPeriodReportRows({
             >
               {item.deceasedName}
             </Link>
+            <span className="mt-2 block">
+              <ActionLink
+                ariaLabel={`Mais detalhes de ${item.deceasedName}`}
+                href={`/deceased/${item.deceasedId}`}
+              >
+                Mais detalhes
+              </ActionLink>
+            </span>
           </th>
           <td className="px-4 py-3 font-mono text-xs text-zinc-700">
             {item.deceasedDocumentMasked ?? "Não informado"}
@@ -109,7 +119,15 @@ function BurialsPeriodReportRows({
             >
               {item.burialSpaceIdentifier}
             </Link>
-            <span className="block text-xs text-zinc-500">
+            <span className="mt-2 block">
+              <ActionLink
+                ariaLabel={`Mais detalhes de ${item.burialSpaceIdentifier}`}
+                href={`/burial-spaces/${item.burialSpaceId}`}
+              >
+                Mais detalhes
+              </ActionLink>
+            </span>
+            <span className="mt-2 block text-xs text-zinc-500">
               {SPACE_TYPE_LABELS[item.burialSpaceType]}
             </span>
           </td>

@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { ErrorMessage } from "@/components/ui/error-message"
 import { LoadingState } from "@/components/ui/loading-state"
 import { Pagination } from "@/components/ui/pagination"
+import { SuccessMessage } from "@/components/ui/success-message"
 import { getCurrentActiveUser } from "@/lib/auth/session"
 import { deceasedListFiltersSchema } from "@/lib/validation/deceased"
 import {
@@ -92,10 +93,16 @@ async function DeceasedList({
 
   if (result.items.length === 0) {
     return (
-      <EmptyState
-        title="Nenhum falecido encontrado"
-        description="Ajuste os filtros para verificar outros nomes, códigos ou datas cadastradas."
-      />
+      <div className="space-y-4">
+        <SuccessMessage
+          message="A busca foi realizada, mas nenhum falecido corresponde aos filtros informados."
+          title="Busca concluída"
+        />
+        <EmptyState
+          title="Nenhum falecido encontrado"
+          description="Ajuste os filtros para verificar outros nomes, códigos ou datas cadastradas."
+        />
+      </div>
     )
   }
 
@@ -111,6 +118,11 @@ async function DeceasedList({
           </p>
         </div>
       </div>
+
+      <SuccessMessage
+        message={`${displayCount(result.pagination.totalRecords)} com os filtros informados.`}
+        title="Busca concluída"
+      />
 
       <DeceasedTable deceasedRecords={result.items} />
 

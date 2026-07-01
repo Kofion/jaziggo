@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { ErrorMessage } from "@/components/ui/error-message"
 import { LoadingState } from "@/components/ui/loading-state"
 import { Pagination } from "@/components/ui/pagination"
+import { SuccessMessage } from "@/components/ui/success-message"
 import { getCurrentActiveUser } from "@/lib/auth/session"
 import {
   responsibleListFiltersSchema,
@@ -85,10 +86,16 @@ async function ResponsiblesList({
 
   if (result.items.length === 0) {
     return (
-      <EmptyState
+      <div className="space-y-4">
+        <SuccessMessage
+          message="A busca foi realizada, mas nenhum responsável corresponde aos filtros informados."
+          title="Busca concluída"
+        />
+        <EmptyState
         title="Nenhum responsável encontrado"
         description="Ajuste o filtro de nome para verificar outros cadastros administrativos."
-      />
+        />
+      </div>
     )
   }
 
@@ -104,6 +111,11 @@ async function ResponsiblesList({
           </p>
         </div>
       </div>
+
+      <SuccessMessage
+        message={`${displayCount(result.pagination.totalRecords)} com os filtros informados.`}
+        title="Busca concluída"
+      />
 
       <ResponsibleTable responsibles={result.items} />
 

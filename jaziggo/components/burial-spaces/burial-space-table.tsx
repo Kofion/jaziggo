@@ -1,5 +1,4 @@
-import Link from "next/link"
-
+import { ActionLink } from "@/components/ui/action-link"
 import type {
   BurialSpaceListItemDto,
   BurialSpaceStatus,
@@ -77,18 +76,16 @@ export function BurialSpaceTable({ spaces }: BurialSpaceTableProps) {
             <th className="px-4 py-3" scope="col">
               Ocupação
             </th>
+            <th className="px-4 py-3" scope="col">
+              Ação
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-zinc-100">
           {spaces.map((space) => (
             <tr className="hover:bg-zinc-50" key={space.id}>
               <th className="px-4 py-3 text-left font-medium text-zinc-950" scope="row">
-                <Link
-                  className="underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
-                  href={`/burial-spaces/${space.id}`}
-                >
-                  {space.identifier}
-                </Link>
+                {space.identifier}
               </th>
               <td className="px-4 py-3 text-zinc-700">{TYPE_LABELS[space.type]}</td>
               <td className="max-w-md px-4 py-3 text-zinc-700">{formatLocation(space)}</td>
@@ -102,6 +99,14 @@ export function BurialSpaceTable({ spaces }: BurialSpaceTableProps) {
                 </span>
               </td>
               <td className="px-4 py-3 text-zinc-700">{formatOccupancy(space)}</td>
+              <td className="px-4 py-3">
+                <ActionLink
+                  ariaLabel={`Mais detalhes de ${space.identifier}`}
+                  href={`/burial-spaces/${space.id}`}
+                >
+                  Mais detalhes
+                </ActionLink>
+              </td>
             </tr>
           ))}
         </tbody>

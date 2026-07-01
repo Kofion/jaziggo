@@ -13,6 +13,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { ErrorMessage } from "@/components/ui/error-message"
 import { LoadingState } from "@/components/ui/loading-state"
 import { Pagination } from "@/components/ui/pagination"
+import { SuccessMessage } from "@/components/ui/success-message"
 import type {
   BurialSpaceStatus,
   BurialSpaceType,
@@ -161,10 +162,16 @@ export function LocationResults({
       mode === "query" &&
       activeResult &&
       activeResult.data.length === 0 ? (
-        <EmptyState
-          title="Nenhum registro encontrado"
-          description="Revise nome, datas, setor, identificação ou documento e tente novamente."
-        />
+        <div className="space-y-4">
+          <SuccessMessage
+            message="A busca foi realizada, mas nenhum registro corresponde aos filtros informados."
+            title="Busca concluída"
+          />
+          <EmptyState
+            title="Nenhum registro encontrado"
+            description="Revise nome, datas, setor, identificação ou documento e tente novamente."
+          />
+        </div>
       ) : null}
 
       {!documentSearchPending &&
@@ -189,6 +196,11 @@ export function LocationResults({
                 </p>
               </div>
             </div>
+
+            <SuccessMessage
+              message={`${displayCount(activeResult.totalRecords)} com os filtros informados.`}
+              title="Busca concluída"
+            />
 
             <div className="overflow-x-auto rounded-md border border-zinc-200 bg-white">
               <table className="min-w-full divide-y divide-zinc-200 text-sm">

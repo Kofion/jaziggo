@@ -1,5 +1,7 @@
 import Link from "next/link"
 
+import { ActionLink } from "@/components/ui/action-link"
+
 import { EmptyState } from "@/components/ui/empty-state"
 import { Pagination } from "@/components/ui/pagination"
 import { generateDeceasedReport } from "@/services/report-service"
@@ -69,6 +71,14 @@ function DeceasedReportRows({
             >
               {deceased.fullName}
             </Link>
+            <span className="mt-2 block">
+              <ActionLink
+                ariaLabel={`Mais detalhes de ${deceased.fullName}`}
+                href={`/deceased/${deceased.id}`}
+              >
+                Mais detalhes
+              </ActionLink>
+            </span>
           </th>
           <td className="px-4 py-3 font-mono text-xs text-zinc-700">
             {deceased.documentMasked ?? "Não informado"}

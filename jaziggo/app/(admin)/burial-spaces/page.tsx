@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { ErrorMessage } from "@/components/ui/error-message"
 import { LoadingState } from "@/components/ui/loading-state"
 import { Pagination } from "@/components/ui/pagination"
+import { SuccessMessage } from "@/components/ui/success-message"
 import { getCurrentActiveUser } from "@/lib/auth/session"
 import { paginationSchema } from "@/lib/validation/pagination"
 import {
@@ -131,10 +132,16 @@ async function BurialSpacesList({
 
   if (result.items.length === 0) {
     return (
-      <EmptyState
+      <div className="space-y-4">
+        <SuccessMessage
+          message="A busca foi realizada, mas nenhum espaço corresponde aos filtros informados."
+          title="Busca concluída"
+        />
+        <EmptyState
         title="Nenhum espaço encontrado"
         description="Ajuste os filtros para verificar outros tipos, status ou setores cadastrados."
-      />
+        />
+      </div>
     )
   }
 
@@ -150,6 +157,11 @@ async function BurialSpacesList({
           </p>
         </div>
       </div>
+
+      <SuccessMessage
+        message={`${displayCount(result.pagination.totalRecords)} com os filtros informados.`}
+        title="Busca concluída"
+      />
 
       <BurialSpaceTable spaces={result.items} />
 

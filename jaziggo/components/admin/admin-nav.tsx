@@ -17,8 +17,8 @@ type AdminNavItem = Readonly<{
 const ADMIN_NAV_ITEMS: readonly AdminNavItem[] = [
   {
     href: "/dashboard",
-    label: "Operação",
-    description: "Cadastros",
+    label: "Principal",
+    description: "Início",
     permissions: [PERMISSION.MANAGE_OPERATIONAL_RECORDS],
   },
   {
@@ -30,19 +30,19 @@ const ADMIN_NAV_ITEMS: readonly AdminNavItem[] = [
   {
     href: "/deceased",
     label: "Falecidos",
-    description: "CRUD",
+    description: "Cadastro",
     permissions: [PERMISSION.MANAGE_OPERATIONAL_RECORDS],
   },
   {
     href: "/responsibles",
     label: "Responsáveis",
-    description: "CRUD",
+    description: "Cadastro",
     permissions: [PERMISSION.MANAGE_OPERATIONAL_RECORDS],
   },
   {
     href: "/burial-spaces",
     label: "Sepulturas e jázigos",
-    description: "CRUD",
+    description: "Cadastro",
     permissions: [PERMISSION.MANAGE_OPERATIONAL_RECORDS],
   },
   {
@@ -60,7 +60,7 @@ const ADMIN_NAV_ITEMS: readonly AdminNavItem[] = [
   {
     href: "/users",
     label: "Usuários",
-    description: "CRUD",
+    description: "Admin",
     permissions: [PERMISSION.MANAGE_USERS],
   },
 ]

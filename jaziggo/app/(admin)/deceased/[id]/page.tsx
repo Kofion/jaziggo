@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 
+import { ActionLink } from "@/components/ui/action-link"
 import { EmptyState } from "@/components/ui/empty-state"
 import { ErrorMessage } from "@/components/ui/error-message"
 import { getCurrentActiveUser } from "@/lib/auth/session"
@@ -275,12 +276,7 @@ export default async function DeceasedDetailPage({
   return (
     <div className="space-y-6">
       <header className="space-y-3">
-        <Link
-          className="inline-flex text-sm font-medium text-zinc-700 underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
-          href="/deceased"
-        >
-          Voltar para falecidos
-        </Link>
+<ActionLink href="/deceased" variant="back">Voltar para falecidos</ActionLink>
         <div>
           <p className="text-sm font-medium text-zinc-500">Operação cemiterial</p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">

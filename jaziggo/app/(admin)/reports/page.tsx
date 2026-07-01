@@ -21,6 +21,7 @@ import {
   SpaceStatusReportTable,
 } from "@/components/reports/space-status-report-table"
 import { ErrorMessage } from "@/components/ui/error-message"
+import { SuccessMessage } from "@/components/ui/success-message"
 import { getCurrentActiveUser } from "@/lib/auth/session"
 import { paginationSchema } from "@/lib/validation/pagination"
 import {
@@ -255,6 +256,11 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
               </p>
             </div>
           </section>
+
+          <SuccessMessage
+            message="Os filtros foram aplicados e o relatório foi consultado."
+            title="Relatório consultado"
+          />
 
           <ReportResults {...parsedQuery.data} />
         </>

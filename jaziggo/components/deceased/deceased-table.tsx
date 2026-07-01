@@ -1,5 +1,4 @@
-import Link from "next/link"
-
+import { ActionLink } from "@/components/ui/action-link"
 import type { DeceasedListItemDto } from "@/types/deceased"
 
 type DeceasedTableProps = Readonly<{
@@ -55,6 +54,9 @@ export function DeceasedTable({ deceasedRecords }: DeceasedTableProps) {
             <th className="px-4 py-3" scope="col">
               Histórico
             </th>
+            <th className="px-4 py-3" scope="col">
+              Ação
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-zinc-100">
@@ -64,12 +66,7 @@ export function DeceasedTable({ deceasedRecords }: DeceasedTableProps) {
                 {deceased.internalCode}
               </td>
               <th className="px-4 py-3 text-left font-medium text-zinc-950" scope="row">
-                <Link
-                  className="underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
-                  href={`/deceased/${deceased.id}`}
-                >
-                  {deceased.fullName}
-                </Link>
+                {deceased.fullName}
               </th>
               <td className="px-4 py-3 font-mono text-xs text-zinc-700">
                 {deceased.documentMasked ?? "Não informado"}
@@ -84,6 +81,14 @@ export function DeceasedTable({ deceasedRecords }: DeceasedTableProps) {
                 >
                   {historyLabel(deceased.historicalDataIncomplete)}
                 </span>
+              </td>
+              <td className="px-4 py-3">
+                <ActionLink
+                  ariaLabel={`Mais detalhes de ${deceased.fullName}`}
+                  href={`/deceased/${deceased.id}`}
+                >
+                  Mais detalhes
+                </ActionLink>
               </td>
             </tr>
           ))}

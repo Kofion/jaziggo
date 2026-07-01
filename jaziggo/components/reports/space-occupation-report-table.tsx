@@ -1,5 +1,7 @@
 import Link from "next/link"
 
+import { ActionLink } from "@/components/ui/action-link"
+
 import { EmptyState } from "@/components/ui/empty-state"
 import { Pagination } from "@/components/ui/pagination"
 import { generateSpaceOccupationReport } from "@/services/report-service"
@@ -72,6 +74,14 @@ function SpaceOccupationRows({
             >
               {item.identifier}
             </Link>
+            <span className="mt-2 block">
+              <ActionLink
+                ariaLabel={`Mais detalhes de ${item.identifier}`}
+                href={`/burial-spaces/${item.burialSpaceId}`}
+              >
+                Mais detalhes
+              </ActionLink>
+            </span>
           </th>
           <td className="px-4 py-3 text-zinc-700">
             {SPACE_TYPE_LABELS[item.burialSpaceType]}
