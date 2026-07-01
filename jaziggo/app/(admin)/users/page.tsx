@@ -16,7 +16,7 @@ import { USER_ROLE, USER_STATUS } from "@/types/user"
 import type { UserDto } from "@/types/user"
 
 export const metadata: Metadata = {
-  title: "Usuários | Jaziggo",
+  title: "UsuÃ¡rios | Jaziggo",
 }
 
 type UsersPageProps = Readonly<{
@@ -39,7 +39,7 @@ const userListQuerySchema = paginationSchema
 const ROLE_FILTER_OPTIONS = [
   { label: "Todos os perfis", value: "" },
   { label: "Administradores", value: USER_ROLE.ADMIN },
-  { label: "Funcionários", value: USER_ROLE.EMPLOYEE },
+  { label: "FuncionÃ¡rios", value: USER_ROLE.EMPLOYEE },
 ] as const
 
 const STATUS_FILTER_OPTIONS = [
@@ -71,7 +71,7 @@ function normalizeSearchParams(params: Record<string, string | string[] | undefi
 }
 
 function displayCount(totalRecords: number) {
-  return totalRecords === 1 ? "1 usuário encontrado" : `${totalRecords} usuários encontrados`
+  return totalRecords === 1 ? "1 usuÃ¡rio encontrado" : `${totalRecords} usuÃ¡rios encontrados`
 }
 
 async function UsersList({ query }: { query: z.output<typeof userListQuerySchema> }) {
@@ -83,8 +83,8 @@ async function UsersList({ query }: { query: z.output<typeof userListQuerySchema
     if (error instanceof UserServiceError) {
       return (
         <ErrorMessage
-          message="Não foi possível carregar a lista de usuários com os filtros informados."
-          title="Lista de usuários indisponível"
+          message="NÃ£o foi possÃ­vel carregar a lista de usuÃ¡rios com os filtros informados."
+          title="Lista de usuÃ¡rios indisponÃ­vel"
         />
       )
     }
@@ -92,7 +92,7 @@ async function UsersList({ query }: { query: z.output<typeof userListQuerySchema
     return (
       <ErrorMessage
         message="Tente novamente em instantes. Se o problema persistir, informe o suporte interno."
-        title="Erro ao carregar usuários"
+        title="Erro ao carregar usuÃ¡rios"
       />
     )
   }
@@ -100,7 +100,7 @@ async function UsersList({ query }: { query: z.output<typeof userListQuerySchema
   if (result.items.length === 0) {
     return (
       <EmptyState
-        title="Nenhum usuário encontrado"
+        title="Nenhum usuÃ¡rio encontrado"
         description="Ajuste os filtros para verificar outros perfis ou status de contas internas."
       />
     )
@@ -122,7 +122,7 @@ async function UsersList({ query }: { query: z.output<typeof userListQuerySchema
       <UserTable users={result.items} />
 
       <Pagination
-        ariaLabel="Paginação de usuários"
+        ariaLabel="PaginaÃ§Ã£o de usuÃ¡rios"
         basePath="/users"
         page={result.pagination.page}
         pageSize={result.pagination.pageSize}
@@ -141,7 +141,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
   }
 
   if (currentUser.role !== USER_ROLE.ADMIN) {
-    redirect("/")
+    redirect("/dashboard")
   }
 
   const normalizedSearchParams = normalizeSearchParams(await searchParams)
@@ -150,11 +150,11 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <p className="text-sm font-medium text-zinc-500">Administração</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-950">Usuários</h1>
+        <p className="text-sm font-medium text-zinc-500">AdministraÃ§Ã£o</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-950">UsuÃ¡rios</h1>
         <p className="max-w-3xl text-sm leading-6 text-zinc-600">
-          Consulte contas internas autorizadas a acessar o Jaziggo. Alterações de cadastro e
-          desativação ficam restritas às próximas etapas do módulo.
+          Consulte contas internas autorizadas a acessar o Jaziggo. AlteraÃ§Ãµes de cadastro e
+          desativaÃ§Ã£o ficam restritas Ã s prÃ³ximas etapas do mÃ³dulo.
         </p>
       </header>
 
@@ -215,8 +215,8 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
         <Suspense
           fallback={
             <LoadingState
-              description="A lista de contas internas está sendo consultada."
-              label="Carregando usuários"
+              description="A lista de contas internas estÃ¡ sendo consultada."
+              label="Carregando usuÃ¡rios"
               rows={4}
             />
           }
@@ -225,8 +225,8 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
         </Suspense>
       ) : (
         <ErrorMessage
-          message="Revise os filtros e a paginação antes de tentar novamente."
-          title="Filtros inválidos"
+          message="Revise os filtros e a paginaÃ§Ã£o antes de tentar novamente."
+          title="Filtros invÃ¡lidos"
         />
       )}
     </div>

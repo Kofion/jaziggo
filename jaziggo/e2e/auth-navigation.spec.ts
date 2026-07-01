@@ -81,7 +81,16 @@ async function login(page: Page, email: string) {
 
   const loginResponse = await loginResponsePromise
   expect(loginResponse.status()).toBe(200)
-  await expect(page).toHaveURL(/\/location-search$/)
+}
+
+async function expectTopNavigation(page: Page, visibleLinks: string[]) {
+  const navigation = page.getByRole("navigation", { name: "Navegacao principal" })
+
+  await expect(navigation).toBeVisible()
+
+  for (const linkName of visibleLinks) {
+    await expect(navigation.getByRole("link", { name: new RegExp(linkName) })).toBeVisible()
+  }
 }
 
 test.beforeAll(async () => {
@@ -97,23 +106,45 @@ test.beforeEach(async () => {
   await seedAuthUsers()
 })
 
-test("ADMIN can log in and reach administrative navigation targets", async ({ page }) => {
+test("ADMIN logs in to the administration screen and sees admin navigation", async ({ page }) => {
   await login(page, adminUserFixture.email)
+
+  await expect(page).toHaveURL(/\/admin$/)
+  await expect(page.getByRole("heading", { name: "Painel administrativo" })).toBeVisible()
+  await expect(page.getByText("Informacoes cadastradas")).toBeVisible()
+  await expectTopNavigation(page, [
+    "Administracao",
+    "Principal",
+    "Busca",
+    "Falecidos",
+    "Sepulturas e jazigos",
+    "Usuarios",
+    "Relatorios",
+  ])
 
   await page.goto("/users")
   await expect(page.getByRole("heading", { name: /Usu.rio?s/ })).toBeVisible()
 
   await page.goto("/reports")
   await expect(page.getByRole("heading", { name: "Relatorios" })).toBeVisible()
-
-  await page.goto("/location-search")
-  await expect(
-    page.getByRole("heading", { name: "Busca e localizacao" }),
-  ).toBeVisible()
 })
 
-test("EMPLOYEE can use operational navigation but not ADMIN-only areas", async ({ page }) => {
+test("EMPLOYEE logs in to the main screen and only sees operational navigation", async ({ page }) => {
   await login(page, activeEmployeeUserFixture.email)
+
+  await expect(page).toHaveURL(/\/dashboard$/)
+  await expect(page.getByRole("heading", { name: "Tela principal" })).toBeVisible()
+  await expectTopNavigation(page, [
+    "Principal",
+    "Busca",
+    "Falecidos",
+    "Sepulturas e jazigos",
+    "Responsaveis",
+  ])
+
+  const navigation = page.getByRole("navigation", { name: "Navegacao principal" })
+  await expect(navigation.getByRole("link", { name: /Usuarios/ })).toHaveCount(0)
+  await expect(navigation.getByRole("link", { name: /Relatorios/ })).toHaveCount(0)
 
   await page.goto("/location-search")
   await expect(
@@ -121,16 +152,16 @@ test("EMPLOYEE can use operational navigation but not ADMIN-only areas", async (
   ).toBeVisible()
 
   await page.goto("/users")
-  await expect(page).not.toHaveURL(/\/users(?:\?|$)/)
+  await expect(page).toHaveURL(/\/dashboard$/)
   await expect(page.getByRole("heading", { name: /Usu.rio?s/ })).toHaveCount(0)
 
   await page.goto("/reports")
-  await expect(page).not.toHaveURL(/\/reports(?:\?|$)/)
+  await expect(page).toHaveURL(/\/dashboard$/)
   await expect(page.getByRole("heading", { name: "Relatorios" })).toHaveCount(0)
 })
 
 test("visitors have no public access to protected internal pages", async ({ page }) => {
-  for (const path of ["/", "/location-search", "/users", "/reports"]) {
+  for (const path of ["/", "/admin", "/dashboard", "/location-search", "/users", "/reports"]) {
     await page.context().clearCookies()
     await page.goto(path)
 

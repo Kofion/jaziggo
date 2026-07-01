@@ -1,5 +1,14 @@
 import { redirect } from "next/navigation"
 
-export default function Home() {
-  redirect("/location-search")
+import { getHomePathForRole } from "@/lib/auth/routes"
+import { getCurrentActiveUser } from "@/lib/auth/session"
+
+export default async function Home() {
+  const user = await getCurrentActiveUser()
+
+  if (!user) {
+    redirect("/login")
+  }
+
+  redirect(getHomePathForRole(user.role))
 }

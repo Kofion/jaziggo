@@ -215,7 +215,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
   }
 
   if (currentUser.role !== USER_ROLE.ADMIN) {
-    redirect("/")
+    redirect("/dashboard")
   }
 
   const normalizedSearchParams = normalizeSearchParams(await searchParams)

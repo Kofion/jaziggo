@@ -3,8 +3,18 @@
 import { useRouter } from "next/navigation"
 import { useState, type FormEvent } from "react"
 
+import { getHomePathForRole } from "@/lib/auth/routes"
+import { USER_ROLE, type UserRole } from "@/types/user"
+
 const GENERIC_LOGIN_ERROR =
-  "Não foi possível entrar. Verifique os dados informados e tente novamente."
+  "Nao foi possivel entrar. Verifique os dados informados e tente novamente."
+
+type LoginResponse = Readonly<{
+  success: boolean
+  data?: {
+    role?: UserRole
+  }
+}>
 
 export function LoginForm() {
   const router = useRouter()
@@ -42,7 +52,14 @@ export function LoginForm() {
         return
       }
 
-      router.replace("/location-search")
+      const payload = (await response.json()) as LoginResponse
+      const role = payload.data?.role
+
+      router.replace(
+        role === USER_ROLE.ADMIN || role === USER_ROLE.EMPLOYEE
+          ? getHomePathForRole(role)
+          : "/dashboard",
+      )
     } catch {
       setErrorMessage(GENERIC_LOGIN_ERROR)
     } finally {

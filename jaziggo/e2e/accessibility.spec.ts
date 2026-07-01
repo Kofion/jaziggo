@@ -171,7 +171,7 @@ async function seedAccessibilityData() {
   })
 }
 
-async function tabUntilFocused(page: Page, locator: Locator, maxTabs = 20) {
+async function tabUntilFocused(page: Page, locator: Locator, maxTabs = 40) {
   for (let index = 0; index < maxTabs; index += 1) {
     if (await locator.evaluate((element) => element === document.activeElement)) {
       return
