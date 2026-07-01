@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { useId, useState, type FormEvent } from "react"
 
 import { ErrorMessage } from "@/components/ui/error-message"
@@ -32,7 +33,7 @@ const TYPE_OPTIONS = [
 ] as const satisfies ReadonlyArray<{ label: string; value: BurialSpaceType }>
 
 const INITIAL_STATUS_OPTIONS = [
-  { label: "Disponivel", value: BURIAL_SPACE_STATUS.AVAILABLE },
+  { label: "Disponível", value: BURIAL_SPACE_STATUS.AVAILABLE },
   { label: "Reservado", value: BURIAL_SPACE_STATUS.RESERVED },
   { label: "Inativo", value: BURIAL_SPACE_STATUS.INACTIVE },
 ] as const satisfies ReadonlyArray<{
@@ -51,20 +52,20 @@ const LOCATION_FIELDS = [
 
 const FORM_COPY = {
   create: {
-    title: "Novo espaco",
-    description: "Cadastre uma sepultura ou jazigo com identificacao, localizacao e capacidade.",
-    submitLabel: "Criar espaco",
+    title: "Novo espaço",
+    description: "Cadastre uma sepultura ou jázigo com identificação, localização e capacidade.",
+    submitLabel: "Criar espaço",
     pendingLabel: "Criando...",
-    successMessage: "Espaco criado com sucesso.",
-    errorMessage: "Nao foi possivel criar o espaco. Revise os dados e tente novamente.",
+    successMessage: "Espaço criado com sucesso.",
+    errorMessage: "Não foi possível criar o espaço. Revise os dados e tente novamente.",
   },
   edit: {
-    title: "Editar espaco",
-    description: "Atualize dados cadastrais, localizacao e capacidade configurada.",
+    title: "Editar espaço",
+    description: "Atualize dados cadastrais, localização e capacidade configurada.",
     submitLabel: "Salvar alteracoes",
     pendingLabel: "Salvando...",
-    successMessage: "Espaco atualizado com sucesso.",
-    errorMessage: "Nao foi possivel atualizar o espaco. Revise os dados e tente novamente.",
+    successMessage: "Espaço atualizado com sucesso.",
+    errorMessage: "Não foi possível atualizar o espaço. Revise os dados e tente novamente.",
   },
 } as const satisfies Record<
   BurialSpaceFormMode,
@@ -127,6 +128,7 @@ export function BurialSpaceForm({
   onSuccess,
   className,
 }: BurialSpaceFormProps) {
+  const router = useRouter()
   const copy = FORM_COPY[mode]
   const formId = useId()
   const errorId = useId()
@@ -158,7 +160,7 @@ export function BurialSpaceForm({
 
     if (!endpoint) {
       setSuccessMessage(null)
-      setErrorMessage("Selecione um espaco valido antes de editar.")
+      setErrorMessage("Selecione um espaço valido antes de editar.")
       return
     }
 
@@ -169,7 +171,7 @@ export function BurialSpaceForm({
 
     if (!hasLocation(location)) {
       setSuccessMessage(null)
-      setErrorMessage("Informe pelo menos um componente de localizacao.")
+      setErrorMessage("Informe pelo menos um componente de localização.")
       return
     }
 
@@ -178,7 +180,7 @@ export function BurialSpaceForm({
 
     if (!Number.isInteger(parsedCapacity) || parsedCapacity < 1) {
       setSuccessMessage(null)
-      setErrorMessage("Informe uma capacidade positiva para jazigos.")
+      setErrorMessage("Informe uma capacidade positiva para jázigos.")
       return
     }
 
@@ -218,6 +220,7 @@ export function BurialSpaceForm({
 
       setSuccessMessage(copy.successMessage)
       onSuccess?.(body.data)
+      router.refresh()
 
       if (mode === "create") {
         resetCreateState(form)
@@ -242,7 +245,7 @@ export function BurialSpaceForm({
       </div>
 
       {errorMessage ? (
-        <ErrorMessage id={errorId} message={errorMessage} title="Acao nao concluida" />
+        <ErrorMessage id={errorId} message={errorMessage} title="Ação não concluída" />
       ) : null}
 
       {successMessage ? (
@@ -263,7 +266,7 @@ export function BurialSpaceForm({
             className="mb-2 block text-sm font-medium text-zinc-800"
             htmlFor={`${formId}-identifier`}
           >
-            Identificacao
+            Identificação
           </label>
           <input
             className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
@@ -352,7 +355,7 @@ export function BurialSpaceForm({
       </div>
 
       <fieldset className="space-y-4">
-        <legend className="text-sm font-semibold text-zinc-950">Localizacao</legend>
+        <legend className="text-sm font-semibold text-zinc-950">Localização</legend>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {LOCATION_FIELDS.map((field) => (
             <div key={field.name}>

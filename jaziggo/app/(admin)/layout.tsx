@@ -16,7 +16,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-950">
+    <div className="jaziggo-admin-theme min-h-screen bg-slate-950 text-slate-100">
       <AdminNav role={user.role} userName={user.name} />
       <main className="mx-auto flex w-full max-w-7xl flex-col px-4 py-6 sm:px-6 lg:px-8">
         {children}

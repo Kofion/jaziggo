@@ -42,7 +42,7 @@ const SPACE_TYPE_LABELS = {
 } as const satisfies Record<BurialSpaceType, string>
 
 const STATUS_LABELS = {
-  AVAILABLE: "Disponivel",
+  AVAILABLE: "Disponível",
   OCCUPIED: "Ocupado",
   RESERVED: "Reservado",
   INACTIVE: "Inativo",
@@ -50,7 +50,7 @@ const STATUS_LABELS = {
 
 function formatDate(value: string | undefined) {
   if (!value) {
-    return "Nao informada"
+    return "Não informada"
   }
 
   return DATE_FORMATTER.format(new Date(`${value}T00:00:00.000Z`))
@@ -75,7 +75,7 @@ function resultKey(item: LocationSearchItem) {
 }
 
 function documentText(value: string | undefined) {
-  return value ?? "Nao informado"
+  return value ?? "Não informado"
 }
 
 function searchParamsFromFilters(filters: LocationSearchFilterValues) {
@@ -137,7 +137,7 @@ export function LocationResults({
       {documentSearchPending ? (
         <LoadingState
           description="A busca por documento esta em andamento sem persistir o valor informado na URL."
-          label="Buscando localizacao"
+          label="Buscando localização"
           rows={3}
         />
       ) : null}
@@ -145,14 +145,14 @@ export function LocationResults({
       {errorMessage ? (
         <ErrorMessage
           message={errorMessage}
-          title="Resultados indisponiveis"
+          title="Resultados indisponíveis"
         />
       ) : null}
 
       {!documentSearchPending && !errorMessage && mode === "idle" ? (
         <EmptyState
           title="Nenhum resultado carregado"
-          description="Informe filtros de atendimento para iniciar a busca de localizacao."
+          description="Informe filtros de atendimento para iniciar a busca de localização."
         />
       ) : null}
 
@@ -163,7 +163,7 @@ export function LocationResults({
       activeResult.data.length === 0 ? (
         <EmptyState
           title="Nenhum registro encontrado"
-          description="Revise nome, datas, setor, identificacao ou documento e tente novamente."
+          description="Revise nome, datas, setor, identificação ou documento e tente novamente."
         />
       ) : null}
 
@@ -182,7 +182,7 @@ export function LocationResults({
                   className="text-base font-semibold text-zinc-950"
                   id="location-results-heading"
                 >
-                  Resultados de localizacao
+                  Resultados de localização
                 </h2>
                 <p className="text-sm text-zinc-600">
                   {displayCount(activeResult.totalRecords)}
@@ -193,7 +193,7 @@ export function LocationResults({
             <div className="overflow-x-auto rounded-md border border-zinc-200 bg-white">
               <table className="min-w-full divide-y divide-zinc-200 text-sm">
                 <caption className="sr-only">
-                  Resultados internos de busca de localizacao
+                  Resultados internos de busca de localização
                 </caption>
                 <thead className="bg-zinc-50 text-left text-xs font-semibold uppercase text-zinc-600">
                   <tr>
@@ -207,13 +207,13 @@ export function LocationResults({
                       Datas
                     </th>
                     <th className="px-4 py-3" scope="col">
-                      Localizacao
+                      Localização
                     </th>
                     <th className="px-4 py-3" scope="col">
-                      Responsavel
+                      Responsável
                     </th>
                     <th className="px-4 py-3" scope="col">
-                      Acao
+                      Ação
                     </th>
                   </tr>
                 </thead>
@@ -244,7 +244,7 @@ export function LocationResults({
                             )}`}
                           >
                             {item.historicalDataIncomplete
-                              ? "Historico incompleto"
+                              ? "Histórico incompleto"
                               : "Registro completo"}
                           </span>
                         </th>
@@ -272,7 +272,7 @@ export function LocationResults({
                         </td>
                         <td className="px-4 py-3 align-top text-zinc-700">
                           <span className="block">
-                            {item.responsibleName ?? "Nao informado"}
+                            {item.responsibleName ?? "Não informado"}
                           </span>
                           <span className="mt-1 block font-mono text-xs">
                             {documentText(item.responsibleDocumentMasked)}
@@ -280,7 +280,7 @@ export function LocationResults({
                         </td>
                         <td className="px-4 py-3 align-top">
                           <button
-                            aria-label={`Ver orientacao de ${item.internalCode}`}
+                            aria-label={`Ver orientação de ${item.internalCode}`}
                             aria-pressed={selected}
                             className="inline-flex min-h-10 items-center justify-center rounded-md border border-zinc-300 px-3 text-sm font-semibold text-zinc-700 hover:bg-zinc-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
                             onClick={() => {
@@ -288,7 +288,7 @@ export function LocationResults({
                             }}
                             type="button"
                           >
-                            Ver orientacao
+                            Ver orientação
                           </button>
                         </td>
                       </tr>
@@ -300,12 +300,12 @@ export function LocationResults({
 
             {documentResult ? (
               <p className="text-sm leading-6 text-zinc-600">
-                Resultado de busca exata por documento. O documento informado nao
+                Resultado de busca exata por documento. O documento informado não
                 foi persistido na URL.
               </p>
             ) : (
               <Pagination
-                ariaLabel="Paginacao de resultados de localizacao"
+                ariaLabel="Paginação de resultados de localização"
                 basePath="/location-search"
                 page={activeResult.page}
                 pageSize={activeResult.pageSize}

@@ -19,7 +19,7 @@ type ResponsibleLinkFormProps = Readonly<{
 
 const LINK_TYPE_OPTIONS = [
   { label: "Falecido", value: RESPONSIBLE_LINK_TYPE.DECEASED },
-  { label: "Sepultura ou jazigo", value: RESPONSIBLE_LINK_TYPE.BURIAL_SPACE },
+  { label: "Sepultura ou jázigo", value: RESPONSIBLE_LINK_TYPE.BURIAL_SPACE },
 ] as const satisfies ReadonlyArray<{
   label: string
   value: ResponsibleLinkType
@@ -61,11 +61,11 @@ function errorMessageForResponse(
 ) {
   if (body?.success === false) {
     if (body.error.code === DOMAIN_ERROR_CODE.NOT_FOUND) {
-      return "Responsavel ou alvo informado nao foi encontrado."
+      return "Responsável ou alvo informado não foi encontrado."
     }
 
     if (body.error.code === DOMAIN_ERROR_CODE.CONFLICT) {
-      return "Este vinculo ativo ja existe para o responsavel informado."
+      return "Este vínculo ativo já existe para o responsável informado."
     }
 
     if (body.error.code === DOMAIN_ERROR_CODE.VALIDATION_ERROR) {
@@ -99,7 +99,7 @@ export function ResponsibleLinkForm({
   const targetLabel =
     linkType === RESPONSIBLE_LINK_TYPE.DECEASED
       ? "ID do falecido"
-      : "ID da sepultura ou jazigo"
+      : "ID da sepultura ou jázigo"
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -111,7 +111,7 @@ export function ResponsibleLinkForm({
 
     if (selectedResponsibleId.length === 0 || targetId.length === 0) {
       setSuccessMessage(null)
-      setErrorMessage("Informe o responsavel e o alvo do vinculo.")
+      setErrorMessage("Informe o responsável e o alvo do vínculo.")
       return
     }
 
@@ -138,19 +138,19 @@ export function ResponsibleLinkForm({
         setErrorMessage(
           errorMessageForResponse(
             body,
-            "Nao foi possivel criar o vinculo. Revise os dados e tente novamente.",
+            "Não foi possível criar o vínculo. Revise os dados e tente novamente.",
           ),
         )
         return
       }
 
-      setSuccessMessage("Vinculo criado com sucesso.")
+      setSuccessMessage("Vínculo criado com sucesso.")
       onSuccess?.(body.data)
       form.reset()
       setLinkType(RESPONSIBLE_LINK_TYPE.DECEASED)
     } catch {
       setErrorMessage(
-        "Nao foi possivel criar o vinculo. Revise os dados e tente novamente.",
+        "Não foi possível criar o vínculo. Revise os dados e tente novamente.",
       )
     } finally {
       setPending(false)
@@ -166,15 +166,15 @@ export function ResponsibleLinkForm({
     >
       <div className="space-y-1">
         <h2 className="text-base font-semibold text-zinc-950">
-          Vincular responsavel
+          Vincular responsável
         </h2>
         <p className="text-sm leading-6 text-zinc-600">
-          Associe o responsavel a um falecido ou a uma sepultura ou jazigo existente.
+          Associe o responsável a um falecido ou a uma sepultura ou jázigo existente.
         </p>
       </div>
 
       {errorMessage ? (
-        <ErrorMessage id={errorId} message={errorMessage} title="Acao nao concluida" />
+        <ErrorMessage id={errorId} message={errorMessage} title="Ação não concluída" />
       ) : null}
 
       {successMessage ? (
@@ -196,7 +196,7 @@ export function ResponsibleLinkForm({
               className="mb-2 block text-sm font-medium text-zinc-800"
               htmlFor={`${formId}-responsibleId`}
             >
-              ID do responsavel
+              ID do responsável
             </label>
             <input
               autoComplete="off"
@@ -259,7 +259,7 @@ export function ResponsibleLinkForm({
           disabled={pending}
           type="submit"
         >
-          {pending ? "Vinculando..." : "Criar vinculo"}
+          {pending ? "Vinculando..." : "Criar vínculo"}
         </button>
       </div>
     </form>

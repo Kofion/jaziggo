@@ -16,7 +16,7 @@ const TYPE_LABELS = {
 } as const satisfies Record<BurialSpaceType, string>
 
 const STATUS_LABELS = {
-  AVAILABLE: "Disponivel",
+  AVAILABLE: "Disponível",
   OCCUPIED: "Ocupado",
   RESERVED: "Reservado",
   INACTIVE: "Inativo",
@@ -48,7 +48,7 @@ function formatLocation(space: BurialSpaceListItemDto) {
     space.complement,
   ].filter(Boolean)
 
-  return parts.length > 0 ? parts.join(" - ") : "Localizacao nao informada"
+  return parts.length > 0 ? parts.join(" - ") : "Localização não informada"
 }
 
 function formatOccupancy(space: BurialSpaceListItemDto) {
@@ -59,23 +59,23 @@ export function BurialSpaceTable({ spaces }: BurialSpaceTableProps) {
   return (
     <div className="overflow-x-auto rounded-md border border-zinc-200 bg-white">
       <table className="min-w-full divide-y divide-zinc-200 text-sm">
-        <caption className="sr-only">Sepulturas e jazigos cadastrados</caption>
+        <caption className="sr-only">Sepulturas e jázigos cadastrados</caption>
         <thead className="bg-zinc-50 text-left text-xs font-semibold uppercase text-zinc-600">
           <tr>
             <th className="px-4 py-3" scope="col">
-              Identificacao
+              Identificação
             </th>
             <th className="px-4 py-3" scope="col">
               Tipo
             </th>
             <th className="px-4 py-3" scope="col">
-              Localizacao
+              Localização
             </th>
             <th className="px-4 py-3" scope="col">
               Status
             </th>
             <th className="px-4 py-3" scope="col">
-              Ocupacao
+              Ocupação
             </th>
           </tr>
         </thead>

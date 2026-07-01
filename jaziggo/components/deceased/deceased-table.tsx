@@ -12,7 +12,7 @@ const DATE_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
 
 function formatDate(value: string | undefined) {
   if (!value) {
-    return "Nao informada"
+    return "Não informada"
   }
 
   return DATE_FORMATTER.format(new Date(`${value}T00:00:00.000Z`))
@@ -27,7 +27,7 @@ function historyClassName(historicalDataIncomplete: boolean) {
 }
 
 function historyLabel(historicalDataIncomplete: boolean) {
-  return historicalDataIncomplete ? "Historico incompleto" : "Registro completo"
+  return historicalDataIncomplete ? "Histórico incompleto" : "Registro completo"
 }
 
 export function DeceasedTable({ deceasedRecords }: DeceasedTableProps) {
@@ -38,7 +38,7 @@ export function DeceasedTable({ deceasedRecords }: DeceasedTableProps) {
         <thead className="bg-zinc-50 text-left text-xs font-semibold uppercase text-zinc-600">
           <tr>
             <th className="px-4 py-3" scope="col">
-              Codigo
+              Código
             </th>
             <th className="px-4 py-3" scope="col">
               Nome
@@ -53,7 +53,7 @@ export function DeceasedTable({ deceasedRecords }: DeceasedTableProps) {
               Sepultamento
             </th>
             <th className="px-4 py-3" scope="col">
-              Historico
+              Histórico
             </th>
           </tr>
         </thead>
@@ -72,7 +72,7 @@ export function DeceasedTable({ deceasedRecords }: DeceasedTableProps) {
                 </Link>
               </th>
               <td className="px-4 py-3 font-mono text-xs text-zinc-700">
-                {deceased.documentMasked ?? "Nao informado"}
+                {deceased.documentMasked ?? "Não informado"}
               </td>
               <td className="px-4 py-3 text-zinc-700">{formatDate(deceased.deathDate)}</td>
               <td className="px-4 py-3 text-zinc-700">{formatDate(deceased.burialDate)}</td>

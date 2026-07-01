@@ -29,7 +29,7 @@ const LINK_STATUS_LABELS = {
 } as const satisfies Record<BurialLinkStatus, string>
 
 const SPACE_STATUS_LABELS = {
-  AVAILABLE: "Disponivel",
+  AVAILABLE: "Disponível",
   OCCUPIED: "Ocupado",
   RESERVED: "Reservado",
   INACTIVE: "Inativo",
@@ -42,7 +42,7 @@ const SPACE_TYPE_LABELS = {
 
 function formatDate(value: string | undefined) {
   if (!value) {
-    return "Nao informada"
+    return "Não informada"
   }
 
   return DATE_FORMATTER.format(new Date(`${value}T00:00:00.000Z`))
@@ -100,7 +100,7 @@ function BurialsPeriodReportRows({
             </Link>
           </th>
           <td className="px-4 py-3 font-mono text-xs text-zinc-700">
-            {item.deceasedDocumentMasked ?? "Nao informado"}
+            {item.deceasedDocumentMasked ?? "Não informado"}
           </td>
           <td className="px-4 py-3 text-zinc-700">
             <Link
@@ -156,7 +156,7 @@ export async function BurialsPeriodReportTable(
         title="Nenhum sepultamento encontrado"
         description={
           report.emptyMessage ??
-          "Nao ha sepultamentos para o periodo selecionado."
+          "Não ha sepultamentos para o período selecionado."
         }
       />
     )
@@ -165,7 +165,7 @@ export async function BurialsPeriodReportTable(
   return (
     <section aria-labelledby="burials-period-report-results" className="space-y-4">
       <h2 className="sr-only" id="burials-period-report-results">
-        Resultados do relatorio de sepultamentos por periodo
+        Resultados do relatório de sepultamentos por período
       </h2>
       <div className="overflow-x-auto rounded-md border border-zinc-200 bg-white">
         <table className="min-w-full divide-y divide-zinc-200 text-sm">
@@ -176,7 +176,7 @@ export async function BurialsPeriodReportTable(
                 Sepultamento
               </th>
               <th className="px-4 py-3" scope="col">
-                Codigo
+                Código
               </th>
               <th className="px-4 py-3" scope="col">
                 Falecido
@@ -185,13 +185,13 @@ export async function BurialsPeriodReportTable(
                 Documento
               </th>
               <th className="px-4 py-3" scope="col">
-                Espaco
+                Espaço
               </th>
               <th className="px-4 py-3" scope="col">
-                Localizacao
+                Localização
               </th>
               <th className="px-4 py-3" scope="col">
-                Vinculo
+                Vínculo
               </th>
               <th className="px-4 py-3" scope="col">
                 Status
@@ -203,7 +203,7 @@ export async function BurialsPeriodReportTable(
       </div>
 
       <Pagination
-        ariaLabel="Paginacao do relatorio de sepultamentos por periodo"
+        ariaLabel="Paginação do relatório de sepultamentos por período"
         basePath="/reports"
         page={report.page}
         pageSize={report.pageSize}

@@ -17,7 +17,7 @@ import type {
 } from "@/types/responsible"
 
 export const metadata: Metadata = {
-  title: "Detalhe do responsavel | Jaziggo",
+  title: "Detalhe do responsável | Jaziggo",
 }
 
 type ResponsibleDetailPageProps = Readonly<{
@@ -26,7 +26,7 @@ type ResponsibleDetailPageProps = Readonly<{
 
 const LINK_TYPE_LABELS = {
   DECEASED: "Falecido",
-  BURIAL_SPACE: "Sepultura ou jazigo",
+  BURIAL_SPACE: "Sepultura ou jázigo",
 } as const satisfies Record<ResponsibleLinkType, string>
 
 const LINK_STATUS_LABELS = {
@@ -42,7 +42,7 @@ const DATE_TIME_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
 
 function formatDateTime(value: string | undefined) {
   if (!value) {
-    return "Nao informado"
+    return "Não informado"
   }
 
   return DATE_TIME_FORMATTER.format(new Date(value))
@@ -79,15 +79,15 @@ function ResponsibleSummary({
           {responsible.fullName}
         </h2>
         <p className="mt-1 font-mono text-xs text-zinc-600">
-          Documento: {responsible.documentMasked ?? "Nao informado"}
+          Documento: {responsible.documentMasked ?? "Não informado"}
         </p>
       </div>
 
       <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <DetailItem label="Telefone" value={responsible.phone ?? "Nao informado"} />
-        <DetailItem label="E-mail" value={responsible.email ?? "Nao informado"} />
-        <DetailItem label="Endereco" value={responsible.address ?? "Nao informado"} />
-        <DetailItem label="Vinculos" value={String(responsible.links.length)} />
+        <DetailItem label="Telefone" value={responsible.phone ?? "Não informado"} />
+        <DetailItem label="E-mail" value={responsible.email ?? "Não informado"} />
+        <DetailItem label="Endereço" value={responsible.address ?? "Não informado"} />
+        <DetailItem label="Vínculos" value={String(responsible.links.length)} />
       </dl>
     </section>
   )
@@ -99,8 +99,8 @@ function ResponsibleLinkTable({
   if (links.length === 0) {
     return (
       <EmptyState
-        title="Nenhum vinculo administrativo"
-        description="Este responsavel ainda nao possui vinculos cadastrados."
+        title="Nenhum vínculo administrativo"
+        description="Este responsável ainda não possui vínculos cadastrados."
       />
     )
   }
@@ -108,7 +108,7 @@ function ResponsibleLinkTable({
   return (
     <div className="overflow-x-auto rounded-md border border-zinc-200 bg-white">
       <table className="min-w-full divide-y divide-zinc-200 text-sm">
-        <caption className="sr-only">Vinculos administrativos do responsavel</caption>
+        <caption className="sr-only">Vínculos administrativos do responsável</caption>
         <thead className="bg-zinc-50 text-left text-xs font-semibold uppercase text-zinc-600">
           <tr>
             <th className="px-4 py-3" scope="col">
@@ -149,10 +149,10 @@ function ResponsibleLinkTable({
               </td>
               <td className="px-4 py-3 text-zinc-700">{formatDateTime(link.createdAt)}</td>
               <td className="px-4 py-3 text-zinc-700">
-                {link.status === "ENDED" ? formatDateTime(link.endedAt) : "Vinculo ativo"}
+                {link.status === "ENDED" ? formatDateTime(link.endedAt) : "Vínculo ativo"}
               </td>
               <td className="max-w-sm px-4 py-3 text-zinc-700">
-                {link.status === "ENDED" ? link.endReason : "Nao se aplica"}
+                {link.status === "ENDED" ? link.endReason : "Não se aplica"}
               </td>
             </tr>
           ))}
@@ -171,8 +171,8 @@ async function ResponsibleDetail({ id }: Readonly<{ id: string }>) {
     if (error instanceof ResponsibleServiceError) {
       return (
         <ErrorMessage
-          message="Nao foi possivel carregar este responsavel. Verifique o identificador ou tente novamente."
-          title="Detalhe indisponivel"
+          message="Não foi possível carregar este responsável. Verifique o identificador ou tente novamente."
+          title="Detalhe indisponível"
         />
       )
     }
@@ -180,7 +180,7 @@ async function ResponsibleDetail({ id }: Readonly<{ id: string }>) {
     return (
       <ErrorMessage
         message="Tente novamente em instantes. Se o problema persistir, informe o suporte interno."
-        title="Erro ao carregar responsavel"
+        title="Erro ao carregar responsável"
       />
     )
   }
@@ -192,10 +192,10 @@ async function ResponsibleDetail({ id }: Readonly<{ id: string }>) {
       <section aria-labelledby="responsible-links-heading" className="space-y-4">
         <div>
           <h2 className="text-base font-semibold text-zinc-950" id="responsible-links-heading">
-            Vinculos administrativos
+            Vínculos administrativos
           </h2>
           <p className="mt-1 text-sm leading-6 text-zinc-600">
-            Vinculos ativos e encerrados permanecem visiveis por identificadores internos.
+            Vínculos ativos e encerrados permanecem visíveis por identificadores internos.
           </p>
         </div>
 
@@ -223,15 +223,15 @@ export default async function ResponsibleDetailPage({
           className="inline-flex text-sm font-medium text-zinc-700 underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
           href="/responsibles"
         >
-          Voltar para responsaveis
+          Voltar para responsáveis
         </Link>
         <div>
-          <p className="text-sm font-medium text-zinc-500">Operacao cemiterial</p>
+          <p className="text-sm font-medium text-zinc-500">Operação cemiterial</p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">
-            Detalhe do responsavel
+            Detalhe do responsável
           </h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-600">
-            Consulte dados administrativos necessarios e vinculos sem expor documento completo.
+            Consulte dados administrativos necessários e vínculos sem expor documento completo.
           </p>
         </div>
       </header>

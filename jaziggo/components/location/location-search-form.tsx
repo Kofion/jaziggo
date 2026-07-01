@@ -55,7 +55,7 @@ type LocationSearchFormProps = Readonly<{
 
 const DOCUMENT_TARGET_OPTIONS = [
   { label: "Documento do falecido", value: "deceasedDocument" },
-  { label: "Documento do responsavel", value: "responsibleDocument" },
+  { label: "Documento do responsável", value: "responsibleDocument" },
 ] as const satisfies ReadonlyArray<{
   label: string
   value: DocumentSearchTarget
@@ -77,11 +77,11 @@ function errorMessageForResponse(
       body.error.code === DOMAIN_ERROR_CODE.UNAUTHORIZED ||
       body.error.code === DOMAIN_ERROR_CODE.FORBIDDEN
     ) {
-      return "Sua sessao nao permite executar esta busca."
+      return "Sua sessão não permite executar esta busca."
     }
   }
 
-  return "Nao foi possivel concluir a busca por documento. Tente novamente."
+  return "Não foi possível concluir a busca por documento. Tente novamente."
 }
 
 function resultSummary(totalRecords: number) {
@@ -157,7 +157,7 @@ export function LocationSearchForm({
       onDocumentSearch?.(body.data)
     } catch {
       setErrorMessage(
-        "Nao foi possivel concluir a busca por documento. Tente novamente.",
+        "Não foi possível concluir a busca por documento. Tente novamente.",
       )
     } finally {
       setDocumentValue("")
@@ -199,7 +199,7 @@ export function LocationSearchForm({
             className="mb-2 block text-sm font-medium text-zinc-800"
             htmlFor={`${formId}-responsibleName`}
           >
-            Nome do responsavel
+            Nome do responsável
           </label>
           <input
             className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
@@ -263,7 +263,7 @@ export function LocationSearchForm({
             className="mb-2 block text-sm font-medium text-zinc-800"
             htmlFor={`${formId}-burialSpaceIdentifier`}
           >
-            Identificacao
+            Identificação
           </label>
           <input
             className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
@@ -276,7 +276,7 @@ export function LocationSearchForm({
 
         <div className="flex items-end">
           <button
-            aria-label="Filtrar localizacoes"
+            aria-label="Filtrar localizações"
             className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-zinc-950 px-4 text-sm font-semibold text-white hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 lg:w-auto"
             type="submit"
           >
@@ -349,7 +349,7 @@ export function LocationSearchForm({
       </form>
 
       {errorMessage ? (
-        <ErrorMessage id={errorId} message={errorMessage} title="Busca nao concluida" />
+        <ErrorMessage id={errorId} message={errorMessage} title="Busca não concluída" />
       ) : null}
 
       {successMessage ? (

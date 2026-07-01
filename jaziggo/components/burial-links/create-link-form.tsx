@@ -38,7 +38,7 @@ type CreateLinkFormProps = Readonly<{
 }>
 
 const STATUS_LABELS = {
-  AVAILABLE: "Disponivel",
+  AVAILABLE: "Disponível",
   OCCUPIED: "Ocupado",
   RESERVED: "Reservado",
   INACTIVE: "Inativo",
@@ -46,17 +46,17 @@ const STATUS_LABELS = {
 
 const BLOCK_REASON_MESSAGES = {
   SPACE_RESERVED:
-    "A sepultura ou jazigo esta reservado e nao aceita novos vinculos.",
+    "A sepultura ou jázigo esta reservado e não aceita novos vínculos.",
   SPACE_INACTIVE:
-    "A sepultura ou jazigo esta inativo e nao aceita novos vinculos.",
+    "A sepultura ou jázigo esta inativo e não aceita novos vínculos.",
   SEPULTURA_OCCUPIED:
-    "Sepulturas aceitam somente um vinculo ativo.",
+    "Sepulturas aceitam somente um vínculo ativo.",
   JAZIGO_CAPACITY_REACHED:
-    "A capacidade do jazigo foi atingida.",
+    "A capacidade do jázigo foi atingida.",
   SPACE_CAPACITY_REACHED:
-    "A capacidade do espaco foi atingida.",
+    "A capacidade do espaço foi atingida.",
   DECEASED_ALREADY_LINKED:
-    "O falecido informado ja possui vinculo ativo.",
+    "O falecido informado já possui vínculo ativo.",
 } as const satisfies Record<BurialLinkBlockReason, string>
 
 function cx(...classes: Array<string | false | undefined>) {
@@ -74,11 +74,11 @@ function errorMessageForCreateResponse(
 ) {
   if (body?.success === false) {
     if (body.error.code === DOMAIN_ERROR_CODE.CONFLICT) {
-      return "Nao foi possivel criar o vinculo por conflito de ocupacao. Verifique a capacidade atual antes de continuar."
+      return "Não foi possível criar o vínculo por conflito de ocupação. Verifique a capacidade atual antes de continuar."
     }
 
     if (body.error.code === DOMAIN_ERROR_CODE.NOT_FOUND) {
-      return "Falecido, sepultura/jazigo ou responsavel informado nao foi encontrado."
+      return "Falecido, sepultura/jázigo ou responsável informado não foi encontrado."
     }
 
     if (body.error.code === DOMAIN_ERROR_CODE.VALIDATION_ERROR) {
@@ -86,19 +86,19 @@ function errorMessageForCreateResponse(
     }
   }
 
-  return "Nao foi possivel criar o vinculo. Revise os dados e tente novamente."
+  return "Não foi possível criar o vínculo. Revise os dados e tente novamente."
 }
 
 function availabilityMessage(availability: SpaceAvailability) {
   if (availability.canLink) {
-    return "Capacidade disponivel para criar o vinculo."
+    return "Capacidade disponível para criar o vínculo."
   }
 
   if (availability.reasonCode) {
     return BLOCK_REASON_MESSAGES[availability.reasonCode]
   }
 
-  return "A sepultura ou jazigo nao esta disponivel para este vinculo."
+  return "A sepultura ou jázigo não esta disponível para este vínculo."
 }
 
 async function readJsonEnvelope<TData>(response: Response) {
@@ -141,7 +141,7 @@ export function CreateLinkForm({
 
     if (selectedDeceasedId.length === 0 || selectedBurialSpaceId.length === 0) {
       setSuccessMessage(null)
-      setErrorMessage("Informe o falecido e a sepultura ou jazigo para verificar a capacidade.")
+      setErrorMessage("Informe o falecido e a sepultura ou jázigo para verificar a capacidade.")
       setAvailability(null)
       return null
     }
@@ -164,7 +164,7 @@ export function CreateLinkForm({
       if (!response.ok || !body?.success) {
         setAvailability(null)
         setErrorMessage(
-          "Nao foi possivel verificar a capacidade. Revise os IDs informados.",
+          "Não foi possível verificar a capacidade. Revise os IDs informados.",
         )
         return null
       }
@@ -173,7 +173,7 @@ export function CreateLinkForm({
       return body.data
     } catch {
       setAvailability(null)
-      setErrorMessage("Nao foi possivel verificar a capacidade. Tente novamente.")
+      setErrorMessage("Não foi possível verificar a capacidade. Tente novamente.")
       return null
     } finally {
       setCheckingAvailability(false)
@@ -197,7 +197,7 @@ export function CreateLinkForm({
 
     if (payload.deceasedId.length === 0 || payload.burialSpaceId.length === 0) {
       setSuccessMessage(null)
-      setErrorMessage("Informe o falecido e a sepultura ou jazigo do vinculo.")
+      setErrorMessage("Informe o falecido e a sepultura ou jázigo do vínculo.")
       setAvailability(null)
       return
     }
@@ -233,7 +233,7 @@ export function CreateLinkForm({
         return
       }
 
-      setSuccessMessage("Vinculo criado com sucesso.")
+      setSuccessMessage("Vínculo criado com sucesso.")
       setAvailability({
         ...currentAvailability,
         activeLinkCount: currentAvailability.activeLinkCount + 1,
@@ -241,7 +241,7 @@ export function CreateLinkForm({
       onSuccess?.(body.data)
     } catch {
       setErrorMessage(
-        "Nao foi possivel criar o vinculo. Revise os dados e tente novamente.",
+        "Não foi possível criar o vínculo. Revise os dados e tente novamente.",
       )
     } finally {
       setPending(false)
@@ -256,14 +256,14 @@ export function CreateLinkForm({
       onSubmit={handleSubmit}
     >
       <div className="space-y-1">
-        <h2 className="text-base font-semibold text-zinc-950">Novo vinculo de sepultamento</h2>
+        <h2 className="text-base font-semibold text-zinc-950">Novo vínculo de sepultamento</h2>
         <p className="text-sm leading-6 text-zinc-600">
-          Informe os IDs internos para vincular um falecido a uma sepultura ou jazigo existente.
+          Informe os IDs internos para vincular um falecido a uma sepultura ou jázigo existente.
         </p>
       </div>
 
       {errorMessage ? (
-        <ErrorMessage id={errorId} message={errorMessage} title="Acao nao concluida" />
+        <ErrorMessage id={errorId} message={errorMessage} title="Ação não concluída" />
       ) : null}
 
       {successMessage ? (
@@ -309,7 +309,7 @@ export function CreateLinkForm({
               className="mb-2 block text-sm font-medium text-zinc-800"
               htmlFor={`${formId}-burialSpaceId`}
             >
-              ID da sepultura ou jazigo
+              ID da sepultura ou jázigo
             </label>
             <input
               autoComplete="off"
@@ -333,7 +333,7 @@ export function CreateLinkForm({
               className="mb-2 block text-sm font-medium text-zinc-800"
               htmlFor={`${formId}-responsibleId`}
             >
-              ID do responsavel
+              ID do responsável
             </label>
             <input
               autoComplete="off"
@@ -380,7 +380,7 @@ export function CreateLinkForm({
                   <dd className="mt-1 text-zinc-950">{STATUS_LABELS[availability.status]}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs font-semibold uppercase text-zinc-500">Ocupacao</dt>
+                  <dt className="text-xs font-semibold uppercase text-zinc-500">Ocupação</dt>
                   <dd className="mt-1 text-zinc-950">
                     {availability.activeLinkCount}/{availability.capacity}
                   </dd>
@@ -399,7 +399,7 @@ export function CreateLinkForm({
               </dl>
             ) : (
               <p className="mt-1 text-sm leading-6 text-zinc-600">
-                Verifique a sepultura ou jazigo antes de criar o vinculo.
+                Verifique a sepultura ou jázigo antes de criar o vínculo.
               </p>
             )}
           </div>
@@ -429,7 +429,7 @@ export function CreateLinkForm({
           disabled={pending || checkingAvailability}
           type="submit"
         >
-          {pending ? "Criando..." : "Criar vinculo"}
+          {pending ? "Criando..." : "Criar vínculo"}
         </button>
       </div>
     </form>

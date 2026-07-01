@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { Suspense } from "react"
 import { z } from "zod"
 
+import { DeceasedForm } from "@/components/deceased/deceased-form"
 import { DeceasedTable } from "@/components/deceased/deceased-table"
 import { EmptyState } from "@/components/ui/empty-state"
 import { ErrorMessage } from "@/components/ui/error-message"
@@ -75,8 +76,8 @@ async function DeceasedList({
     if (error instanceof DeceasedServiceError) {
       return (
         <ErrorMessage
-          message="Nao foi possivel carregar a lista de falecidos com os filtros informados."
-          title="Lista de falecidos indisponivel"
+          message="Não foi possível carregar a lista de falecidos com os filtros informados."
+          title="Lista de falecidos indisponível"
         />
       )
     }
@@ -93,7 +94,7 @@ async function DeceasedList({
     return (
       <EmptyState
         title="Nenhum falecido encontrado"
-        description="Ajuste os filtros para verificar outros nomes, codigos ou datas cadastradas."
+        description="Ajuste os filtros para verificar outros nomes, códigos ou datas cadastradas."
       />
     )
   }
@@ -114,7 +115,7 @@ async function DeceasedList({
       <DeceasedTable deceasedRecords={result.items} />
 
       <Pagination
-        ariaLabel="Paginacao de falecidos"
+        ariaLabel="Paginação de falecidos"
         basePath="/deceased"
         page={result.pagination.page}
         pageSize={result.pagination.pageSize}
@@ -138,15 +139,19 @@ export default async function DeceasedPage({ searchParams }: DeceasedPageProps) 
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <p className="text-sm font-medium text-zinc-500">Operacao cemiterial</p>
+        <p className="text-sm font-medium text-zinc-500">Operação cemiterial</p>
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-950">
           Falecidos
         </h1>
         <p className="max-w-3xl text-sm leading-6 text-zinc-600">
-          Consulte registros por nome, codigo interno e datas. Documentos aparecem somente
-          mascarados e registros historicos incompletos ficam sinalizados.
+          Consulte registros por nome, código interno e datas. Documentos aparecem somente
+          mascarados e registros históricos incompletos ficam sinalizados.
         </p>
       </header>
+
+      <section className="space-y-4">
+        <DeceasedForm mode="create" />
+      </section>
 
       <form
         action="/deceased"
@@ -174,7 +179,7 @@ export default async function DeceasedPage({ searchParams }: DeceasedPageProps) 
 
         <div>
           <label className="mb-2 block text-sm font-medium text-zinc-800" htmlFor="internalCode">
-            Codigo interno
+            Código interno
           </label>
           <input
             className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
@@ -236,8 +241,8 @@ export default async function DeceasedPage({ searchParams }: DeceasedPageProps) 
         </Suspense>
       ) : (
         <ErrorMessage
-          message="Revise os filtros e a paginacao antes de tentar novamente."
-          title="Filtros invalidos"
+          message="Revise os filtros e a paginação antes de tentar novamente."
+          title="Filtros inválidos"
         />
       )}
     </div>

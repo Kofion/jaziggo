@@ -20,19 +20,19 @@ type EndLinkDialogProps = Readonly<{
 function errorMessageForResponse(body: ApiEnvelope<EndedBurialLink> | null) {
   if (body?.success === false) {
     if (body.error.code === DOMAIN_ERROR_CODE.CONFLICT) {
-      return "Este vinculo ja foi encerrado."
+      return "Este vínculo já foi encerrado."
     }
 
     if (body.error.code === DOMAIN_ERROR_CODE.NOT_FOUND) {
-      return "Vinculo de sepultamento nao encontrado."
+      return "Vínculo de sepultamento não encontrado."
     }
 
     if (body.error.code === DOMAIN_ERROR_CODE.VALIDATION_ERROR) {
-      return "Informe data, motivo e confirmacao para encerrar o vinculo."
+      return "Informe data, motivo e confirmação para encerrar o vínculo."
     }
   }
 
-  return "Nao foi possivel encerrar o vinculo. Revise os dados e tente novamente."
+  return "Não foi possível encerrar o vínculo. Revise os dados e tente novamente."
 }
 
 async function readJsonEnvelope<TData>(response: Response) {
@@ -76,13 +76,13 @@ export function EndLinkDialog({
 
     if (burialLinkId.trim().length === 0) {
       setSuccessMessage(null)
-      setErrorMessage("Selecione um vinculo valido antes de encerrar.")
+      setErrorMessage("Selecione um vínculo valido antes de encerrar.")
       return
     }
 
     if (!endedAt || trimmedReason.length === 0 || !confirmation) {
       setSuccessMessage(null)
-      setErrorMessage("Informe data, motivo e marque a confirmacao do encerramento.")
+      setErrorMessage("Informe data, motivo e marque a confirmação do encerramento.")
       return
     }
 
@@ -121,11 +121,11 @@ export function EndLinkDialog({
         return
       }
 
-      setSuccessMessage("Vinculo encerrado e mantido no historico.")
+      setSuccessMessage("Vínculo encerrado e mantido no histórico.")
       onSuccess?.(body.data)
     } catch {
       setErrorMessage(
-        "Nao foi possivel encerrar o vinculo. Revise os dados e tente novamente.",
+        "Não foi possível encerrar o vínculo. Revise os dados e tente novamente.",
       )
     } finally {
       setPending(false)
@@ -135,19 +135,19 @@ export function EndLinkDialog({
   return (
     <ConfirmDialog
       cancelLabel="Fechar"
-      confirmLabel="Encerrar vinculo"
-      description="Registre o encerramento historico do vinculo ativo sem apagar o historico de sepultamento."
+      confirmLabel="Encerrar vínculo"
+      description="Registre o encerramento histórico do vínculo ativo sem apagar o histórico de sepultamento."
       intent="danger"
       onConfirm={handleConfirm}
       onOpenChange={handleOpenChange}
       open={open}
       pending={pending}
-      title="Encerrar vinculo"
+      title="Encerrar vínculo"
     >
       <div className="space-y-4">
         <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
-          O encerramento altera o status do vinculo para historico e pode liberar a
-          sepultura ou jazigo quando nao houver outros vinculos ativos.
+          O encerramento altera o status do vínculo para histórico e pode liberar a
+          sepultura ou jázigo quando não houver outros vínculos ativos.
         </div>
 
         <div className="grid gap-4">
@@ -202,12 +202,12 @@ export function EndLinkDialog({
               required
               type="checkbox"
             />
-            <span>Confirmo que o vinculo ativo deve ser encerrado e preservado no historico.</span>
+            <span>Confirmo que o vínculo ativo deve ser encerrado e preservado no histórico.</span>
           </label>
         </div>
 
         {errorMessage ? (
-          <ErrorMessage id={errorId} message={errorMessage} title="Encerramento nao concluido" />
+          <ErrorMessage id={errorId} message={errorMessage} title="Encerramento não concluído" />
         ) : null}
 
         {successMessage ? (

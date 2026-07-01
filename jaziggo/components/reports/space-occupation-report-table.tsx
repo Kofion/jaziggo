@@ -18,7 +18,7 @@ type SpaceOccupationReportTableProps = Readonly<{
 }>
 
 const SPACE_STATUS_LABELS = {
-  AVAILABLE: "Disponivel",
+  AVAILABLE: "Disponível",
   OCCUPIED: "Ocupado",
   RESERVED: "Reservado",
   INACTIVE: "Inativo",
@@ -110,10 +110,10 @@ export async function SpaceOccupationReportTable(
   if (report.data.length === 0) {
     return (
       <EmptyState
-        title="Nenhum espaco encontrado"
+        title="Nenhum espaço encontrado"
         description={
           report.emptyMessage ??
-          "Nao ha espacos para os filtros selecionados."
+          "Não ha espaços para os filtros selecionados."
         }
       />
     )
@@ -122,7 +122,7 @@ export async function SpaceOccupationReportTable(
   return (
     <section aria-labelledby="space-occupation-report-results" className="space-y-4">
       <h2 className="sr-only" id="space-occupation-report-results">
-        Resultados do relatorio de ocupacao de espacos
+        Resultados do relatório de ocupação de espaços
       </h2>
       <div className="overflow-x-auto rounded-md border border-zinc-200 bg-white">
         <table className="min-w-full divide-y divide-zinc-200 text-sm">
@@ -130,19 +130,19 @@ export async function SpaceOccupationReportTable(
           <thead className="bg-zinc-50 text-left text-xs font-semibold uppercase text-zinc-600">
             <tr>
               <th className="px-4 py-3" scope="col">
-                Identificacao
+                Identificação
               </th>
               <th className="px-4 py-3" scope="col">
                 Tipo
               </th>
               <th className="px-4 py-3" scope="col">
-                Localizacao
+                Localização
               </th>
               <th className="px-4 py-3" scope="col">
                 Status
               </th>
               <th className="px-4 py-3" scope="col">
-                Ocupacao
+                Ocupação
               </th>
               <th className="px-4 py-3" scope="col">
                 Vagas livres
@@ -154,7 +154,7 @@ export async function SpaceOccupationReportTable(
       </div>
 
       <Pagination
-        ariaLabel="Paginacao do relatorio de ocupacao de espacos"
+        ariaLabel="Paginação do relatório de ocupação de espaços"
         basePath="/reports"
         page={report.page}
         pageSize={report.pageSize}

@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { useId, useState, type FormEvent } from "react"
 
 import { ErrorMessage } from "@/components/ui/error-message"
@@ -23,25 +24,25 @@ type UserFormProps = Readonly<{
 
 const ROLE_OPTIONS = [
   { label: "Administrador", value: USER_ROLE.ADMIN },
-  { label: "Funcionario", value: USER_ROLE.EMPLOYEE },
+  { label: "Funcionário", value: USER_ROLE.EMPLOYEE },
 ] as const satisfies ReadonlyArray<{ label: string; value: UserRole }>
 
 const FORM_COPY = {
   create: {
-    title: "Novo usuario",
+    title: "Novo usuário",
     description: "Cadastre uma conta interna autorizada a acessar o Jaziggo.",
-    submitLabel: "Criar usuario",
+    submitLabel: "Criar usuário",
     pendingLabel: "Criando...",
-    successMessage: "Usuario criado com sucesso.",
-    errorMessage: "Nao foi possivel criar o usuario. Revise os dados e tente novamente.",
+    successMessage: "Usuário criado com sucesso.",
+    errorMessage: "Não foi possível criar o usuário. Revise os dados e tente novamente.",
   },
   edit: {
-    title: "Editar usuario",
+    title: "Editar usuário",
     description: "Atualize os dados administrativos da conta interna.",
     submitLabel: "Salvar alteracoes",
     pendingLabel: "Salvando...",
-    successMessage: "Usuario atualizado com sucesso.",
-    errorMessage: "Nao foi possivel atualizar o usuario. Revise os dados e tente novamente.",
+    successMessage: "Usuário atualizado com sucesso.",
+    errorMessage: "Não foi possível atualizar o usuário. Revise os dados e tente novamente.",
   },
 } as const satisfies Record<
   UserFormMode,
@@ -78,6 +79,7 @@ function userEndpoint(mode: UserFormMode, user?: UserDto) {
 }
 
 export function UserForm({ mode, user, onSuccess, className }: UserFormProps) {
+  const router = useRouter()
   const copy = FORM_COPY[mode]
   const formId = useId()
   const errorId = useId()
@@ -99,7 +101,7 @@ export function UserForm({ mode, user, onSuccess, className }: UserFormProps) {
 
     if (!endpoint) {
       setSuccessMessage(null)
-      setErrorMessage("Selecione um usuario valido antes de editar.")
+      setErrorMessage("Selecione um usuário valido antes de editar.")
       return
     }
 
@@ -142,6 +144,7 @@ export function UserForm({ mode, user, onSuccess, className }: UserFormProps) {
 
       setSuccessMessage(copy.successMessage)
       onSuccess?.(body.data)
+      router.refresh()
 
       if (mode === "create") {
         form.reset()
@@ -166,7 +169,7 @@ export function UserForm({ mode, user, onSuccess, className }: UserFormProps) {
       </div>
 
       {errorMessage ? (
-        <ErrorMessage id={errorId} message={errorMessage} title="Acao nao concluida" />
+        <ErrorMessage id={errorId} message={errorMessage} title="Ação não concluída" />
       ) : null}
 
       {successMessage ? (

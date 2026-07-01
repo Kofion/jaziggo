@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Jaziggo",
-  description: "Sistema interno de gestao cemiterial",
+  description: "Sistema interno de gestão cemiterial",
 }
 
 export default function RootLayout({

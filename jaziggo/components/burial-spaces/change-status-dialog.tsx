@@ -31,28 +31,28 @@ const TYPE_LABELS = {
 } as const satisfies Record<BurialSpaceType, string>
 
 const STATUS_LABELS = {
-  AVAILABLE: "Disponivel",
+  AVAILABLE: "Disponível",
   OCCUPIED: "Ocupado",
   RESERVED: "Reservado",
   INACTIVE: "Inativo",
 } as const satisfies Record<BurialSpaceStatus, string>
 
 const TARGET_STATUS_DESCRIPTIONS = {
-  AVAILABLE: "O espaco ficara liberado para novos vinculos, respeitando capacidade e regras de ocupacao.",
-  RESERVED: "O espaco ficara reservado e nao aceitara novos vinculos enquanto permanecer assim.",
-  INACTIVE: "O espaco ficara inativo e nao aceitara novos vinculos enquanto permanecer assim.",
+  AVAILABLE: "O espaço ficara liberado para novos vínculos, respeitando capacidade e regras de ocupação.",
+  RESERVED: "O espaço ficara reservado e não aceitara novos vínculos enquanto permanecer assim.",
+  INACTIVE: "O espaço ficara inativo e não aceitara novos vínculos enquanto permanecer assim.",
 } as const satisfies Record<ChangeableBurialSpaceStatus, string>
 
 function conflictMessage(targetStatus: ChangeableBurialSpaceStatus) {
   if (targetStatus === BURIAL_SPACE_STATUS.RESERVED) {
-    return "Nao e possivel reservar um espaco com vinculo ativo. Encerre os vinculos ativos antes de alterar para RESERVED."
+    return "Não e possível reservar um espaço com vínculo ativo. Encerre os vínculos ativos antes de alterar para RESERVED."
   }
 
   if (targetStatus === BURIAL_SPACE_STATUS.INACTIVE) {
-    return "Nao e possivel inativar um espaco com vinculo ativo. Encerre os vinculos ativos antes de alterar para INACTIVE."
+    return "Não e possível inativar um espaço com vínculo ativo. Encerre os vínculos ativos antes de alterar para INACTIVE."
   }
 
-  return "Nao e possivel marcar como disponivel enquanto houver vinculo ativo. Encerre os vinculos ativos antes da alteracao."
+  return "Não e possível marcar como disponível enquanto houver vínculo ativo. Encerre os vínculos ativos antes da alteracao."
 }
 
 function statusSummary(status: BurialSpaceStatus) {
@@ -85,7 +85,7 @@ export function ChangeStatusDialog({
   async function handleConfirm() {
     if (space.status === targetStatus) {
       setErrorMessage(null)
-      setSuccessMessage(`O espaco ja esta com status ${targetStatusLabel}.`)
+      setSuccessMessage(`O espaço já esta com status ${targetStatusLabel}.`)
       return
     }
 
@@ -122,7 +122,7 @@ export function ChangeStatusDialog({
         setErrorMessage(
           body?.success === false && body.error.code === "CONFLICT"
             ? conflictMessage(targetStatus)
-            : "Nao foi possivel alterar o status do espaco. Tente novamente.",
+            : "Não foi possível alterar o status do espaço. Tente novamente.",
         )
         return
       }
@@ -130,7 +130,7 @@ export function ChangeStatusDialog({
       setSuccessMessage(`Status alterado para ${targetStatusLabel}.`)
       onSuccess?.(body.data)
     } catch {
-      setErrorMessage("Nao foi possivel alterar o status do espaco. Tente novamente.")
+      setErrorMessage("Não foi possível alterar o status do espaço. Tente novamente.")
     } finally {
       setPending(false)
     }
@@ -146,12 +146,12 @@ export function ChangeStatusDialog({
       onOpenChange={handleOpenChange}
       open={open}
       pending={pending}
-      title="Alterar status do espaco"
+      title="Alterar status do espaço"
     >
       <div className="space-y-3">
         <dl className="grid gap-3 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-3 sm:grid-cols-2">
           <div>
-            <dt className="text-xs font-semibold uppercase text-zinc-500">Identificacao</dt>
+            <dt className="text-xs font-semibold uppercase text-zinc-500">Identificação</dt>
             <dd className="mt-1 font-medium text-zinc-950">{space.identifier}</dd>
           </div>
           <div>
@@ -163,7 +163,7 @@ export function ChangeStatusDialog({
             <dd className="mt-1 font-medium text-zinc-950">{statusSummary(space.status)}</dd>
           </div>
           <div>
-            <dt className="text-xs font-semibold uppercase text-zinc-500">Ocupacao</dt>
+            <dt className="text-xs font-semibold uppercase text-zinc-500">Ocupação</dt>
             <dd className="mt-1 font-medium text-zinc-950">
               {space.activeLinkCount}/{space.capacity}
             </dd>
@@ -172,15 +172,15 @@ export function ChangeStatusDialog({
 
         {hasActiveLinks ? (
           <p className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
-            RESERVED e INACTIVE bloqueiam novos vinculos e exigem zero vinculos ativos.
-            Encerre os vinculos ativos antes de mudar para esse status.
+            RESERVED e INACTIVE bloqueiam novos vínculos e exigem zero vínculos ativos.
+            Encerre os vínculos ativos antes de mudar para esse status.
           </p>
         ) : null}
 
         {errorMessage ? (
           <ErrorMessage
             message={errorMessage}
-            title="Alteracao de status nao concluida"
+            title="Alteracao de status não concluída"
           />
         ) : null}
 

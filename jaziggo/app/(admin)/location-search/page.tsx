@@ -8,7 +8,6 @@ import {
   type LocationSearchFilterValues,
   type LocationSearchPageData,
 } from "@/components/location/location-results"
-import { ErrorMessage } from "@/components/ui/error-message"
 import { LoadingState } from "@/components/ui/loading-state"
 import { getCurrentActiveUser } from "@/lib/auth/session"
 import { locationSearchFiltersSchema } from "@/lib/validation/search"
@@ -18,7 +17,7 @@ import {
 } from "@/services/location-search-service"
 
 export const metadata: Metadata = {
-  title: "Busca e localizacao | Jaziggo",
+  title: "Busca e localização | Jaziggo",
 }
 
 type LocationSearchPageProps = Readonly<{
@@ -130,7 +129,7 @@ async function LocationSearchContent({
   } catch (error) {
     const message =
       error instanceof LocationSearchServiceError
-        ? "Nao foi possivel carregar os resultados com os filtros informados."
+        ? "Não foi possível carregar os resultados com os filtros informados."
         : "Tente novamente em instantes. Se o problema persistir, informe o suporte interno."
 
     return (
@@ -175,10 +174,10 @@ export default async function LocationSearchPage({
       <header className="space-y-2">
         <p className="text-sm font-medium text-zinc-500">Atendimento interno</p>
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-950">
-          Busca e localizacao
+          Busca e localização
         </h1>
         <p className="max-w-3xl text-sm leading-6 text-zinc-600">
-          Localize falecidos por dados operacionais e identifique a sepultura ou jazigo ativo para orientar atendimentos.
+          Localize falecidos por dados operacionais e identifique a sepultura ou jázigo ativo para orientar atendimentos.
         </p>
       </header>
 
@@ -186,8 +185,8 @@ export default async function LocationSearchPage({
         <Suspense
           fallback={
             <LoadingState
-              description="Os resultados de localizacao estao sendo consultados."
-              label="Carregando localizacoes"
+              description="Os resultados de localização estáo sendo consultados."
+              label="Carregando localizações"
               rows={4}
             />
           }
@@ -195,9 +194,10 @@ export default async function LocationSearchPage({
           <LocationSearchContent filters={filters} query={parsedQuery.data} />
         </Suspense>
       ) : (
-        <ErrorMessage
-          message="Revise os filtros e remova parametros nao reconhecidos antes de tentar novamente."
-          title="Filtros invalidos"
+        <LocationResults
+          errorMessage="Revise os filtros e remova parâmetros não reconhecidos antes de tentar novamente."
+          initialFilters={filters}
+          initialMode="query"
         />
       )}
     </div>

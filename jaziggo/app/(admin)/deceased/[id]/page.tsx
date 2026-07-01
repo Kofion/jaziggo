@@ -37,7 +37,7 @@ const DATE_TIME_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
 
 function formatDate(value: string | undefined) {
   if (!value) {
-    return "Nao informada"
+    return "Não informada"
   }
 
   return DATE_FORMATTER.format(new Date(`${value}T00:00:00.000Z`))
@@ -45,7 +45,7 @@ function formatDate(value: string | undefined) {
 
 function formatDateTime(value: string | undefined) {
   if (!value) {
-    return "Nao informado"
+    return "Não informado"
   }
 
   return DATE_TIME_FORMATTER.format(new Date(value))
@@ -60,7 +60,7 @@ function historyClassName(historicalDataIncomplete: boolean) {
 }
 
 function historyLabel(historicalDataIncomplete: boolean) {
-  return historicalDataIncomplete ? "Historico incompleto" : "Registro completo"
+  return historicalDataIncomplete ? "Histórico incompleto" : "Registro completo"
 }
 
 function DetailItem({ label, value }: Readonly<{ label: string; value: string }>) {
@@ -86,7 +86,7 @@ function DeceasedSummary({
             {deceased.fullName}
           </h2>
           <p className="mt-1 font-mono text-xs text-zinc-600">
-            Documento: {deceased.documentMasked ?? "Nao informado"}
+            Documento: {deceased.documentMasked ?? "Não informado"}
           </p>
         </div>
         <span
@@ -104,7 +104,7 @@ function DeceasedSummary({
         <DetailItem label="Sepultamento" value={formatDate(deceased.burialDate)} />
         <DetailItem
           label="Datas desconhecidas"
-          value={deceased.datesUnknown ? "Sim" : "Nao"}
+          value={deceased.datesUnknown ? "Sim" : "Não"}
         />
       </dl>
     </section>
@@ -120,10 +120,10 @@ function NotesSection({
       className="rounded-md border border-zinc-200 bg-white p-4"
     >
       <h2 className="text-base font-semibold text-zinc-950" id="deceased-notes-heading">
-        Observacoes
+        Observações
       </h2>
       <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-zinc-700">
-        {notes ?? "Nenhuma observacao administrativa registrada."}
+        {notes ?? "Nenhuma observação administrativa registrada."}
       </p>
     </section>
   )
@@ -143,8 +143,8 @@ function BurialLinkHistoryTable({
   if (links.length === 0) {
     return (
       <EmptyState
-        title="Nenhum vinculo de sepultamento"
-        description="Este falecido ainda nao possui vinculos ativos ou historicos cadastrados."
+        title="Nenhum vínculo de sepultamento"
+        description="Este falecido ainda não possui vínculos ativos ou históricos cadastrados."
       />
     )
   }
@@ -152,17 +152,17 @@ function BurialLinkHistoryTable({
   return (
     <div className="overflow-x-auto rounded-md border border-zinc-200 bg-white">
       <table className="min-w-full divide-y divide-zinc-200 text-sm">
-        <caption className="sr-only">Historico de vinculos do falecido</caption>
+        <caption className="sr-only">Histórico de vínculos do falecido</caption>
         <thead className="bg-zinc-50 text-left text-xs font-semibold uppercase text-zinc-600">
           <tr>
             <th className="px-4 py-3" scope="col">
               Status
             </th>
             <th className="px-4 py-3" scope="col">
-              Espaco
+              Espaço
             </th>
             <th className="px-4 py-3" scope="col">
-              Responsavel
+              Responsável
             </th>
             <th className="px-4 py-3" scope="col">
               Data de sepultamento
@@ -199,15 +199,15 @@ function BurialLinkHistoryTable({
                 </Link>
               </td>
               <td className="px-4 py-3 font-mono text-xs text-zinc-700">
-                {link.responsibleId ?? "Nao informado"}
+                {link.responsibleId ?? "Não informado"}
               </td>
               <td className="px-4 py-3 text-zinc-700">{formatDate(link.burialDate)}</td>
               <td className="px-4 py-3 text-zinc-700">{formatDateTime(link.createdAt)}</td>
               <td className="px-4 py-3 text-zinc-700">
-                {link.status === "ENDED" ? formatDateTime(link.endedAt) : "Vinculo ativo"}
+                {link.status === "ENDED" ? formatDateTime(link.endedAt) : "Vínculo ativo"}
               </td>
               <td className="max-w-sm px-4 py-3 text-zinc-700">
-                {link.status === "ENDED" ? link.endReason : "Nao se aplica"}
+                {link.status === "ENDED" ? link.endReason : "Não se aplica"}
               </td>
             </tr>
           ))}
@@ -226,8 +226,8 @@ async function DeceasedDetail({ id }: Readonly<{ id: string }>) {
     if (error instanceof DeceasedServiceError) {
       return (
         <ErrorMessage
-          message="Nao foi possivel carregar este falecido. Verifique o identificador ou tente novamente."
-          title="Detalhe indisponivel"
+          message="Não foi possível carregar este falecido. Verifique o identificador ou tente novamente."
+          title="Detalhe indisponível"
         />
       )
     }
@@ -248,10 +248,10 @@ async function DeceasedDetail({ id }: Readonly<{ id: string }>) {
       <section aria-labelledby="deceased-links-heading" className="space-y-4">
         <div>
           <h2 className="text-base font-semibold text-zinc-950" id="deceased-links-heading">
-            Historico de sepultamento
+            Histórico de sepultamento
           </h2>
           <p className="mt-1 text-sm leading-6 text-zinc-600">
-            Vinculos ativos e encerrados permanecem visiveis por identificadores internos.
+            Vínculos ativos e encerrados permanecem visíveis por identificadores internos.
           </p>
         </div>
 
@@ -282,12 +282,12 @@ export default async function DeceasedDetailPage({
           Voltar para falecidos
         </Link>
         <div>
-          <p className="text-sm font-medium text-zinc-500">Operacao cemiterial</p>
+          <p className="text-sm font-medium text-zinc-500">Operação cemiterial</p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">
             Detalhe do falecido
           </h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-600">
-            Consulte codigo interno, datas, indicador historico e vinculos sem expor documento completo.
+            Consulte código interno, datas, indicador histórico e vínculos sem expor documento completo.
           </p>
         </div>
       </header>

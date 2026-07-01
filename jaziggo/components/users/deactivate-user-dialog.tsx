@@ -40,7 +40,7 @@ export function DeactivateUserDialog({
   async function handleConfirm() {
     if (user.status === USER_STATUS.INACTIVE) {
       setErrorMessage(null)
-      setSuccessMessage("Usuario ja esta inativo.")
+      setSuccessMessage("Usuário já esta inativo.")
       return
     }
 
@@ -61,14 +61,14 @@ export function DeactivateUserDialog({
         | null
 
       if (!response.ok || !body?.success) {
-        setErrorMessage("Nao foi possivel desativar o usuario. Tente novamente.")
+        setErrorMessage("Não foi possível desativar o usuário. Tente novamente.")
         return
       }
 
-      setSuccessMessage("Usuario desativado com sucesso.")
+      setSuccessMessage("Usuário desativado com sucesso.")
       onSuccess?.()
     } catch {
-      setErrorMessage("Nao foi possivel desativar o usuario. Tente novamente.")
+      setErrorMessage("Não foi possível desativar o usuário. Tente novamente.")
     } finally {
       setPending(false)
     }
@@ -77,14 +77,14 @@ export function DeactivateUserDialog({
   return (
     <ConfirmDialog
       cancelLabel="Fechar"
-      confirmLabel="Desativar usuario"
-      description="A conta deixara de acessar o Jaziggo, mas o historico administrativo sera preservado."
+      confirmLabel="Desativar usuário"
+      description="A conta deixará de acessar o Jaziggo, mas o histórico administrativo será preservado."
       intent="danger"
       onConfirm={handleConfirm}
       onOpenChange={handleOpenChange}
       open={open}
       pending={pending}
-      title="Desativar usuario"
+      title="Desativar usuário"
     >
       <div className="space-y-3">
         <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
@@ -95,7 +95,7 @@ export function DeactivateUserDialog({
         {errorMessage ? (
           <ErrorMessage
             message={errorMessage}
-            title="Desativacao nao concluida"
+            title="Desativacao não concluída"
           />
         ) : null}
 

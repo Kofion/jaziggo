@@ -18,7 +18,7 @@ const DATE_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
 
 function formatDate(value: string | undefined) {
   if (!value) {
-    return "Nao informada"
+    return "Não informada"
   }
 
   return DATE_FORMATTER.format(new Date(`${value}T00:00:00.000Z`))
@@ -41,7 +41,7 @@ function historyClassName(historicalDataIncomplete: boolean) {
 }
 
 function historyLabel(historicalDataIncomplete: boolean) {
-  return historicalDataIncomplete ? "Historico incompleto" : "Registro completo"
+  return historicalDataIncomplete ? "Histórico incompleto" : "Registro completo"
 }
 
 function buildPaginationParams(props: DeceasedReportTableProps) {
@@ -71,7 +71,7 @@ function DeceasedReportRows({
             </Link>
           </th>
           <td className="px-4 py-3 font-mono text-xs text-zinc-700">
-            {deceased.documentMasked ?? "Nao informado"}
+            {deceased.documentMasked ?? "Não informado"}
           </td>
           <td className="px-4 py-3 text-zinc-700">{formatDate(deceased.deathDate)}</td>
           <td className="px-4 py-3 text-zinc-700">{formatDate(deceased.burialDate)}</td>
@@ -105,7 +105,7 @@ export async function DeceasedReportTable(props: DeceasedReportTableProps) {
         title="Nenhum falecido encontrado"
         description={
           report.emptyMessage ??
-          "Nao ha falecidos cadastrados para o periodo selecionado."
+          "Não ha falecidos cadastrados para o período selecionado."
         }
       />
     )
@@ -114,7 +114,7 @@ export async function DeceasedReportTable(props: DeceasedReportTableProps) {
   return (
     <section aria-labelledby="deceased-report-results" className="space-y-4">
       <h2 className="sr-only" id="deceased-report-results">
-        Resultados do relatorio de falecidos
+        Resultados do relatório de falecidos
       </h2>
       <div className="overflow-x-auto rounded-md border border-zinc-200 bg-white">
         <table className="min-w-full divide-y divide-zinc-200 text-sm">
@@ -122,7 +122,7 @@ export async function DeceasedReportTable(props: DeceasedReportTableProps) {
           <thead className="bg-zinc-50 text-left text-xs font-semibold uppercase text-zinc-600">
             <tr>
               <th className="px-4 py-3" scope="col">
-                Codigo
+                Código
               </th>
               <th className="px-4 py-3" scope="col">
                 Nome
@@ -140,7 +140,7 @@ export async function DeceasedReportTable(props: DeceasedReportTableProps) {
                 Cadastro
               </th>
               <th className="px-4 py-3" scope="col">
-                Historico
+                Histórico
               </th>
             </tr>
           </thead>
@@ -149,7 +149,7 @@ export async function DeceasedReportTable(props: DeceasedReportTableProps) {
       </div>
 
       <Pagination
-        ariaLabel="Paginacao do relatorio de falecidos"
+        ariaLabel="Paginação do relatório de falecidos"
         basePath="/reports"
         page={report.page}
         pageSize={report.pageSize}

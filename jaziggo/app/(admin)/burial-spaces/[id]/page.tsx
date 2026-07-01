@@ -21,7 +21,7 @@ import type {
 } from "@/types/burial-space"
 
 export const metadata: Metadata = {
-  title: "Detalhe do espaco | Jaziggo",
+  title: "Detalhe do espaço | Jaziggo",
 }
 
 type BurialSpaceDetailPageProps = Readonly<{
@@ -34,7 +34,7 @@ const TYPE_LABELS = {
 } as const satisfies Record<BurialSpaceType, string>
 
 const STATUS_LABELS = {
-  AVAILABLE: "Disponivel",
+  AVAILABLE: "Disponível",
   OCCUPIED: "Ocupado",
   RESERVED: "Reservado",
   INACTIVE: "Inativo",
@@ -86,7 +86,7 @@ function formatLocation(space: BurialSpaceListItemDto) {
 
 function formatDate(value: string | undefined) {
   if (!value) {
-    return "Nao informado"
+    return "Não informado"
   }
 
   return DATE_FORMATTER.format(new Date(`${value}T00:00:00.000Z`))
@@ -94,7 +94,7 @@ function formatDate(value: string | undefined) {
 
 function formatDateTime(value: string | undefined) {
   if (!value) {
-    return "Nao informado"
+    return "Não informado"
   }
 
   return DATE_TIME_FORMATTER.format(new Date(value))
@@ -132,9 +132,9 @@ function SpaceSummary({ space }: Readonly<{ space: BurialSpaceListItemDto }>) {
 
       <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <DetailItem label="Capacidade" value={String(space.capacity)} />
-        <DetailItem label="Vinculos ativos" value={String(space.activeLinkCount)} />
+        <DetailItem label="Vínculos ativos" value={String(space.activeLinkCount)} />
         <DetailItem label="Vagas livres" value={String(availableSlots)} />
-        <DetailItem label="Ocupacao" value={`${space.activeLinkCount}/${space.capacity}`} />
+        <DetailItem label="Ocupação" value={`${space.activeLinkCount}/${space.capacity}`} />
       </dl>
     </section>
   )
@@ -146,7 +146,7 @@ function LocationDetails({ space }: Readonly<{ space: BurialSpaceListItemDto }>)
   return (
     <section aria-labelledby="space-location-heading" className="rounded-md border border-zinc-200 bg-white p-4">
       <h2 className="text-base font-semibold text-zinc-950" id="space-location-heading">
-        Localizacao
+        Localização
       </h2>
 
       {locationRows.length > 0 ? (
@@ -159,7 +159,7 @@ function LocationDetails({ space }: Readonly<{ space: BurialSpaceListItemDto }>)
           ))}
         </dl>
       ) : (
-        <p className="mt-2 text-sm text-zinc-600">Localizacao nao informada.</p>
+        <p className="mt-2 text-sm text-zinc-600">Localização não informada.</p>
       )}
     </section>
   )
@@ -169,8 +169,8 @@ function LinkHistoryTable({ links }: Readonly<{ links: readonly BurialLink[] }>)
   if (links.length === 0) {
     return (
       <EmptyState
-        title="Nenhum vinculo historico"
-        description="Este espaco ainda nao possui vinculos de sepultamento registrados."
+        title="Nenhum vínculo histórico"
+        description="Este espaço ainda não possui vínculos de sepultamento registrados."
       />
     )
   }
@@ -178,7 +178,7 @@ function LinkHistoryTable({ links }: Readonly<{ links: readonly BurialLink[] }>)
   return (
     <div className="overflow-x-auto rounded-md border border-zinc-200 bg-white">
       <table className="min-w-full divide-y divide-zinc-200 text-sm">
-        <caption className="sr-only">Historico de vinculos do espaco</caption>
+        <caption className="sr-only">Histórico de vínculos do espaço</caption>
         <thead className="bg-zinc-50 text-left text-xs font-semibold uppercase text-zinc-600">
           <tr>
             <th className="px-4 py-3" scope="col">
@@ -209,10 +209,10 @@ function LinkHistoryTable({ links }: Readonly<{ links: readonly BurialLink[] }>)
               <td className="px-4 py-3 text-zinc-700">{formatDate(link.burialDate)}</td>
               <td className="px-4 py-3 text-zinc-700">{formatDateTime(link.createdAt)}</td>
               <td className="px-4 py-3 text-zinc-700">
-                {link.status === "ENDED" ? formatDateTime(link.endedAt) : "Vinculo ativo"}
+                {link.status === "ENDED" ? formatDateTime(link.endedAt) : "Vínculo ativo"}
               </td>
               <td className="max-w-sm px-4 py-3 text-zinc-700">
-                {link.status === "ENDED" ? link.endReason : "Nao se aplica"}
+                {link.status === "ENDED" ? link.endReason : "Não se aplica"}
               </td>
             </tr>
           ))}
@@ -238,8 +238,8 @@ async function BurialSpaceDetail({ id }: Readonly<{ id: string }>) {
     ) {
       return (
         <ErrorMessage
-          message="Nao foi possivel carregar este espaco. Verifique o identificador ou tente novamente."
-          title="Detalhe indisponivel"
+          message="Não foi possível carregar este espaço. Verifique o identificador ou tente novamente."
+          title="Detalhe indisponível"
         />
       )
     }
@@ -247,7 +247,7 @@ async function BurialSpaceDetail({ id }: Readonly<{ id: string }>) {
     return (
       <ErrorMessage
         message="Tente novamente em instantes. Se o problema persistir, informe o suporte interno."
-        title="Erro ao carregar espaco"
+        title="Erro ao carregar espaço"
       />
     )
   }
@@ -260,10 +260,10 @@ async function BurialSpaceDetail({ id }: Readonly<{ id: string }>) {
       <section aria-labelledby="space-history-heading" className="space-y-4">
         <div>
           <h2 className="text-base font-semibold text-zinc-950" id="space-history-heading">
-            Historico de vinculos
+            Histórico de vínculos
           </h2>
           <p className="mt-1 text-sm leading-6 text-zinc-600">
-            Vinculos ativos e encerrados permanecem visiveis para preservar o historico do espaco.
+            Vínculos ativos e encerrados permanecem visíveis para preservar o histórico do espaço.
           </p>
         </div>
 
@@ -289,15 +289,15 @@ export default async function BurialSpaceDetailPage({ params }: BurialSpaceDetai
           className="inline-flex text-sm font-medium text-zinc-700 underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
           href="/burial-spaces"
         >
-          Voltar para sepulturas e jazigos
+          Voltar para sepulturas e jázigos
         </Link>
         <div>
-          <p className="text-sm font-medium text-zinc-500">Operacao cemiterial</p>
+          <p className="text-sm font-medium text-zinc-500">Operação cemiterial</p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">
-            Detalhe do espaco
+            Detalhe do espaço
           </h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-600">
-            Acompanhe status, capacidade, localizacao e historico administrativo de vinculos.
+            Acompanhe status, capacidade, localização e histórico administrativo de vínculos.
           </p>
         </div>
       </header>

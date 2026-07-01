@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { useId, useState, type FormEvent } from "react"
 
 import { ErrorMessage } from "@/components/ui/error-message"
@@ -29,24 +30,24 @@ type ResponsibleFormPayload = {
 
 const FORM_COPY = {
   create: {
-    title: "Novo responsavel",
+    title: "Novo responsável",
     description:
       "Cadastre uma pessoa de contato administrativo, sem criar acesso ao sistema.",
-    submitLabel: "Criar responsavel",
+    submitLabel: "Criar responsável",
     pendingLabel: "Criando...",
-    successMessage: "Responsavel criado com sucesso.",
+    successMessage: "Responsável criado com sucesso.",
     errorMessage:
-      "Nao foi possivel criar o responsavel. Revise os dados e tente novamente.",
+      "Não foi possível criar o responsável. Revise os dados e tente novamente.",
   },
   edit: {
-    title: "Editar responsavel",
+    title: "Editar responsável",
     description:
-      "Atualize dados administrativos necessarios para manutencao do cadastro.",
+      "Atualize dados administrativos necessários para manutenção do cadastro.",
     submitLabel: "Salvar alteracoes",
     pendingLabel: "Salvando...",
-    successMessage: "Responsavel atualizado com sucesso.",
+    successMessage: "Responsável atualizado com sucesso.",
     errorMessage:
-      "Nao foi possivel atualizar o responsavel. Revise os dados e tente novamente.",
+      "Não foi possível atualizar o responsável. Revise os dados e tente novamente.",
   },
 } as const satisfies Record<
   ResponsibleFormMode,
@@ -98,6 +99,7 @@ export function ResponsibleForm({
   onSuccess,
   className,
 }: ResponsibleFormProps) {
+  const router = useRouter()
   const copy = FORM_COPY[mode]
   const formId = useId()
   const errorId = useId()
@@ -119,7 +121,7 @@ export function ResponsibleForm({
 
     if (!endpoint) {
       setSuccessMessage(null)
-      setErrorMessage("Selecione um responsavel valido antes de editar.")
+      setErrorMessage("Selecione um responsável valido antes de editar.")
       return
     }
 
@@ -136,13 +138,13 @@ export function ResponsibleForm({
 
     if (fullName.length === 0) {
       setSuccessMessage(null)
-      setErrorMessage("Informe o nome completo do responsavel.")
+      setErrorMessage("Informe o nome completo do responsável.")
       return
     }
 
     if (mode === "create" && !hasContactOrIdentifier(payload)) {
       setSuccessMessage(null)
-      setErrorMessage("Informe ao menos um documento, telefone, e-mail ou endereco.")
+      setErrorMessage("Informe ao menos um documento, telefone, e-mail ou endereço.")
       return
     }
 
@@ -172,6 +174,7 @@ export function ResponsibleForm({
 
       setSuccessMessage(copy.successMessage)
       onSuccess?.(body.data)
+      router.refresh()
 
       if (mode === "create") {
         form.reset()
@@ -196,7 +199,7 @@ export function ResponsibleForm({
       </div>
 
       {errorMessage ? (
-        <ErrorMessage id={errorId} message={errorMessage} title="Acao nao concluida" />
+        <ErrorMessage id={errorId} message={errorMessage} title="Ação não concluída" />
       ) : null}
 
       {successMessage ? (
@@ -249,7 +252,7 @@ export function ResponsibleForm({
           />
           {mode === "edit" ? (
             <p className="mt-1 text-xs text-zinc-600">
-              Documento atual: {responsible?.documentMasked ?? "Nao informado"}
+              Documento atual: {responsible?.documentMasked ?? "Não informado"}
             </p>
           ) : null}
         </div>
@@ -295,7 +298,7 @@ export function ResponsibleForm({
             className="mb-2 block text-sm font-medium text-zinc-800"
             htmlFor={`${formId}-address`}
           >
-            Endereco
+            Endereço
           </label>
           <input
             autoComplete="street-address"

@@ -7,7 +7,7 @@ import { getHomePathForRole } from "@/lib/auth/routes"
 import { USER_ROLE, type UserRole } from "@/types/user"
 
 const GENERIC_LOGIN_ERROR =
-  "Nao foi possivel entrar. Verifique os dados informados e tente novamente."
+  "Não foi possível entrar. Verifique os dados informados e tente novamente."
 
 type LoginResponse = Readonly<{
   success: boolean
@@ -76,7 +76,7 @@ export function LoginForm() {
       <div>
         <label
           htmlFor="email"
-          className="mb-2 block text-sm font-medium text-slate-800 dark:text-slate-100"
+          className="mb-2 block text-sm font-medium text-slate-100"
         >
           E-mail
         </label>
@@ -90,14 +90,14 @@ export function LoginForm() {
           required
           disabled={pending}
           aria-describedby={errorMessage ? "login-error" : undefined}
-          className="block min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/30 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-emerald-400 dark:focus:ring-emerald-400/30 dark:disabled:bg-slate-800"
+          className="block min-h-11 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-base text-white outline-none transition placeholder:text-slate-400 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/30 disabled:cursor-not-allowed disabled:bg-slate-800"
         />
       </div>
 
       <div>
         <label
           htmlFor="password"
-          className="mb-2 block text-sm font-medium text-slate-800 dark:text-slate-100"
+          className="mb-2 block text-sm font-medium text-slate-100"
         >
           Senha
         </label>
@@ -110,7 +110,7 @@ export function LoginForm() {
           required
           disabled={pending}
           aria-describedby={errorMessage ? "login-error" : undefined}
-          className="block min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/30 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-emerald-400 dark:focus:ring-emerald-400/30 dark:disabled:bg-slate-800"
+          className="block min-h-11 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-base text-white outline-none transition placeholder:text-slate-400 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/30 disabled:cursor-not-allowed disabled:bg-slate-800"
         />
       </div>
 
@@ -121,7 +121,7 @@ export function LoginForm() {
         aria-atomic="true"
         className={
           errorMessage
-            ? "rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200"
+            ? "rounded-lg border border-red-900 bg-red-950 px-3 py-2 text-sm text-red-200"
             : "sr-only"
         }
       >
@@ -131,7 +131,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={pending}
-        className="flex min-h-11 w-full items-center justify-center rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-400 dark:bg-emerald-600 dark:hover:bg-emerald-500 dark:focus-visible:outline-emerald-400"
+        className="flex min-h-11 w-full items-center justify-center rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-700"
       >
         {pending ? "Entrando..." : "Entrar"}
       </button>

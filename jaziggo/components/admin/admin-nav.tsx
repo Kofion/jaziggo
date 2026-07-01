@@ -16,52 +16,52 @@ type AdminNavItem = Readonly<{
 
 const ADMIN_NAV_ITEMS: readonly AdminNavItem[] = [
   {
-    href: "/admin",
-    label: "Administracao",
-    description: "Resumo",
-    permissions: [PERMISSION.VIEW_REPORTS],
-  },
-  {
     href: "/dashboard",
-    label: "Principal",
-    description: "Operacao",
+    label: "Operação",
+    description: "Cadastros",
     permissions: [PERMISSION.MANAGE_OPERATIONAL_RECORDS],
   },
   {
     href: "/location-search",
     label: "Busca",
-    description: "Localizacao",
+    description: "Localização",
     permissions: [PERMISSION.SEARCH_RECORDS, PERMISSION.VIEW_LOCATIONS],
   },
   {
     href: "/deceased",
     label: "Falecidos",
-    description: "Cadastro",
+    description: "CRUD",
     permissions: [PERMISSION.MANAGE_OPERATIONAL_RECORDS],
   },
   {
     href: "/responsibles",
-    label: "Responsaveis",
-    description: "Cadastro",
+    label: "Responsáveis",
+    description: "CRUD",
     permissions: [PERMISSION.MANAGE_OPERATIONAL_RECORDS],
   },
   {
     href: "/burial-spaces",
-    label: "Sepulturas e jazigos",
-    description: "Cadastro",
+    label: "Sepulturas e jázigos",
+    description: "CRUD",
     permissions: [PERMISSION.MANAGE_OPERATIONAL_RECORDS],
   },
   {
-    href: "/users",
-    label: "Usuarios",
-    description: "Contas",
-    permissions: [PERMISSION.MANAGE_USERS],
+    href: "/reports",
+    label: "Relatórios",
+    description: "Gestão",
+    permissions: [PERMISSION.VIEW_REPORTS],
   },
   {
-    href: "/reports",
-    label: "Relatorios",
-    description: "Gestao",
+    href: "/admin",
+    label: "Gerenciamento",
+    description: "Admin",
     permissions: [PERMISSION.VIEW_REPORTS],
+  },
+  {
+    href: "/users",
+    label: "Usuários",
+    description: "CRUD",
+    permissions: [PERMISSION.MANAGE_USERS],
   },
 ]
 
@@ -98,7 +98,7 @@ export function AdminNav({ role, userName, className }: AdminNavProps) {
   const router = useRouter()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const items = getAdminNavItems(role)
-  const roleLabel = role === USER_ROLE.ADMIN ? "Admin" : "Funcionario"
+  const roleLabel = role === USER_ROLE.ADMIN ? "Admin" : "Funcionário"
 
   async function handleLogout() {
     if (isLoggingOut) return
@@ -119,7 +119,7 @@ export function AdminNav({ role, userName, className }: AdminNavProps) {
   return (
     <header
       className={cx(
-        "sticky top-0 z-30 border-b border-zinc-200 bg-white/95 shadow-sm backdrop-blur",
+        "sticky top-0 z-30 border-b border-slate-800 bg-slate-900/95 shadow-sm backdrop-blur",
         className,
       )}
     >
@@ -129,17 +129,17 @@ export function AdminNav({ role, userName, className }: AdminNavProps) {
             className="min-w-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
             href={role === USER_ROLE.ADMIN ? "/admin" : "/dashboard"}
           >
-            <span className="block text-lg font-semibold leading-6 text-zinc-950">
+            <span className="block text-lg font-semibold leading-6 text-emerald-400">
               Jaziggo
             </span>
-            <span className="block truncate text-xs leading-5 text-zinc-500">
+            <span className="block truncate text-xs leading-5 text-slate-400">
               {roleLabel} - {userName}
             </span>
           </Link>
 
           <button
             aria-label={isLoggingOut ? "Saindo do sistema" : "Sair do sistema"}
-            className="inline-flex min-h-10 items-center justify-center rounded-md border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm font-medium text-slate-100 transition hover:border-emerald-500 hover:bg-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
             disabled={isLoggingOut}
             onClick={handleLogout}
             type="button"
@@ -148,7 +148,7 @@ export function AdminNav({ role, userName, className }: AdminNavProps) {
           </button>
         </div>
 
-        <nav aria-label="Navegacao principal">
+        <nav aria-label="Navegação principal">
           <ul className="flex gap-2 overflow-x-auto pb-1">
             {items.map((item) => {
               const active = isCurrentPath(item.href, pathname)
@@ -158,10 +158,10 @@ export function AdminNav({ role, userName, className }: AdminNavProps) {
                   <Link
                     aria-current={active ? "page" : undefined}
                     className={cx(
-                      "block min-w-32 rounded-md border px-3 py-2 text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950",
+                      "admin-nav-link group block min-w-32 rounded-lg border px-3 py-2 text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400",
                       active
-                        ? "border-zinc-950 bg-zinc-950 text-white"
-                        : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-100 hover:text-zinc-950",
+                        ? "admin-nav-link-active !border-emerald-500 !bg-emerald-600 !text-white"
+                        : "border-slate-700 bg-slate-950 text-slate-200 hover:!border-emerald-500 hover:!bg-emerald-600 hover:!text-white",
                     )}
                     href={item.href}
                   >
@@ -171,7 +171,7 @@ export function AdminNav({ role, userName, className }: AdminNavProps) {
                     <span
                       className={cx(
                         "block whitespace-nowrap text-xs leading-4",
-                        active ? "text-zinc-200" : "text-zinc-500",
+                        active ? "!text-emerald-100" : "text-slate-400 group-hover:!text-emerald-100",
                       )}
                     >
                       {item.description}

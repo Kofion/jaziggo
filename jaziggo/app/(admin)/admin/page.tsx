@@ -7,7 +7,7 @@ import { prisma } from "@/lib/db/prisma"
 import { USER_ROLE } from "@/types/user"
 
 export const metadata: Metadata = {
-  title: "Administracao | Jaziggo",
+  title: "Administração | Jaziggo",
 }
 
 type StatCardProps = Readonly<{
@@ -95,12 +95,12 @@ export default async function AdminHomePage() {
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <p className="text-sm font-medium text-zinc-500">Administracao</p>
+        <p className="text-sm font-medium text-zinc-500">Administração</p>
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-950">
           Painel administrativo
         </h1>
         <p className="max-w-3xl text-sm leading-6 text-zinc-600">
-          Acompanhe o volume cadastrado no sistema e acesse as rotinas de gestao interna.
+          Acompanhe o volume cadastrado no sistema e acesse as rotinas de gestão interna.
         </p>
       </header>
 
@@ -108,7 +108,7 @@ export default async function AdminHomePage() {
         <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="text-base font-semibold text-zinc-950" id="admin-summary-heading">
-              Informacoes cadastradas
+              Informações cadastradas
             </h2>
             <p className="text-sm text-zinc-600">
               Totais gerais para acompanhamento administrativo.
@@ -119,7 +119,7 @@ export default async function AdminHomePage() {
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard
             helper={`${summary.activeUsers.toLocaleString("pt-BR")} contas ativas`}
-            label="Usuarios internos"
+            label="Usuários internos"
             value={summary.totalUsers}
           />
           <StatCard
@@ -128,13 +128,13 @@ export default async function AdminHomePage() {
             value={summary.totalDeceased}
           />
           <StatCard
-            helper={`${summary.availableSpaces.toLocaleString("pt-BR")} disponiveis, ${summary.occupiedSpaces.toLocaleString("pt-BR")} ocupados`}
-            label="Sepulturas e jazigos"
+            helper={`${summary.availableSpaces.toLocaleString("pt-BR")} disponíveis, ${summary.occupiedSpaces.toLocaleString("pt-BR")} ocupados`}
+            label="Sepulturas e jázigos"
             value={summary.totalSpaces}
           />
           <StatCard
-            helper={`${summary.activeBurialLinks.toLocaleString("pt-BR")} vinculos ativos de sepultamento`}
-            label="Responsaveis"
+            helper={`${summary.activeBurialLinks.toLocaleString("pt-BR")} vínculos ativos de sepultamento`}
+            label="Responsáveis"
             value={summary.totalResponsibles}
           />
         </div>
@@ -143,43 +143,43 @@ export default async function AdminHomePage() {
       <section aria-labelledby="admin-actions-heading" className="space-y-4">
         <div>
           <h2 className="text-base font-semibold text-zinc-950" id="admin-actions-heading">
-            Atalhos de gestao
+            Atalhos do administrador
           </h2>
           <p className="text-sm text-zinc-600">
-            Acesse cadastros, usuarios e relatorios com a mesma margem e organizacao das demais telas.
+            O administrador acessa todas as rotinas operacionais do funcionário e também gerencia usuários, relatórios e a vis?o administrativa.
           </p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <ActionCard
-            description="Gerencie contas internas de administradores e funcionarios."
+            description="Gerencie contas internas de administradores e funcionários."
             href="/users"
-            title="Usuarios"
+            title="Cadastrar e gerenciar usuários"
           />
           <ActionCard
-            description="Consulte visoes administrativas sobre cadastros, ocupacao e sepultamentos."
+            description="Consulte visões administrativas sobre cadastros, ocupação e sepultamentos."
             href="/reports"
-            title="Relatorios"
+            title="Relatórios"
           />
           <ActionCard
-            description="Abra a busca de localizacao para apoiar atendimentos internos."
+            description="Abra a busca de localização para apoiar atendimentos internos."
             href="/location-search"
-            title="Busca e localizacao"
+            title="Busca e localização"
           />
           <ActionCard
-            description="Acompanhe registros de falecidos e dados historicos cadastrados."
+            description="Cadastre, consulte e atualize registros de falecidos e dados históricos."
             href="/deceased"
-            title="Falecidos"
+            title="Cadastrar falecidos"
           />
           <ActionCard
-            description="Consulte sepulturas, jazigos, capacidade e status de ocupacao."
+            description="Cadastre, consulte e atualize sepulturas, jázigos, capacidade e status de ocupação."
             href="/burial-spaces"
-            title="Sepulturas e jazigos"
+            title="Cadastrar sepulturas e jázigos"
           />
           <ActionCard
-            description="Consulte responsaveis administrativos e seus vinculos."
+            description="Cadastre, consulte e atualize responsáveis administrativos e seus vínculos."
             href="/responsibles"
-            title="Responsaveis"
+            title="Cadastrar responsáveis"
           />
         </div>
       </section>

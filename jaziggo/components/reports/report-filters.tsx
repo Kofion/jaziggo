@@ -26,9 +26,9 @@ export type ReportFilterValues = Readonly<{
 
 const REPORT_TYPE_OPTIONS = [
   { label: "Falecidos cadastrados", value: REPORT_TYPE.DECEASED },
-  { label: "Sepultamentos por periodo", value: REPORT_TYPE.BURIALS_BY_PERIOD },
-  { label: "Ocupacao de espacos", value: REPORT_TYPE.SPACE_OCCUPATION },
-  { label: "Espacos por status", value: REPORT_TYPE.SPACE_STATUS },
+  { label: "Sepultamentos por período", value: REPORT_TYPE.BURIALS_BY_PERIOD },
+  { label: "Ocupação de espaços", value: REPORT_TYPE.SPACE_OCCUPATION },
+  { label: "Espaços por status", value: REPORT_TYPE.SPACE_STATUS },
 ] as const
 
 const SPACE_TYPE_OPTIONS = [
@@ -39,7 +39,7 @@ const SPACE_TYPE_OPTIONS = [
 
 const SPACE_STATUS_OPTIONS = [
   { label: "Todos os status", value: "" },
-  { label: "Disponiveis", value: BURIAL_SPACE_STATUS.AVAILABLE },
+  { label: "Disponíveis", value: BURIAL_SPACE_STATUS.AVAILABLE },
   { label: "Ocupados", value: BURIAL_SPACE_STATUS.OCCUPIED },
   { label: "Reservados", value: BURIAL_SPACE_STATUS.RESERVED },
   { label: "Inativos", value: BURIAL_SPACE_STATUS.INACTIVE },
@@ -52,7 +52,7 @@ type ReportFiltersProps = Readonly<{
 export function reportTypeLabel(reportType: ReportType) {
   return (
     REPORT_TYPE_OPTIONS.find((option) => option.value === reportType)?.label ??
-    "Relatorio"
+    "Relatório"
   )
 }
 
@@ -74,7 +74,7 @@ export function ReportFilters({ values }: ReportFiltersProps) {
 
       <div>
         <label className="mb-2 block text-sm font-medium text-zinc-800" htmlFor="reportType">
-          Tipo de relatorio
+          Tipo de relatório
         </label>
         <select
           className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
@@ -149,7 +149,7 @@ export function ReportFilters({ values }: ReportFiltersProps) {
               className="mb-2 block text-sm font-medium text-zinc-800"
               htmlFor="type"
             >
-              Espaco
+              Espaço
             </label>
             <select
               className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
@@ -170,7 +170,7 @@ export function ReportFilters({ values }: ReportFiltersProps) {
               className="mb-2 block text-sm font-medium text-zinc-800"
               htmlFor="status"
             >
-              Status do espaco
+              Status do espaço
             </label>
             <select
               className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
@@ -190,7 +190,7 @@ export function ReportFilters({ values }: ReportFiltersProps) {
 
       <div className="flex items-end lg:col-start-4">
         <button
-          aria-label="Aplicar filtros de relatorio"
+          aria-label="Aplicar filtros de relatório"
           className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-zinc-950 px-4 text-sm font-semibold text-white hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
           type="submit"
         >

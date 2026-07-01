@@ -15,14 +15,14 @@ const DATE_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
 
 function formatDate(value: string | undefined) {
   if (!value) {
-    return "Nao informada"
+    return "Não informada"
   }
 
   return DATE_FORMATTER.format(new Date(`${value}T00:00:00.000Z`))
 }
 
 function historyLabel(historicalDataIncomplete: boolean) {
-  return historicalDataIncomplete ? "Historico incompleto" : "Registro completo"
+  return historicalDataIncomplete ? "Histórico incompleto" : "Registro completo"
 }
 
 function historyClassName(historicalDataIncomplete: boolean) {
@@ -64,7 +64,7 @@ export function DuplicateReview({
           <thead className="bg-amber-100/70 text-left text-xs font-semibold uppercase text-amber-950">
             <tr>
               <th className="px-4 py-3" scope="col">
-                Codigo
+                Código
               </th>
               <th className="px-4 py-3" scope="col">
                 Nome
@@ -82,7 +82,7 @@ export function DuplicateReview({
                 Sepultamento
               </th>
               <th className="px-4 py-3" scope="col">
-                Historico
+                Histórico
               </th>
             </tr>
           </thead>
@@ -96,7 +96,7 @@ export function DuplicateReview({
                   {candidate.fullName}
                 </th>
                 <td className="px-4 py-3 font-mono text-xs text-zinc-700">
-                  {candidate.documentMasked ?? "Nao informado"}
+                  {candidate.documentMasked ?? "Não informado"}
                 </td>
                 <td className="px-4 py-3 text-zinc-700">
                   {formatDate(candidate.birthDate)}

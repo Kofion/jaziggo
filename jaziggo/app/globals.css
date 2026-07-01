@@ -24,3 +24,228 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+
+.jaziggo-admin-theme {
+  color-scheme: dark;
+}
+
+.jaziggo-admin-theme .bg-white,
+.jaziggo-admin-theme .bg-zinc-50 {
+  background-color: rgb(15 23 42);
+}
+
+.jaziggo-admin-theme .bg-white\/95 {
+  background-color: rgb(15 23 42 / 0.95);
+}
+
+.jaziggo-admin-theme .bg-zinc-100,
+.jaziggo-admin-theme table thead,
+.jaziggo-admin-theme .bg-zinc-100\/70 {
+  background-color: rgb(30 41 59);
+}
+
+.jaziggo-admin-theme .bg-zinc-950 {
+  background-color: rgb(5 150 105);
+}
+
+.jaziggo-admin-theme .hover\:bg-zinc-100:hover,
+.jaziggo-admin-theme .hover\:bg-zinc-800:hover {
+  background-color: rgb(16 185 129);
+}
+
+.jaziggo-admin-theme .hover\:bg-zinc-100:hover {
+  color: white;
+}
+
+.jaziggo-admin-theme .border-zinc-200,
+.jaziggo-admin-theme .border-zinc-300,
+.jaziggo-admin-theme .border-zinc-950 {
+  border-color: rgb(51 65 85);
+}
+
+.jaziggo-admin-theme .hover\:border-zinc-300:hover {
+  border-color: rgb(16 185 129);
+}
+
+.jaziggo-admin-theme .text-zinc-950,
+.jaziggo-admin-theme .text-zinc-900,
+.jaziggo-admin-theme .text-zinc-800,
+.jaziggo-admin-theme .text-zinc-700 {
+  color: rgb(248 250 252);
+}
+
+.jaziggo-admin-theme .text-zinc-600,
+.jaziggo-admin-theme .text-zinc-500,
+.jaziggo-admin-theme .text-zinc-400 {
+  color: rgb(203 213 225);
+}
+
+.jaziggo-admin-theme .text-zinc-200 {
+  color: rgb(209 250 229);
+}
+
+.jaziggo-admin-theme input,
+.jaziggo-admin-theme select,
+.jaziggo-admin-theme textarea {
+  border-color: rgb(51 65 85);
+  background-color: rgb(2 6 23);
+  color: white;
+}
+
+.jaziggo-admin-theme input::placeholder,
+.jaziggo-admin-theme textarea::placeholder {
+  color: rgb(148 163 184);
+}
+
+.jaziggo-admin-theme input:focus,
+.jaziggo-admin-theme select:focus,
+.jaziggo-admin-theme textarea:focus {
+  border-color: rgb(52 211 153);
+  --tw-ring-color: rgb(52 211 153 / 0.3);
+}
+
+.jaziggo-admin-theme .disabled\:bg-zinc-400:disabled,
+.jaziggo-admin-theme .disabled\:bg-slate-400:disabled,
+.jaziggo-admin-theme .disabled\:bg-zinc-100:disabled,
+.jaziggo-admin-theme .read-only\:bg-zinc-100:read-only {
+  background-color: rgb(51 65 85);
+}
+
+.jaziggo-admin-theme .shadow-sm {
+  box-shadow: 0 18px 45px rgb(0 0 0 / 0.18);
+}
+
+.jaziggo-admin-theme .divide-zinc-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgb(51 65 85);
+}
+
+.jaziggo-admin-theme .focus-visible\:outline-zinc-950:focus-visible {
+  outline-color: rgb(52 211 153);
+}
+
+.jaziggo-admin-theme .bg-emerald-50 {
+  background-color: rgb(6 78 59);
+}
+
+.jaziggo-admin-theme .border-emerald-200 {
+  border-color: rgb(5 150 105);
+}
+
+.jaziggo-admin-theme .text-emerald-900,
+.jaziggo-admin-theme .text-emerald-800,
+.jaziggo-admin-theme .text-emerald-700 {
+  color: rgb(209 250 229);
+}
+
+.jaziggo-admin-theme .bg-red-50 {
+  background-color: rgb(69 10 10);
+}
+
+.jaziggo-admin-theme .border-red-200 {
+  border-color: rgb(127 29 29);
+}
+
+.jaziggo-admin-theme .text-red-900,
+.jaziggo-admin-theme .text-red-800,
+.jaziggo-admin-theme .text-red-700 {
+  color: rgb(254 202 202);
+}
+
+.jaziggo-admin-theme .bg-amber-50 {
+  background-color: rgb(69 26 3);
+}
+
+.jaziggo-admin-theme .border-amber-200 {
+  border-color: rgb(146 64 14);
+}
+
+.jaziggo-admin-theme .text-amber-900,
+.jaziggo-admin-theme .text-amber-800,
+.jaziggo-admin-theme .text-amber-700 {
+  color: rgb(254 243 199);
+}
+
+
+.jaziggo-admin-theme main {
+  background: rgb(2 6 23);
+}
+
+.jaziggo-admin-theme article,
+.jaziggo-admin-theme form,
+.jaziggo-admin-theme section > .rounded-md,
+.jaziggo-admin-theme .rounded-md.border,
+.jaziggo-admin-theme .rounded-lg.border {
+  border-color: rgb(30 41 59);
+  background-color: rgb(15 23 42);
+}
+
+.jaziggo-admin-theme button.bg-zinc-950,
+.jaziggo-admin-theme a.bg-zinc-950 {
+  background-color: rgb(5 150 105);
+  color: white;
+}
+
+.jaziggo-admin-theme button.bg-zinc-950:hover,
+.jaziggo-admin-theme a.bg-zinc-950:hover {
+  background-color: rgb(16 185 129);
+}
+
+.jaziggo-admin-theme button.border-zinc-950,
+.jaziggo-admin-theme a.border-zinc-950 {
+  border-color: rgb(5 150 105);
+  color: rgb(209 250 229);
+}
+
+.jaziggo-admin-theme button.border-zinc-950:hover,
+.jaziggo-admin-theme a.border-zinc-950:hover {
+  background-color: rgb(6 78 59);
+}
+
+.jaziggo-admin-theme .rounded-md {
+  border-radius: 0.5rem;
+}
+
+
+.jaziggo-admin-theme .hover\:bg-zinc-50:hover,
+.jaziggo-admin-theme tr.hover\:bg-zinc-50:hover,
+.jaziggo-admin-theme .hover\:bg-white:hover {
+  background-color: rgb(30 41 59);
+  color: rgb(248 250 252);
+}
+
+.jaziggo-admin-theme tr.hover\:bg-zinc-50:hover td,
+.jaziggo-admin-theme tr.hover\:bg-zinc-50:hover th,
+.jaziggo-admin-theme .hover\:bg-zinc-50:hover .text-zinc-950,
+.jaziggo-admin-theme .hover\:bg-zinc-50:hover .text-zinc-700,
+.jaziggo-admin-theme .hover\:bg-zinc-50:hover .text-zinc-600,
+.jaziggo-admin-theme .hover\:bg-zinc-50:hover .text-zinc-500 {
+  color: rgb(248 250 252);
+}
+
+.jaziggo-admin-theme tr.bg-zinc-50,
+.jaziggo-admin-theme .bg-zinc-50 {
+  background-color: rgb(15 23 42);
+}
+
+
+.jaziggo-admin-theme .admin-nav-link:hover,
+.jaziggo-admin-theme .admin-nav-link:focus-visible {
+  border-color: rgb(16 185 129);
+  background-color: rgb(5 150 105);
+  color: white;
+}
+
+.jaziggo-admin-theme .admin-nav-link-active,
+.jaziggo-admin-theme .admin-nav-link-active:hover,
+.jaziggo-admin-theme .admin-nav-link-active:focus-visible {
+  border-color: rgb(16 185 129);
+  background-color: rgb(5 150 105);
+  color: white;
+}
+
+.jaziggo-admin-theme .admin-nav-link:hover .text-slate-400,
+.jaziggo-admin-theme .admin-nav-link-active .text-emerald-100,
+.jaziggo-admin-theme .admin-nav-link-active .text-slate-400 {
+  color: rgb(209 250 229);
+}

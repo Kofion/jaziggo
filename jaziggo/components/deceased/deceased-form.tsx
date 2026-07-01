@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { useId, useState, type FormEvent } from "react"
 
 import { DuplicateReview } from "@/components/deceased/duplicate-review"
@@ -38,22 +39,22 @@ const FORM_COPY = {
   create: {
     title: "Novo falecido",
     description:
-      "Cadastre o falecido com nome, datas disponiveis e indicacao explicita quando as datas forem desconhecidas.",
+      "Cadastre o falecido com nome, datas disponíveis e indicação explicita quando as datas forem desconhecidas.",
     submitLabel: "Criar falecido",
     pendingLabel: "Criando...",
     successMessage: "Falecido criado com sucesso.",
     errorMessage:
-      "Nao foi possivel criar o falecido. Revise os dados e tente novamente.",
+      "Não foi possível criar o falecido. Revise os dados e tente novamente.",
   },
   edit: {
     title: "Editar falecido",
     description:
-      "Atualize os dados administrativos do falecido preservando a indicacao historica quando aplicavel.",
+      "Atualize os dados administrativos do falecido preservando a indicação histórica quando aplicável.",
     submitLabel: "Salvar alteracoes",
     pendingLabel: "Salvando...",
     successMessage: "Falecido atualizado com sucesso.",
     errorMessage:
-      "Nao foi possivel atualizar o falecido. Revise os dados e tente novamente.",
+      "Não foi possível atualizar o falecido. Revise os dados e tente novamente.",
   },
 } as const satisfies Record<
   DeceasedFormMode,
@@ -136,15 +137,15 @@ function validatePayload(payload: DeceasedFormPayload) {
   }
 
   if (payload.birthDate && payload.deathDate && payload.birthDate > payload.deathDate) {
-    return "A data de nascimento nao pode ser posterior ao falecimento."
+    return "A data de nascimento não pode ser posterior ao falecimento."
   }
 
   if (payload.birthDate && payload.burialDate && payload.birthDate > payload.burialDate) {
-    return "A data de nascimento nao pode ser posterior ao sepultamento."
+    return "A data de nascimento não pode ser posterior ao sepultamento."
   }
 
   if (payload.deathDate && payload.burialDate && payload.burialDate < payload.deathDate) {
-    return "A data de sepultamento nao pode ser anterior ao falecimento."
+    return "A data de sepultamento não pode ser anterior ao falecimento."
   }
 
   return null
@@ -160,6 +161,7 @@ export function DeceasedForm({
   onSuccess,
   className,
 }: DeceasedFormProps) {
+  const router = useRouter()
   const copy = FORM_COPY[mode]
   const formId = useId()
   const errorId = useId()
@@ -222,6 +224,7 @@ export function DeceasedForm({
       setSuccessMessage(copy.successMessage)
       resetDuplicateReview()
       onSuccess?.(body.data)
+      router.refresh()
 
       if (mode === "create" && form) {
         resetCreateState(form)
@@ -283,7 +286,7 @@ export function DeceasedForm({
 
       await submitPayload(payload as CreateDeceasedInput, form)
     } catch {
-      setErrorMessage("Nao foi possivel revisar duplicidades. Tente novamente.")
+      setErrorMessage("Não foi possível revisar duplicidades. Tente novamente.")
     } finally {
       setPending(false)
     }
@@ -302,7 +305,7 @@ export function DeceasedForm({
       </div>
 
       {errorMessage ? (
-        <ErrorMessage id={errorId} message={errorMessage} title="Acao nao concluida" />
+        <ErrorMessage id={errorId} message={errorMessage} title="Ação não concluída" />
       ) : null}
 
       {successMessage ? (
@@ -355,7 +358,7 @@ export function DeceasedForm({
           />
           {mode === "edit" ? (
             <p className="mt-1 text-xs text-zinc-600">
-              Documento atual: {deceased?.documentMasked ?? "Nao informado"}
+              Documento atual: {deceased?.documentMasked ?? "Não informado"}
             </p>
           ) : null}
         </div>
@@ -422,7 +425,7 @@ export function DeceasedForm({
           type="checkbox"
         />
         <span>
-          Datas de falecimento e sepultamento desconhecidas para registro historico.
+          Datas de falecimento e sepultamento desconhecidas para registro histórico.
         </span>
       </label>
 
@@ -431,7 +434,7 @@ export function DeceasedForm({
           className="mb-2 block text-sm font-medium text-zinc-800"
           htmlFor={`${formId}-notes`}
         >
-          Observacoes
+          Observações
         </label>
         <textarea
           className="min-h-28 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"

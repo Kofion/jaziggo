@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { Suspense } from "react"
 
+import { ResponsibleForm } from "@/components/responsibles/responsible-form"
 import { ResponsibleTable } from "@/components/responsibles/responsible-table"
 import { EmptyState } from "@/components/ui/empty-state"
 import { ErrorMessage } from "@/components/ui/error-message"
@@ -20,7 +21,7 @@ import type { PaginatedData } from "@/types/api"
 import type { ResponsibleListItemDto } from "@/types/responsible"
 
 export const metadata: Metadata = {
-  title: "Responsaveis | Jaziggo",
+  title: "Responsáveis | Jaziggo",
 }
 
 type ResponsiblesPageProps = Readonly<{
@@ -51,8 +52,8 @@ function normalizeSearchParams(params: Record<string, string | string[] | undefi
 
 function displayCount(totalRecords: number) {
   return totalRecords === 1
-    ? "1 responsavel encontrado"
-    : `${totalRecords} responsaveis encontrados`
+    ? "1 responsável encontrado"
+    : `${totalRecords} responsáveis encontrados`
 }
 
 async function ResponsiblesList({
@@ -68,8 +69,8 @@ async function ResponsiblesList({
     if (error instanceof ResponsibleServiceError) {
       return (
         <ErrorMessage
-          message="Nao foi possivel carregar a lista de responsaveis com os filtros informados."
-          title="Lista de responsaveis indisponivel"
+          message="Não foi possível carregar a lista de responsáveis com os filtros informados."
+          title="Lista de responsáveis indisponível"
         />
       )
     }
@@ -77,7 +78,7 @@ async function ResponsiblesList({
     return (
       <ErrorMessage
         message="Tente novamente em instantes. Se o problema persistir, informe o suporte interno."
-        title="Erro ao carregar responsaveis"
+        title="Erro ao carregar responsáveis"
       />
     )
   }
@@ -85,7 +86,7 @@ async function ResponsiblesList({
   if (result.items.length === 0) {
     return (
       <EmptyState
-        title="Nenhum responsavel encontrado"
+        title="Nenhum responsável encontrado"
         description="Ajuste o filtro de nome para verificar outros cadastros administrativos."
       />
     )
@@ -96,7 +97,7 @@ async function ResponsiblesList({
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-base font-semibold text-zinc-950" id="responsibles-list-heading">
-            Cadastros de responsaveis
+            Cadastros de responsáveis
           </h2>
           <p className="text-sm text-zinc-600">
             {displayCount(result.pagination.totalRecords)}
@@ -107,7 +108,7 @@ async function ResponsiblesList({
       <ResponsibleTable responsibles={result.items} />
 
       <Pagination
-        ariaLabel="Paginacao de responsaveis"
+        ariaLabel="Paginação de responsáveis"
         basePath="/responsibles"
         page={result.pagination.page}
         pageSize={result.pagination.pageSize}
@@ -134,15 +135,19 @@ export default async function ResponsiblesPage({
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <p className="text-sm font-medium text-zinc-500">Operacao cemiterial</p>
+        <p className="text-sm font-medium text-zinc-500">Operação cemiterial</p>
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-950">
-          Responsaveis
+          Responsáveis
         </h1>
         <p className="max-w-3xl text-sm leading-6 text-zinc-600">
-          Consulte responsaveis administrativos por nome. A listagem mantem
+          Consulte responsáveis administrativos por nome. A listagem mantem
           contatos fora da tela e exibe documentos somente mascarados.
         </p>
       </header>
+
+      <section className="space-y-4">
+        <ResponsibleForm mode="create" />
+      </section>
 
       <form
         action="/responsibles"
@@ -182,8 +187,8 @@ export default async function ResponsiblesPage({
         <Suspense
           fallback={
             <LoadingState
-              description="A lista de responsaveis esta sendo consultada."
-              label="Carregando responsaveis"
+              description="A lista de responsáveis esta sendo consultada."
+              label="Carregando responsáveis"
               rows={4}
             />
           }
@@ -192,8 +197,8 @@ export default async function ResponsiblesPage({
         </Suspense>
       ) : (
         <ErrorMessage
-          message="Revise o filtro e a paginacao antes de tentar novamente."
-          title="Filtros invalidos"
+          message="Revise o filtro e a paginação antes de tentar novamente."
+          title="Filtros inválidos"
         />
       )}
     </div>

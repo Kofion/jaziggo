@@ -10,7 +10,7 @@ export function ResponsibleTable({ responsibles }: ResponsibleTableProps) {
   return (
     <div className="overflow-x-auto rounded-md border border-zinc-200 bg-white">
       <table className="min-w-full divide-y divide-zinc-200 text-sm">
-        <caption className="sr-only">Responsaveis cadastrados</caption>
+        <caption className="sr-only">Responsáveis cadastrados</caption>
         <thead className="bg-zinc-50 text-left text-xs font-semibold uppercase text-zinc-600">
           <tr>
             <th className="px-4 py-3" scope="col">
@@ -33,7 +33,7 @@ export function ResponsibleTable({ responsibles }: ResponsibleTableProps) {
                 </Link>
               </th>
               <td className="px-4 py-3 font-mono text-xs text-zinc-700">
-                {responsible.documentMasked ?? "Nao informado"}
+                {responsible.documentMasked ?? "Não informado"}
               </td>
             </tr>
           ))}

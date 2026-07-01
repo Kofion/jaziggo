@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { Suspense } from "react"
 import { z } from "zod"
 
+import { BurialSpaceForm } from "@/components/burial-spaces/burial-space-form"
 import { BurialSpaceTable } from "@/components/burial-spaces/burial-space-table"
 import { EmptyState } from "@/components/ui/empty-state"
 import { ErrorMessage } from "@/components/ui/error-message"
@@ -22,7 +23,7 @@ import {
 } from "@/types/burial-space"
 
 export const metadata: Metadata = {
-  title: "Sepulturas e jazigos | Jaziggo",
+  title: "Sepulturas e jázigos | Jaziggo",
 }
 
 type BurialSpacesPageProps = Readonly<{
@@ -67,7 +68,7 @@ const TYPE_FILTER_OPTIONS = [
 
 const STATUS_FILTER_OPTIONS = [
   { label: "Todos os status", value: "" },
-  { label: "Disponiveis", value: BURIAL_SPACE_STATUS.AVAILABLE },
+  { label: "Disponíveis", value: BURIAL_SPACE_STATUS.AVAILABLE },
   { label: "Ocupados", value: BURIAL_SPACE_STATUS.OCCUPIED },
   { label: "Reservados", value: BURIAL_SPACE_STATUS.RESERVED },
   { label: "Inativos", value: BURIAL_SPACE_STATUS.INACTIVE },
@@ -97,8 +98,8 @@ function normalizeSearchParams(params: Record<string, string | string[] | undefi
 
 function displayCount(totalRecords: number) {
   return totalRecords === 1
-    ? "1 espaco encontrado"
-    : `${totalRecords} espacos encontrados`
+    ? "1 espaço encontrado"
+    : `${totalRecords} espaços encontrados`
 }
 
 async function BurialSpacesList({
@@ -114,8 +115,8 @@ async function BurialSpacesList({
     if (error instanceof BurialSpaceServiceError) {
       return (
         <ErrorMessage
-          message="Nao foi possivel carregar a lista de sepulturas e jazigos com os filtros informados."
-          title="Lista de espacos indisponivel"
+          message="Não foi possível carregar a lista de sepulturas e jázigos com os filtros informados."
+          title="Lista de espaços indisponível"
         />
       )
     }
@@ -123,7 +124,7 @@ async function BurialSpacesList({
     return (
       <ErrorMessage
         message="Tente novamente em instantes. Se o problema persistir, informe o suporte interno."
-        title="Erro ao carregar espacos"
+        title="Erro ao carregar espaços"
       />
     )
   }
@@ -131,7 +132,7 @@ async function BurialSpacesList({
   if (result.items.length === 0) {
     return (
       <EmptyState
-        title="Nenhum espaco encontrado"
+        title="Nenhum espaço encontrado"
         description="Ajuste os filtros para verificar outros tipos, status ou setores cadastrados."
       />
     )
@@ -142,7 +143,7 @@ async function BurialSpacesList({
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-base font-semibold text-zinc-950" id="burial-spaces-list-heading">
-            Espacos cemiteriais
+            Espaços cemiteriais
           </h2>
           <p className="text-sm text-zinc-600">
             {displayCount(result.pagination.totalRecords)}
@@ -153,7 +154,7 @@ async function BurialSpacesList({
       <BurialSpaceTable spaces={result.items} />
 
       <Pagination
-        ariaLabel="Paginacao de sepulturas e jazigos"
+        ariaLabel="Paginação de sepulturas e jázigos"
         basePath="/burial-spaces"
         page={result.pagination.page}
         pageSize={result.pagination.pageSize}
@@ -177,14 +178,18 @@ export default async function BurialSpacesPage({ searchParams }: BurialSpacesPag
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <p className="text-sm font-medium text-zinc-500">Operacao cemiterial</p>
+        <p className="text-sm font-medium text-zinc-500">Operação cemiterial</p>
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-950">
-          Sepulturas e jazigos
+          Sepulturas e jázigos
         </h1>
         <p className="max-w-3xl text-sm leading-6 text-zinc-600">
-          Consulte espacos cadastrados, capacidade configurada, ocupacao atual e status operacional.
+          Consulte espaços cadastrados, capacidade configurada, ocupação atual e status operacional.
         </p>
       </header>
+
+      <section className="space-y-4">
+        <BurialSpaceForm mode="create" />
+      </section>
 
       <form
         action="/burial-spaces"
@@ -199,7 +204,7 @@ export default async function BurialSpacesPage({ searchParams }: BurialSpacesPag
 
         <div>
           <label className="mb-2 block text-sm font-medium text-zinc-800" htmlFor="identifier">
-            Identificacao
+            Identificação
           </label>
           <input
             className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
@@ -261,7 +266,7 @@ export default async function BurialSpacesPage({ searchParams }: BurialSpacesPag
 
         <div className="flex items-end">
           <button
-            aria-label="Filtrar sepulturas e jazigos"
+            aria-label="Filtrar sepulturas e jázigos"
             className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-zinc-950 px-4 text-sm font-semibold text-white hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 lg:w-auto"
             type="submit"
           >
@@ -274,8 +279,8 @@ export default async function BurialSpacesPage({ searchParams }: BurialSpacesPag
         <Suspense
           fallback={
             <LoadingState
-              description="A lista de sepulturas e jazigos esta sendo consultada."
-              label="Carregando espacos"
+              description="A lista de sepulturas e jázigos esta sendo consultada."
+              label="Carregando espaços"
               rows={4}
             />
           }
@@ -284,8 +289,8 @@ export default async function BurialSpacesPage({ searchParams }: BurialSpacesPag
         </Suspense>
       ) : (
         <ErrorMessage
-          message="Revise os filtros e a paginacao antes de tentar novamente."
-          title="Filtros invalidos"
+          message="Revise os filtros e a paginação antes de tentar novamente."
+          title="Filtros inválidos"
         />
       )}
     </div>

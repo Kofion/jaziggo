@@ -30,7 +30,7 @@ import {
 import { USER_ROLE } from "@/types/user"
 
 export const metadata: Metadata = {
-  title: "Relatorios | Jaziggo",
+  title: "Relatórios | Jaziggo",
 }
 
 type ReportsPageProps = Readonly<{
@@ -154,7 +154,7 @@ function selectedFilterSummary(query: z.output<typeof reportPageQuerySchema>) {
     values.startDate ? `Inicio: ${values.startDate}` : undefined,
     values.endDate ? `Fim: ${values.endDate}` : undefined,
     values.sector ? `Setor: ${values.sector}` : undefined,
-    values.type ? `Espaco: ${values.type}` : undefined,
+    values.type ? `Espaço: ${values.type}` : undefined,
     values.status ? `Status: ${values.status}` : undefined,
   ].filter(Boolean)
 
@@ -226,12 +226,12 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <p className="text-sm font-medium text-zinc-500">Administracao</p>
+        <p className="text-sm font-medium text-zinc-500">Administração</p>
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-950">
-          Relatorios
+          Relatórios
         </h1>
         <p className="max-w-3xl text-sm leading-6 text-zinc-600">
-          Consulte visoes administrativas restritas sobre cadastros, sepultamentos e ocupacao dos espacos.
+          Consulte visões administrativas restritas sobre cadastros, sepultamentos e ocupação dos espaços.
         </p>
       </header>
 
@@ -260,8 +260,8 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
         </>
       ) : (
         <ErrorMessage
-          message="Revise os filtros e remova parametros nao reconhecidos antes de tentar novamente."
-          title="Filtros invalidos"
+          message="Revise os filtros e remova parâmetros não reconhecidos antes de tentar novamente."
+          title="Filtros inválidos"
         />
       )}
     </div>

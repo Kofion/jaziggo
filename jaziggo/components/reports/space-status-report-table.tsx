@@ -18,7 +18,7 @@ type SpaceStatusReportTableProps = Readonly<{
 }>
 
 const SPACE_STATUS_LABELS = {
-  AVAILABLE: "Disponivel",
+  AVAILABLE: "Disponível",
   OCCUPIED: "Ocupado",
   RESERVED: "Reservado",
   INACTIVE: "Inativo",
@@ -106,10 +106,10 @@ export async function SpaceStatusReportTable(
   if (report.data.length === 0) {
     return (
       <EmptyState
-        title="Nenhum espaco encontrado"
+        title="Nenhum espaço encontrado"
         description={
           report.emptyMessage ??
-          "Nao ha espacos para os filtros selecionados."
+          "Não ha espaços para os filtros selecionados."
         }
       />
     )
@@ -118,7 +118,7 @@ export async function SpaceStatusReportTable(
   return (
     <section aria-labelledby="space-status-report-results" className="space-y-4">
       <h2 className="sr-only" id="space-status-report-results">
-        Resultados do relatorio de espacos por status
+        Resultados do relatório de espaços por status
       </h2>
       <div className="overflow-x-auto rounded-md border border-zinc-200 bg-white">
         <table className="min-w-full divide-y divide-zinc-200 text-sm">
@@ -129,19 +129,19 @@ export async function SpaceStatusReportTable(
                 Status
               </th>
               <th className="px-4 py-3" scope="col">
-                Identificacao
+                Identificação
               </th>
               <th className="px-4 py-3" scope="col">
                 Tipo
               </th>
               <th className="px-4 py-3" scope="col">
-                Localizacao
+                Localização
               </th>
               <th className="px-4 py-3" scope="col">
                 Capacidade
               </th>
               <th className="px-4 py-3" scope="col">
-                Vinculos ativos
+                Vínculos ativos
               </th>
             </tr>
           </thead>
@@ -150,7 +150,7 @@ export async function SpaceStatusReportTable(
       </div>
 
       <Pagination
-        ariaLabel="Paginacao do relatorio de espacos por status"
+        ariaLabel="Paginação do relatório de espaços por status"
         basePath="/reports"
         page={report.page}
         pageSize={report.pageSize}
