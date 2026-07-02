@@ -1,6 +1,7 @@
-﻿import type { Metadata } from "next"
+import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 
+import { BurialLinkManagement } from "@/components/burial-links/burial-link-management"
 import { BurialSpaceForm } from "@/components/burial-spaces/burial-space-form"
 
 import { ActionLink } from "@/components/ui/action-link"
@@ -269,6 +270,12 @@ async function BurialSpaceDetail({
           cancelHref={`/burial-spaces/${id}`}
           mode="edit"
           space={space}
+        />
+        <BurialLinkManagement
+          burialSpaceId={id}
+          description="Crie um vínculo para este espaço ou encerre um vínculo ativo antes de registrar a correção. O histórico permanece preservado."
+          links={links}
+          title="Vínculos de sepultamento"
         />
         <RecordDangerActions
           afterDeleteHref="/burial-spaces"

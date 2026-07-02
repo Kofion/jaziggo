@@ -1,6 +1,7 @@
-﻿import type { Metadata } from "next"
+import type { Metadata } from "next"
 import Link from "next/link"
 
+import { BurialLinkManagement } from "@/components/burial-links/burial-link-management"
 import { DeceasedForm } from "@/components/deceased/deceased-form"
 import { redirect } from "next/navigation"
 
@@ -258,6 +259,12 @@ async function DeceasedDetail({
           cancelHref={`/deceased/${id}`}
           deceased={deceased}
           mode="edit"
+        />
+        <BurialLinkManagement
+          deceasedId={id}
+          description="Crie um vínculo para este falecido ou encerre um vínculo ativo antes de registrar a correção. O histórico permanece preservado."
+          links={deceased.links}
+          title="Vínculos de sepultamento"
         />
         <RecordDangerActions
           afterDeleteHref="/deceased"

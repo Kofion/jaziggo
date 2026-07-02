@@ -1,7 +1,8 @@
-﻿import type { Metadata } from "next"
+import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 
 import { ResponsibleForm } from "@/components/responsibles/responsible-form"
+import { ResponsibleLinkManagement } from "@/components/responsibles/responsible-link-management"
 
 import { ActionLink } from "@/components/ui/action-link"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -202,6 +203,12 @@ async function ResponsibleDetail({
           cancelHref={`/responsibles/${id}`}
           mode="edit"
           responsible={responsible}
+        />
+        <ResponsibleLinkManagement
+          description="Crie um vínculo para este responsável ou encerre um vínculo ativo antes de registrar a correção. O histórico permanece preservado."
+          links={responsible.links}
+          responsibleId={id}
+          title="Vínculos administrativos"
         />
         <RecordDangerActions
           afterDeleteHref="/responsibles"
