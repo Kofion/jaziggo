@@ -1,9 +1,9 @@
-import type { Metadata } from "next"
+﻿import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { Suspense } from "react"
 import { z } from "zod"
 
-import { BurialSpaceForm } from "@/components/burial-spaces/burial-space-form"
+import { BurialSpaceRegistrationWorkflow } from "@/components/burial-spaces/burial-space-registration-workflow"
 import { BurialSpaceTable } from "@/components/burial-spaces/burial-space-table"
 import { EmptyState } from "@/components/ui/empty-state"
 import { ErrorMessage } from "@/components/ui/error-message"
@@ -24,7 +24,7 @@ import {
 } from "@/types/burial-space"
 
 export const metadata: Metadata = {
-  title: "Sepulturas e jázigos | Jaziggo",
+  title: "Sepulturas e jazigos | Jaziggo",
 }
 
 type BurialSpacesPageProps = Readonly<{
@@ -75,6 +75,10 @@ const STATUS_FILTER_OPTIONS = [
   { label: "Inativos", value: BURIAL_SPACE_STATUS.INACTIVE },
 ] as const
 
+function shouldKeepQueryValue(key: string, value: string) {
+  return key === "page" || key === "pageSize" || value.trim().length > 0
+}
+
 function normalizeSearchParams(params: Record<string, string | string[] | undefined>) {
   const normalized: Record<string, string> = {}
 
@@ -82,14 +86,14 @@ function normalizeSearchParams(params: Record<string, string | string[] | undefi
     if (Array.isArray(value)) {
       const firstValue = value.at(0)
 
-      if (firstValue !== undefined) {
+      if (firstValue !== undefined && shouldKeepQueryValue(key, firstValue)) {
         normalized[key] = firstValue
       }
 
       continue
     }
 
-    if (value !== undefined) {
+    if (value !== undefined && shouldKeepQueryValue(key, value)) {
       normalized[key] = value
     }
   }
@@ -116,7 +120,7 @@ async function BurialSpacesList({
     if (error instanceof BurialSpaceServiceError) {
       return (
         <ErrorMessage
-          message="Não foi possível carregar a lista de sepulturas e jázigos com os filtros informados."
+          message="Não foi possível carregar a lista de sepulturas e jazigos com os filtros informados."
           title="Lista de espaços indisponível"
         />
       )
@@ -166,7 +170,7 @@ async function BurialSpacesList({
       <BurialSpaceTable spaces={result.items} />
 
       <Pagination
-        ariaLabel="Paginação de sepulturas e jázigos"
+        ariaLabel="Paginação de sepulturas e jazigos"
         basePath="/burial-spaces"
         page={result.pagination.page}
         pageSize={result.pagination.pageSize}
@@ -192,7 +196,7 @@ export default async function BurialSpacesPage({ searchParams }: BurialSpacesPag
       <header className="space-y-2">
         <p className="text-sm font-medium text-zinc-500">Operação cemiterial</p>
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-950">
-          Sepulturas e jázigos
+          Sepulturas e jazigos
         </h1>
         <p className="max-w-3xl text-sm leading-6 text-zinc-600">
           Consulte espaços cadastrados, capacidade configurada, ocupação atual e status operacional.
@@ -200,7 +204,7 @@ export default async function BurialSpacesPage({ searchParams }: BurialSpacesPag
       </header>
 
       <section className="space-y-4">
-        <BurialSpaceForm mode="create" />
+        <BurialSpaceRegistrationWorkflow />
       </section>
 
       <form
@@ -278,7 +282,7 @@ export default async function BurialSpacesPage({ searchParams }: BurialSpacesPag
 
         <div className="flex items-end">
           <button
-            aria-label="Filtrar sepulturas e jázigos"
+            aria-label="Filtrar sepulturas e jazigos"
             className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-zinc-950 px-4 text-sm font-semibold text-white hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 lg:w-auto"
             type="submit"
           >
@@ -291,7 +295,7 @@ export default async function BurialSpacesPage({ searchParams }: BurialSpacesPag
         <Suspense
           fallback={
             <LoadingState
-              description="A lista de sepulturas e jázigos esta sendo consultada."
+              description="A lista de sepulturas e jazigos está sendo consultada."
               label="Carregando espaços"
               rows={4}
             />

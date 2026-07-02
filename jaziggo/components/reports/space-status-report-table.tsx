@@ -1,4 +1,4 @@
-import Link from "next/link"
+﻿import Link from "next/link"
 
 import { ActionLink } from "@/components/ui/action-link"
 
@@ -119,7 +119,7 @@ export async function SpaceStatusReportTable(
         title="Nenhum espaço encontrado"
         description={
           report.emptyMessage ??
-          "Não ha espaços para os filtros selecionados."
+          "Não há espaços para os filtros selecionados."
         }
       />
     )

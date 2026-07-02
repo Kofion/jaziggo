@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+﻿import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { Suspense } from "react"
 import { z } from "zod"
@@ -48,6 +48,10 @@ const locationSearchPageQuerySchema = locationSearchFiltersSchema
   })
   .strict()
 
+function shouldKeepQueryValue(key: string, value: string) {
+  return key === "page" || key === "pageSize" || value.trim().length > 0
+}
+
 function normalizeSearchParams(
   params: Record<string, string | string[] | undefined>,
 ) {
@@ -57,14 +61,14 @@ function normalizeSearchParams(
     if (Array.isArray(value)) {
       const firstValue = value.at(0)
 
-      if (firstValue !== undefined) {
+      if (firstValue !== undefined && shouldKeepQueryValue(key, firstValue)) {
         normalized[key] = firstValue
       }
 
       continue
     }
 
-    if (value !== undefined) {
+    if (value !== undefined && shouldKeepQueryValue(key, value)) {
       normalized[key] = value
     }
   }
@@ -91,15 +95,8 @@ function initialFilters(
   }
 }
 
-function hasSearchFilter(query: z.output<typeof locationSearchPageQuerySchema>) {
-  return Boolean(
-    query.deceasedName ||
-      query.responsibleName ||
-      query.deathDate ||
-      query.burialDate ||
-      query.sector ||
-      query.burialSpaceIdentifier,
-  )
+function hasSubmittedSearch(params: Record<string, string>) {
+  return Object.keys(params).length > 0
 }
 
 function toLocationPageData(
@@ -114,11 +111,13 @@ function toLocationPageData(
 async function LocationSearchContent({
   filters,
   query,
+  shouldSearch,
 }: {
   filters: LocationSearchFilterValues
   query: z.output<typeof locationSearchPageQuerySchema>
+  shouldSearch: boolean
 }) {
-  if (!hasSearchFilter(query)) {
+  if (!shouldSearch) {
     return <LocationResults initialFilters={filters} initialMode="idle" />
   }
 
@@ -168,6 +167,7 @@ export default async function LocationSearchPage({
     normalizedSearchParams,
     parsedQuery.success ? parsedQuery.data.pageSize : 25,
   )
+  const shouldSearch = hasSubmittedSearch(normalizedSearchParams)
 
   return (
     <div className="space-y-6">
@@ -177,7 +177,7 @@ export default async function LocationSearchPage({
           Busca e localização
         </h1>
         <p className="max-w-3xl text-sm leading-6 text-zinc-600">
-          Localize falecidos por dados operacionais e identifique a sepultura ou jázigo ativo para orientar atendimentos.
+          Localize falecidos por dados operacionais e identifique a sepultura ou jazigo ativo para orientar atendimentos.
         </p>
       </header>
 
@@ -191,7 +191,11 @@ export default async function LocationSearchPage({
             />
           }
         >
-          <LocationSearchContent filters={filters} query={parsedQuery.data} />
+          <LocationSearchContent
+            filters={filters}
+            query={parsedQuery.data}
+            shouldSearch={shouldSearch}
+          />
         </Suspense>
       ) : (
         <LocationResults

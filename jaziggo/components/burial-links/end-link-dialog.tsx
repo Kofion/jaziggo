@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useId, useState } from "react"
 
@@ -147,7 +147,7 @@ export function EndLinkDialog({
       <div className="space-y-4">
         <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
           O encerramento altera o status do vínculo para histórico e pode liberar a
-          sepultura ou jázigo quando não houver outros vínculos ativos.
+          sepultura ou jazigo quando não houver outros vínculos ativos.
         </div>
 
         <div className="grid gap-4">

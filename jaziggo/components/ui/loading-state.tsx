@@ -1,4 +1,4 @@
-type LoadingStateProps = Readonly<{
+﻿type LoadingStateProps = Readonly<{
   label?: string
   description?: string
   rows?: number

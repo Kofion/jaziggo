@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useRouter } from "next/navigation"
 import { useId, useState, type FormEvent } from "react"
@@ -39,7 +39,7 @@ const FORM_COPY = {
   edit: {
     title: "Editar usuário",
     description: "Atualize os dados administrativos da conta interna.",
-    submitLabel: "Salvar alteracoes",
+    submitLabel: "Salvar alterações",
     pendingLabel: "Salvando...",
     successMessage: "Usuário atualizado com sucesso.",
     errorMessage: "Não foi possível atualizar o usuário. Revise os dados e tente novamente.",

@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+﻿import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { z } from "zod"
 
@@ -100,6 +100,10 @@ const reportPageQuerySchema = paginationSchema
     }
   })
 
+function shouldKeepQueryValue(key: string, value: string) {
+  return key === "page" || key === "pageSize" || value.trim().length > 0
+}
+
 function normalizeSearchParams(
   params: Record<string, string | string[] | undefined>,
 ) {
@@ -109,14 +113,14 @@ function normalizeSearchParams(
     if (Array.isArray(value)) {
       const firstValue = value.at(0)
 
-      if (firstValue !== undefined) {
+      if (firstValue !== undefined && shouldKeepQueryValue(key, firstValue)) {
         normalized[key] = firstValue
       }
 
       continue
     }
 
-    if (value !== undefined) {
+    if (value !== undefined && shouldKeepQueryValue(key, value)) {
       normalized[key] = value
     }
   }

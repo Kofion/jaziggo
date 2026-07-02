@@ -1,4 +1,4 @@
-import "server-only"
+﻿import "server-only"
 
 import { Prisma } from "@prisma/client"
 
@@ -38,6 +38,7 @@ const RESPONSIBLE_LIST_DTO_SELECT = {
   id: true,
   fullName: true,
   document: true,
+  documentType: true,
 } as const satisfies Prisma.ResponsibleSelect
 
 const RESPONSIBLE_LINK_DTO_SELECT = {
@@ -142,6 +143,29 @@ function isRecordNotFoundError(error: unknown): boolean {
     error instanceof Prisma.PrismaClientKnownRequestError &&
     error.code === "P2025"
   )
+}
+
+async function assertUniqueResponsibleDocument(
+  documentType: "CPF" | "RG" | undefined,
+  document: string | undefined,
+  excludeResponsibleId?: string,
+): Promise<void> {
+  if (!documentType || !document) {
+    return
+  }
+
+  const duplicate = await prisma.responsible.findFirst({
+    where: {
+      documentType,
+      document,
+      ...(excludeResponsibleId ? { id: { not: excludeResponsibleId } } : {}),
+    },
+    select: { id: true },
+  })
+
+  if (duplicate) {
+    throw ResponsibleServiceError.conflict()
+  }
 }
 
 function toResponsibleLinkDto(
@@ -350,6 +374,11 @@ export async function createResponsible(
     throw ResponsibleServiceError.validation()
   }
 
+  await assertUniqueResponsibleDocument(
+    parsedInput.data.documentType,
+    parsedInput.data.document,
+  )
+
   const responsible = await prisma.responsible.create({
     data: {
       ...parsedInput.data,
@@ -374,13 +403,21 @@ export async function updateResponsible(
     throw ResponsibleServiceError.validation()
   }
 
-  const { fullName, ...contactData } = parsedInput.data
+  const { fullName, document, documentType, ...contactData } = parsedInput.data
+
+  await assertUniqueResponsibleDocument(documentType, document, parsedId.data)
 
   try {
     const responsible = await prisma.responsible.update({
       where: { id: parsedId.data },
       data: {
         ...contactData,
+        ...(document
+          ? {
+              document,
+              documentType,
+            }
+          : {}),
         ...(fullName === undefined
           ? {}
           : {
@@ -592,4 +629,77 @@ export async function listResponsibleLinks(
   }
 
   return responsible.links.map(toResponsibleLinkDto)
+}
+
+function validateConfirmationText(confirmationText: string | undefined): void {
+  if (confirmationText?.trim().toLowerCase() !== "confirmo") {
+    throw ResponsibleServiceError.validation()
+  }
+}
+
+export async function countResponsibleLinks(responsibleId: string): Promise<number> {
+  await requirePermission(PERMISSION.MANAGE_OPERATIONAL_RECORDS)
+
+  const parsedId = uuidSchema.safeParse(responsibleId)
+
+  if (!parsedId.success) {
+    throw ResponsibleServiceError.validation()
+  }
+
+  const [responsibleLinks, burialLinks] = await prisma.$transaction([
+    prisma.responsibleLink.count({ where: { responsibleId: parsedId.data } }),
+    prisma.burialLink.count({ where: { responsibleId: parsedId.data } }),
+  ])
+
+  return responsibleLinks + burialLinks
+}
+
+export async function unlinkResponsible(
+  responsibleId: string,
+  confirmationText: string | undefined,
+): Promise<void> {
+  await requirePermission(PERMISSION.MANAGE_OPERATIONAL_RECORDS)
+  validateConfirmationText(confirmationText)
+
+  const parsedId = uuidSchema.safeParse(responsibleId)
+
+  if (!parsedId.success) {
+    throw ResponsibleServiceError.validation()
+  }
+
+  await prisma.$transaction([
+    prisma.responsibleLink.deleteMany({ where: { responsibleId: parsedId.data } }),
+    prisma.burialLink.updateMany({
+      where: { responsibleId: parsedId.data },
+      data: { responsibleId: null },
+    }),
+  ])
+}
+
+export async function deleteResponsible(
+  responsibleId: string,
+  confirmationText: string | undefined,
+): Promise<void> {
+  await requirePermission(PERMISSION.MANAGE_OPERATIONAL_RECORDS)
+  validateConfirmationText(confirmationText)
+
+  const parsedId = uuidSchema.safeParse(responsibleId)
+
+  if (!parsedId.success) {
+    throw ResponsibleServiceError.validation()
+  }
+
+  if ((await countResponsibleLinks(parsedId.data)) > 0) {
+    throw ResponsibleServiceError.conflict()
+  }
+
+  try {
+    await prisma.responsible.delete({ where: { id: parsedId.data } })
+  } catch (error) {
+    if (isRecordNotFoundError(error)) {
+      throw ResponsibleServiceError.notFound()
+    }
+
+    throw error
+  }
 }

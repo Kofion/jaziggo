@@ -1,4 +1,4 @@
-import { ActionLink } from "@/components/ui/action-link"
+﻿import { ActionLink } from "@/components/ui/action-link"
 import type { DeceasedListItemDto } from "@/types/deceased"
 
 type DeceasedTableProps = Readonly<{

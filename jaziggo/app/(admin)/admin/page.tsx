@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+﻿import type { Metadata } from "next"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 
@@ -129,7 +129,7 @@ export default async function AdminHomePage() {
           />
           <StatCard
             helper={`${summary.availableSpaces.toLocaleString("pt-BR")} disponíveis, ${summary.occupiedSpaces.toLocaleString("pt-BR")} ocupados`}
-            label="Sepulturas e jázigos"
+            label="Sepulturas e jazigos"
             value={summary.totalSpaces}
           />
           <StatCard
@@ -172,9 +172,9 @@ export default async function AdminHomePage() {
             title="Cadastrar falecidos"
           />
           <ActionCard
-            description="Cadastre, consulte e atualize sepulturas, jázigos, capacidade e status de ocupação."
+            description="Cadastre, consulte e atualize sepulturas, jazigos, capacidade e status de ocupação."
             href="/burial-spaces"
-            title="Cadastrar sepulturas e jázigos"
+            title="Cadastrar sepulturas e jazigos"
           />
           <ActionCard
             description="Cadastre, consulte e atualize responsáveis administrativos e seus vínculos."

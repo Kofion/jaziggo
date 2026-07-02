@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useId, useState, type FormEvent } from "react"
 
@@ -46,13 +46,13 @@ const STATUS_LABELS = {
 
 const BLOCK_REASON_MESSAGES = {
   SPACE_RESERVED:
-    "A sepultura ou jázigo esta reservado e não aceita novos vínculos.",
+    "A sepultura ou jazigo está reservado e não aceita novos vínculos.",
   SPACE_INACTIVE:
-    "A sepultura ou jázigo esta inativo e não aceita novos vínculos.",
+    "A sepultura ou jazigo está inativo e não aceita novos vínculos.",
   SEPULTURA_OCCUPIED:
     "Sepulturas aceitam somente um vínculo ativo.",
   JAZIGO_CAPACITY_REACHED:
-    "A capacidade do jázigo foi atingida.",
+    "A capacidade do jazigo foi atingida.",
   SPACE_CAPACITY_REACHED:
     "A capacidade do espaço foi atingida.",
   DECEASED_ALREADY_LINKED:
@@ -78,7 +78,7 @@ function errorMessageForCreateResponse(
     }
 
     if (body.error.code === DOMAIN_ERROR_CODE.NOT_FOUND) {
-      return "Falecido, sepultura/jázigo ou responsável informado não foi encontrado."
+      return "Falecido, sepultura/jazigo ou responsável informado não foi encontrado."
     }
 
     if (body.error.code === DOMAIN_ERROR_CODE.VALIDATION_ERROR) {
@@ -98,7 +98,7 @@ function availabilityMessage(availability: SpaceAvailability) {
     return BLOCK_REASON_MESSAGES[availability.reasonCode]
   }
 
-  return "A sepultura ou jázigo não esta disponível para este vínculo."
+  return "A sepultura ou jazigo não está disponível para este vínculo."
 }
 
 async function readJsonEnvelope<TData>(response: Response) {
@@ -141,7 +141,7 @@ export function CreateLinkForm({
 
     if (selectedDeceasedId.length === 0 || selectedBurialSpaceId.length === 0) {
       setSuccessMessage(null)
-      setErrorMessage("Informe o falecido e a sepultura ou jázigo para verificar a capacidade.")
+      setErrorMessage("Informe o falecido e a sepultura ou jazigo para verificar a capacidade.")
       setAvailability(null)
       return null
     }
@@ -197,7 +197,7 @@ export function CreateLinkForm({
 
     if (payload.deceasedId.length === 0 || payload.burialSpaceId.length === 0) {
       setSuccessMessage(null)
-      setErrorMessage("Informe o falecido e a sepultura ou jázigo do vínculo.")
+      setErrorMessage("Informe o falecido e a sepultura ou jazigo do vínculo.")
       setAvailability(null)
       return
     }
@@ -258,7 +258,7 @@ export function CreateLinkForm({
       <div className="space-y-1">
         <h2 className="text-base font-semibold text-zinc-950">Novo vínculo de sepultamento</h2>
         <p className="text-sm leading-6 text-zinc-600">
-          Informe os IDs internos para vincular um falecido a uma sepultura ou jázigo existente.
+          Informe os IDs internos para vincular um falecido a uma sepultura ou jazigo existente.
         </p>
       </div>
 
@@ -309,7 +309,7 @@ export function CreateLinkForm({
               className="mb-2 block text-sm font-medium text-zinc-800"
               htmlFor={`${formId}-burialSpaceId`}
             >
-              ID da sepultura ou jázigo
+              ID da sepultura ou jazigo
             </label>
             <input
               autoComplete="off"
@@ -399,7 +399,7 @@ export function CreateLinkForm({
               </dl>
             ) : (
               <p className="mt-1 text-sm leading-6 text-zinc-600">
-                Verifique a sepultura ou jázigo antes de criar o vínculo.
+                Verifique a sepultura ou jazigo antes de criar o vínculo.
               </p>
             )}
           </div>

@@ -1,13 +1,17 @@
-import type { Metadata } from "next"
+﻿import type { Metadata } from "next"
 import Link from "next/link"
+
+import { DeceasedForm } from "@/components/deceased/deceased-form"
 import { redirect } from "next/navigation"
 
 import { ActionLink } from "@/components/ui/action-link"
 import { EmptyState } from "@/components/ui/empty-state"
 import { ErrorMessage } from "@/components/ui/error-message"
+import { RecordDangerActions } from "@/components/ui/record-danger-actions"
 import { getCurrentActiveUser } from "@/lib/auth/session"
 import {
   DeceasedServiceError,
+  countDeceasedLinks,
   getDeceasedById,
   type DeceasedDetailWithBurialLinksDto,
 } from "@/services/deceased-service"
@@ -19,6 +23,7 @@ export const metadata: Metadata = {
 
 type DeceasedDetailPageProps = Readonly<{
   params: Promise<{ id: string }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }>
 
 const LINK_STATUS_LABELS = {
@@ -218,7 +223,10 @@ function BurialLinkHistoryTable({
   )
 }
 
-async function DeceasedDetail({ id }: Readonly<{ id: string }>) {
+async function DeceasedDetail({
+  id,
+  isEditing,
+}: Readonly<{ id: string; isEditing: boolean }>) {
   let deceased: DeceasedDetailWithBurialLinksDto
 
   try {
@@ -238,6 +246,28 @@ async function DeceasedDetail({ id }: Readonly<{ id: string }>) {
         message="Tente novamente em instantes. Se o problema persistir, informe o suporte interno."
         title="Erro ao carregar falecido"
       />
+    )
+  }
+
+  if (isEditing) {
+    const linkCount = await countDeceasedLinks(id)
+
+    return (
+      <div className="space-y-6">
+        <DeceasedForm
+          cancelHref={`/deceased/${id}`}
+          deceased={deceased}
+          mode="edit"
+        />
+        <RecordDangerActions
+          afterDeleteHref="/deceased"
+          deleteEndpoint={`/api/v1/deceased/${id}`}
+          entityLabel="falecido"
+          entityName={deceased.fullName}
+          hasLinks={linkCount > 0}
+          unlinkEndpoint={`/api/v1/deceased/${id}/links`}
+        />
+      </div>
     )
   }
 
@@ -264,6 +294,7 @@ async function DeceasedDetail({ id }: Readonly<{ id: string }>) {
 
 export default async function DeceasedDetailPage({
   params,
+  searchParams,
 }: DeceasedDetailPageProps) {
   const currentUser = await getCurrentActiveUser()
 
@@ -272,11 +303,18 @@ export default async function DeceasedDetailPage({
   }
 
   const { id } = await params
+  const query = await searchParams
+  const isEditing = query.edit === "1"
 
   return (
     <div className="space-y-6">
       <header className="space-y-3">
-<ActionLink href="/deceased" variant="back">Voltar para falecidos</ActionLink>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <ActionLink href="/deceased" variant="back">Voltar para falecidos</ActionLink>
+          {!isEditing ? (
+            <ActionLink href={`/deceased/${id}?edit=1`}>Editar informações</ActionLink>
+          ) : null}
+        </div>
         <div>
           <p className="text-sm font-medium text-zinc-500">Operação cemiterial</p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">
@@ -288,7 +326,7 @@ export default async function DeceasedDetailPage({
         </div>
       </header>
 
-      <DeceasedDetail id={id} />
+      <DeceasedDetail id={id} isEditing={isEditing} />
     </div>
   )
 }

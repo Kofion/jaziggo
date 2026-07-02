@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 
 import { AuthorizationError } from "../../../../lib/auth/permissions"
 import { locationSearchFiltersSchema } from "../../../../lib/validation/search"
@@ -95,6 +95,9 @@ function hasUnknownQueryParameter(
   return false
 }
 
+function shouldKeepQueryValue(key: string, value: string) {
+  return key === "page" || key === "pageSize" || value.trim().length > 0
+}
 export async function GET(request: NextRequest) {
   const requestId = crypto.randomUUID()
 
@@ -108,7 +111,9 @@ export async function GET(request: NextRequest) {
   }
 
   const query = Object.fromEntries(
-    request.nextUrl.searchParams.entries(),
+    Array.from(request.nextUrl.searchParams.entries()).filter(([key, value]) =>
+      shouldKeepQueryValue(key, value),
+    ),
   )
   const parsedQuery = locationSearchQuerySchema.safeParse(query)
 

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useId, useRef, type KeyboardEvent, type ReactNode } from "react"
 
@@ -9,7 +9,7 @@ type ConfirmDialogProps = Readonly<{
   confirmLabel?: string
   cancelLabel?: string
   pending?: boolean
-  intent?: "default" | "danger"
+  intent?: "default" | "danger" | "warning"
   children?: ReactNode
   onConfirm: () => void | Promise<void>
   onOpenChange: (open: boolean) => void

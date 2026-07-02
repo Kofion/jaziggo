@@ -1,7 +1,8 @@
-import "server-only"
+﻿import "server-only"
 
 import { maskDocument } from "../privacy/mask-document"
 import type {
+  DocumentType,
   ResponsibleDetailDto,
   ResponsibleLinkDto,
   ResponsibleListItemDto,
@@ -11,6 +12,7 @@ interface ResponsibleListDtoSource {
   id: string
   fullName: string
   document: string | null
+  documentType: DocumentType | null
 }
 
 interface ResponsibleDetailDtoSource
@@ -29,6 +31,7 @@ export function toResponsibleListItemDto(
   return {
     id: responsible.id,
     fullName: responsible.fullName,
+    ...(responsible.documentType ? { documentType: responsible.documentType } : {}),
     ...(documentMasked ? { documentMasked } : {}),
   }
 }

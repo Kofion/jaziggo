@@ -1,8 +1,15 @@
 "use client"
 
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useId, useState, type FormEvent } from "react"
 
+import {
+  DocumentInputFields,
+  isDocumentLengthValid,
+  onlyDocumentDigits,
+  type DocumentType,
+} from "@/components/ui/document-input-fields"
 import { ErrorMessage } from "@/components/ui/error-message"
 import type { ApiEnvelope } from "@/types/api"
 import type {
@@ -17,11 +24,13 @@ type ResponsibleFormProps = Readonly<{
   mode: ResponsibleFormMode
   responsible?: ResponsibleDetailDto
   onSuccess?: (responsible: ResponsibleDetailDto | ResponsibleListItemDto) => void
+  cancelHref?: string
   className?: string
 }>
 
 type ResponsibleFormPayload = {
   fullName?: string
+  documentType?: DocumentType
   document?: string
   phone?: string
   email?: string
@@ -33,7 +42,7 @@ const FORM_COPY = {
     title: "Novo responsável",
     description:
       "Cadastre uma pessoa de contato administrativo, sem criar acesso ao sistema.",
-    submitLabel: "Criar responsável",
+    submitLabel: "Cadastrar responsável",
     pendingLabel: "Criando...",
     successMessage: "Responsável criado com sucesso.",
     errorMessage:
@@ -43,7 +52,7 @@ const FORM_COPY = {
     title: "Editar responsável",
     description:
       "Atualize dados administrativos necessários para manutenção do cadastro.",
-    submitLabel: "Salvar alteracoes",
+    submitLabel: "Salvar alterações",
     pendingLabel: "Salvando...",
     successMessage: "Responsável atualizado com sucesso.",
     errorMessage:
@@ -81,6 +90,12 @@ function hasContactOrIdentifier(payload: ResponsibleFormPayload) {
   return Boolean(payload.document || payload.phone || payload.email || payload.address)
 }
 
+function selectedDocumentType(formData: FormData): DocumentType | undefined {
+  const value = fieldValue(formData, "documentType")
+
+  return value === "CPF" || value === "RG" ? value : undefined
+}
+
 function responsibleEndpoint(mode: ResponsibleFormMode, responsible?: ResponsibleDetailDto) {
   if (mode === "create") {
     return "/api/v1/responsibles"
@@ -97,6 +112,7 @@ export function ResponsibleForm({
   mode,
   responsible,
   onSuccess,
+  cancelHref,
   className,
 }: ResponsibleFormProps) {
   const router = useRouter()
@@ -128,9 +144,11 @@ export function ResponsibleForm({
     const form = event.currentTarget
     const formData = new FormData(form)
     const fullName = fieldValue(formData, "fullName")
+    const document = optionalFieldValue(formData, "document")
+    const documentType = document ? selectedDocumentType(formData) : undefined
     const payload: ResponsibleFormPayload = {
       fullName,
-      document: optionalFieldValue(formData, "document"),
+      ...(document ? { document: onlyDocumentDigits(document), documentType } : {}),
       phone: optionalFieldValue(formData, "phone"),
       email: optionalFieldValue(formData, "email"),
       address: optionalFieldValue(formData, "address"),
@@ -139,6 +157,16 @@ export function ResponsibleForm({
     if (fullName.length === 0) {
       setSuccessMessage(null)
       setErrorMessage("Informe o nome completo do responsável.")
+      return
+    }
+
+    if (payload.document && (!payload.documentType || !isDocumentLengthValid(payload.documentType, payload.document))) {
+      setSuccessMessage(null)
+      setErrorMessage(
+        payload.documentType === "CPF"
+          ? "Informe um CPF válido com 11 números."
+          : "Informe um RG válido usando apenas números.",
+      )
       return
     }
 
@@ -168,17 +196,26 @@ export function ResponsibleForm({
         | null
 
       if (!response.ok || !body?.success) {
-        setErrorMessage(copy.errorMessage)
+        setErrorMessage(
+          response.status === 409
+            ? "Já existe um cadastro com esse tipo e número de documento."
+            : copy.errorMessage,
+        )
         return
       }
 
       setSuccessMessage(copy.successMessage)
       onSuccess?.(body.data)
-      router.refresh()
 
       if (mode === "create") {
         form.reset()
       }
+
+      if (mode === "edit" && cancelHref) {
+        router.push(cancelHref)
+      }
+
+      router.refresh()
     } catch {
       setErrorMessage(copy.errorMessage)
     } finally {
@@ -234,29 +271,14 @@ export function ResponsibleForm({
           />
         </div>
 
-        <div>
-          <label
-            className="mb-2 block text-sm font-medium text-zinc-800"
-            htmlFor={`${formId}-document`}
-          >
-            Documento
-          </label>
-          <input
-            autoComplete="off"
-            className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
-            id={`${formId}-document`}
-            maxLength={40}
-            name="document"
-            placeholder={mode === "edit" ? "Informar novo documento" : undefined}
-            type="text"
+        <div className="sm:col-span-2">
+          <DocumentInputFields
+            baseId={formId}
+            currentDocumentMasked={responsible?.documentMasked}
+            currentDocumentType={responsible?.documentType}
+            editMode={mode === "edit"}
           />
-          {mode === "edit" ? (
-            <p className="mt-1 text-xs text-zinc-600">
-              Documento atual: {responsible?.documentMasked ?? "Não informado"}
-            </p>
-          ) : null}
         </div>
-
         <div>
           <label
             className="mb-2 block text-sm font-medium text-zinc-800"
@@ -312,10 +334,18 @@ export function ResponsibleForm({
         </div>
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+        {mode === "edit" && cancelHref ? (
+          <Link
+            className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-red-600 px-4 text-sm font-semibold text-white hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 sm:w-auto"
+            href={cancelHref}
+          >
+            Cancelar alterações
+          </Link>
+        ) : null}
         <button
           aria-busy={pending}
-          className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-zinc-950 px-4 text-sm font-semibold text-white hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 disabled:cursor-not-allowed disabled:bg-zinc-400 sm:w-auto"
+          className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 disabled:cursor-not-allowed disabled:bg-zinc-400 sm:w-auto"
           disabled={pending}
           type="submit"
         >

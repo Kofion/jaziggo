@@ -1,4 +1,4 @@
-import { ActionLink } from "@/components/ui/action-link"
+﻿import { ActionLink } from "@/components/ui/action-link"
 import type { ResponsibleListItemDto } from "@/types/responsible"
 
 type ResponsibleTableProps = Readonly<{

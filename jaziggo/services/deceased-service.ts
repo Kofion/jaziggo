@@ -46,6 +46,7 @@ const DECEASED_LIST_DTO_SELECT = {
   internalCode: true,
   fullName: true,
   document: true,
+  documentType: true,
   deathDate: true,
   burialDate: true,
   historicalDataIncomplete: true,
@@ -56,6 +57,7 @@ const DECEASED_DUPLICATE_DTO_SELECT = {
   internalCode: true,
   fullName: true,
   document: true,
+  documentType: true,
   birthDate: true,
   deathDate: true,
   burialDate: true,
@@ -67,6 +69,7 @@ const DECEASED_DETAIL_DTO_SELECT = {
   internalCode: true,
   fullName: true,
   document: true,
+  documentType: true,
   birthDate: true,
   deathDate: true,
   burialDate: true,
@@ -80,10 +83,12 @@ const DECEASED_DETAIL_DTO_SELECT = {
 type DeceasedServiceErrorCode =
   | typeof DOMAIN_ERROR_CODE.VALIDATION_ERROR
   | typeof DOMAIN_ERROR_CODE.NOT_FOUND
+  | typeof DOMAIN_ERROR_CODE.CONFLICT
 
 type DeceasedServiceErrorStatus =
   | typeof HTTP_STATUS.UNPROCESSABLE_ENTITY
   | typeof HTTP_STATUS.NOT_FOUND
+  | typeof HTTP_STATUS.CONFLICT
 
 export class DeceasedServiceError extends Error {
   readonly code: DeceasedServiceErrorCode
@@ -108,6 +113,14 @@ export class DeceasedServiceError extends Error {
     )
   }
 
+  static conflict(): DeceasedServiceError {
+    return new DeceasedServiceError(
+      DOMAIN_ERROR_CODE.CONFLICT,
+      HTTP_STATUS.CONFLICT,
+      "Deceased has links",
+    )
+  }
+
   static notFound(): DeceasedServiceError {
     return new DeceasedServiceError(
       DOMAIN_ERROR_CODE.NOT_FOUND,
@@ -122,6 +135,29 @@ function isRecordNotFoundError(error: unknown): boolean {
     error instanceof Prisma.PrismaClientKnownRequestError &&
     error.code === "P2025"
   )
+}
+
+async function assertUniqueDeceasedDocument(
+  documentType: "CPF" | "RG" | undefined,
+  document: string | undefined,
+  excludeDeceasedId?: string,
+): Promise<void> {
+  if (!documentType || !document) {
+    return
+  }
+
+  const duplicate = await prisma.deceased.findFirst({
+    where: {
+      documentType,
+      document,
+      ...(excludeDeceasedId ? { id: { not: excludeDeceasedId } } : {}),
+    },
+    select: { id: true },
+  })
+
+  if (duplicate) {
+    throw DeceasedServiceError.conflict()
+  }
 }
 
 function calculateHistoricalDataIncomplete(
@@ -144,6 +180,7 @@ function toNullableDate(value: string | undefined): Date | null {
 }
 
 function buildDuplicateMatchFilters(input: {
+  documentType?: "CPF" | "RG"
   document?: string
   birthDate?: string
   deathDate?: string
@@ -152,7 +189,7 @@ function buildDuplicateMatchFilters(input: {
   const filters: Prisma.DeceasedWhereInput[] = []
 
   if (input.document !== undefined) {
-    filters.push({ document: input.document })
+    filters.push({ document: input.document, documentType: input.documentType })
   }
 
   if (input.birthDate !== undefined) {
@@ -294,9 +331,9 @@ export async function searchDeceasedByDocument(
     throw DeceasedServiceError.validation()
   }
 
-  const { document, page, pageSize } = parsedInput.data
+  const { document, documentType, page, pageSize } = parsedInput.data
 
-  return findDeceasedPage({ document }, page, pageSize)
+  return findDeceasedPage({ document, documentType }, page, pageSize)
 }
 
 export async function getDeceasedById(
@@ -338,6 +375,11 @@ export async function createDeceased(
     throw DeceasedServiceError.validation()
   }
 
+  await assertUniqueDeceasedDocument(
+    parsedInput.data.documentType,
+    parsedInput.data.document,
+  )
+
   const internalCode = await generateUniqueInternalCode(
     async (candidate) =>
       (await prisma.deceased.findUnique({
@@ -378,19 +420,41 @@ export async function updateDeceased(
     throw DeceasedServiceError.validation()
   }
 
+  const currentDeceased = await prisma.deceased.findUnique({
+    where: { id: parsedId.data },
+    select: { document: true },
+  })
+
+  if (!currentDeceased) {
+    throw DeceasedServiceError.notFound()
+  }
+
+  await assertUniqueDeceasedDocument(
+    parsedInput.data.documentType,
+    parsedInput.data.document,
+    parsedId.data,
+  )
+
+  const nextDocument = parsedInput.data.document ?? currentDeceased.document ?? undefined
+
   try {
     const deceased = await prisma.deceased.update({
       where: { id: parsedId.data },
       data: {
         fullName: parsedInput.data.fullName,
         searchName: normalizeSearchName(parsedInput.data.fullName),
-        document: parsedInput.data.document ?? null,
+        ...(parsedInput.data.document
+          ? {
+              document: parsedInput.data.document,
+              documentType: parsedInput.data.documentType,
+            }
+          : {}),
         birthDate: toNullableDate(parsedInput.data.birthDate),
         deathDate: toNullableDate(parsedInput.data.deathDate),
         burialDate: toNullableDate(parsedInput.data.burialDate),
         datesUnknown: parsedInput.data.datesUnknown === true,
         historicalDataIncomplete: calculateHistoricalDataIncomplete(
-          parsedInput.data.document,
+          nextDocument,
           parsedInput.data.datesUnknown,
         ),
         notes: parsedInput.data.notes ?? null,
@@ -399,6 +463,76 @@ export async function updateDeceased(
     })
 
     return toDeceasedDetailDto(deceased)
+  } catch (error) {
+    if (isRecordNotFoundError(error)) {
+      throw DeceasedServiceError.notFound()
+    }
+
+    throw error
+  }
+}
+
+function validateConfirmationText(confirmationText: string | undefined): void {
+  if (confirmationText?.trim().toLowerCase() !== "confirmo") {
+    throw DeceasedServiceError.validation()
+  }
+}
+
+export async function countDeceasedLinks(deceasedId: string): Promise<number> {
+  await requirePermission(PERMISSION.MANAGE_OPERATIONAL_RECORDS)
+
+  const parsedId = uuidSchema.safeParse(deceasedId)
+
+  if (!parsedId.success) {
+    throw DeceasedServiceError.validation()
+  }
+
+  const [burialLinks, responsibleLinks] = await prisma.$transaction([
+    prisma.burialLink.count({ where: { deceasedId: parsedId.data } }),
+    prisma.responsibleLink.count({ where: { deceasedId: parsedId.data } }),
+  ])
+
+  return burialLinks + responsibleLinks
+}
+
+export async function unlinkDeceased(
+  deceasedId: string,
+  confirmationText: string | undefined,
+): Promise<void> {
+  await requirePermission(PERMISSION.MANAGE_OPERATIONAL_RECORDS)
+  validateConfirmationText(confirmationText)
+
+  const parsedId = uuidSchema.safeParse(deceasedId)
+
+  if (!parsedId.success) {
+    throw DeceasedServiceError.validation()
+  }
+
+  await prisma.$transaction([
+    prisma.responsibleLink.deleteMany({ where: { deceasedId: parsedId.data } }),
+    prisma.burialLink.deleteMany({ where: { deceasedId: parsedId.data } }),
+  ])
+}
+
+export async function deleteDeceased(
+  deceasedId: string,
+  confirmationText: string | undefined,
+): Promise<void> {
+  await requirePermission(PERMISSION.MANAGE_OPERATIONAL_RECORDS)
+  validateConfirmationText(confirmationText)
+
+  const parsedId = uuidSchema.safeParse(deceasedId)
+
+  if (!parsedId.success) {
+    throw DeceasedServiceError.validation()
+  }
+
+  if ((await countDeceasedLinks(parsedId.data)) > 0) {
+    throw DeceasedServiceError.conflict()
+  }
+
+  try {
+    await prisma.deceased.delete({ where: { id: parsedId.data } })
   } catch (error) {
     if (isRecordNotFoundError(error)) {
       throw DeceasedServiceError.notFound()

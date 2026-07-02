@@ -1,12 +1,16 @@
-import type { Metadata } from "next"
+﻿import type { Metadata } from "next"
 import { redirect } from "next/navigation"
+
+import { BurialSpaceForm } from "@/components/burial-spaces/burial-space-form"
 
 import { ActionLink } from "@/components/ui/action-link"
 import { EmptyState } from "@/components/ui/empty-state"
 import { ErrorMessage } from "@/components/ui/error-message"
+import { RecordDangerActions } from "@/components/ui/record-danger-actions"
 import { getCurrentActiveUser } from "@/lib/auth/session"
 import {
   BurialSpaceServiceError,
+  countBurialSpaceLinks,
   getBurialSpaceById,
 } from "@/services/burial-space-service"
 import {
@@ -26,6 +30,7 @@ export const metadata: Metadata = {
 
 type BurialSpaceDetailPageProps = Readonly<{
   params: Promise<{ id: string }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }>
 
 const TYPE_LABELS = {
@@ -222,7 +227,10 @@ function LinkHistoryTable({ links }: Readonly<{ links: readonly BurialLink[] }>)
   )
 }
 
-async function BurialSpaceDetail({ id }: Readonly<{ id: string }>) {
+async function BurialSpaceDetail({
+  id,
+  isEditing,
+}: Readonly<{ id: string; isEditing: boolean }>) {
   let space: BurialSpaceListItemDto
   let links: BurialLink[]
 
@@ -252,6 +260,28 @@ async function BurialSpaceDetail({ id }: Readonly<{ id: string }>) {
     )
   }
 
+  if (isEditing) {
+    const linkCount = await countBurialSpaceLinks(id)
+
+    return (
+      <div className="space-y-6">
+        <BurialSpaceForm
+          cancelHref={`/burial-spaces/${id}`}
+          mode="edit"
+          space={space}
+        />
+        <RecordDangerActions
+          afterDeleteHref="/burial-spaces"
+          deleteEndpoint={`/api/v1/burial-spaces/${id}`}
+          entityLabel="sepultura ou jazigo"
+          entityName={space.identifier}
+          hasLinks={linkCount > 0}
+          unlinkEndpoint={`/api/v1/burial-spaces/${id}/links`}
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <SpaceSummary space={space} />
@@ -273,7 +303,10 @@ async function BurialSpaceDetail({ id }: Readonly<{ id: string }>) {
   )
 }
 
-export default async function BurialSpaceDetailPage({ params }: BurialSpaceDetailPageProps) {
+export default async function BurialSpaceDetailPage({
+  params,
+  searchParams,
+}: BurialSpaceDetailPageProps) {
   const currentUser = await getCurrentActiveUser()
 
   if (!currentUser) {
@@ -281,11 +314,17 @@ export default async function BurialSpaceDetailPage({ params }: BurialSpaceDetai
   }
 
   const { id } = await params
-
+  const query = await searchParams
+  const isEditing = query.edit === "1"
   return (
     <div className="space-y-6">
       <header className="space-y-3">
-        <ActionLink href="/burial-spaces" variant="back">Voltar para sepulturas e jazigos</ActionLink>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <ActionLink href="/burial-spaces" variant="back">Voltar para sepulturas e jazigos</ActionLink>
+          {!isEditing ? (
+            <ActionLink href={`/burial-spaces/${id}?edit=1`}>Editar informações</ActionLink>
+          ) : null}
+        </div>
         <div>
           <p className="text-sm font-medium text-zinc-500">Operação cemiterial</p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">
@@ -297,7 +336,7 @@ export default async function BurialSpaceDetailPage({ params }: BurialSpaceDetai
         </div>
       </header>
 
-      <BurialSpaceDetail id={id} />
+      <BurialSpaceDetail id={id} isEditing={isEditing} />
     </div>
   )
 }

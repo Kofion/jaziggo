@@ -6,8 +6,8 @@ import {
   paginationSchema,
   requiredTrimmedStringSchema,
 } from "./common"
+import { documentTypeSchema, normalizeDocumentNumber } from "./document"
 import {
-  normalizeDocument,
   normalizeLocationComponent,
   normalizeSearchName,
 } from "./normalize"
@@ -23,7 +23,7 @@ const normalizedLocationFilterSchema = requiredTrimmedStringSchema
   .optional()
 
 const normalizedDocumentSchema = requiredTrimmedStringSchema
-  .transform(normalizeDocument)
+  .transform(normalizeDocumentNumber)
   .pipe(z.string().min(1))
 
 export const locationSearchFiltersSchema = paginationSchema
@@ -44,6 +44,7 @@ export const locationSearchFiltersSchema = paginationSchema
 
 const deceasedDocumentSearchSchema = paginationSchema
   .extend({
+    documentType: documentTypeSchema,
     deceasedDocument: normalizedDocumentSchema,
     responsibleDocument: z.never().optional(),
   })
@@ -51,6 +52,7 @@ const deceasedDocumentSearchSchema = paginationSchema
 
 const responsibleDocumentSearchSchema = paginationSchema
   .extend({
+    documentType: documentTypeSchema,
     deceasedDocument: z.never().optional(),
     responsibleDocument: normalizedDocumentSchema,
   })

@@ -1,8 +1,8 @@
-import type { Metadata } from "next"
+﻿import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { Suspense } from "react"
 
-import { ResponsibleForm } from "@/components/responsibles/responsible-form"
+import { ResponsibleRegistrationWorkflow } from "@/components/responsibles/responsible-registration-workflow"
 import { ResponsibleTable } from "@/components/responsibles/responsible-table"
 import { EmptyState } from "@/components/ui/empty-state"
 import { ErrorMessage } from "@/components/ui/error-message"
@@ -29,6 +29,10 @@ type ResponsiblesPageProps = Readonly<{
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }>
 
+function shouldKeepQueryValue(key: string, value: string) {
+  return key === "page" || key === "pageSize" || value.trim().length > 0
+}
+
 function normalizeSearchParams(params: Record<string, string | string[] | undefined>) {
   const normalized: Record<string, string> = {}
 
@@ -36,14 +40,14 @@ function normalizeSearchParams(params: Record<string, string | string[] | undefi
     if (Array.isArray(value)) {
       const firstValue = value.at(0)
 
-      if (firstValue !== undefined) {
+      if (firstValue !== undefined && shouldKeepQueryValue(key, firstValue)) {
         normalized[key] = firstValue
       }
 
       continue
     }
 
-    if (value !== undefined) {
+    if (value !== undefined && shouldKeepQueryValue(key, value)) {
       normalized[key] = value
     }
   }
@@ -158,7 +162,7 @@ export default async function ResponsiblesPage({
       </header>
 
       <section className="space-y-4">
-        <ResponsibleForm mode="create" />
+        <ResponsibleRegistrationWorkflow />
       </section>
 
       <form
@@ -199,7 +203,7 @@ export default async function ResponsiblesPage({
         <Suspense
           fallback={
             <LoadingState
-              description="A lista de responsáveis esta sendo consultada."
+              description="A lista de responsáveis está sendo consultada."
               label="Carregando responsáveis"
               rows={4}
             />

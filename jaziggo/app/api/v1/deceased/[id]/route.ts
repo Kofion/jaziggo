@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 
 import {
   AuthorizationError,
@@ -8,6 +8,7 @@ import { uuidSchema } from "../../../../../lib/validation/common"
 import { updateDeceasedSchema } from "../../../../../lib/validation/deceased"
 import {
   DeceasedServiceError,
+  deleteDeceased,
   getDeceasedById,
   updateDeceased,
 } from "../../../../../services/deceased-service"
@@ -27,6 +28,10 @@ const NO_STORE_HEADERS = { "Cache-Control": "no-store" }
 interface DeceasedRouteContext {
   params: Promise<{ id: string }>
 }
+
+type DeleteRequestBody = Readonly<{
+  confirmationText?: unknown
+}>
 
 function errorResponse(
   requestId: string,
@@ -53,6 +58,19 @@ function successResponse<TDeceased extends DeceasedDetailDto>(
   const body: SuccessEnvelope<TDeceased> = {
     success: true,
     data: deceased,
+    requestId,
+  }
+
+  return NextResponse.json(body, {
+    status: HTTP_STATUS.OK,
+    headers: NO_STORE_HEADERS,
+  })
+}
+
+function deleteSuccessResponse(requestId: string) {
+  const body: SuccessEnvelope<{ completed: true }> = {
+    success: true,
+    data: { completed: true },
     requestId,
   }
 
@@ -97,6 +115,14 @@ async function authorizeAndParseDeceasedId(
   }
 
   return parsedId.data
+}
+
+async function readDeleteBody(request: NextRequest) {
+  const input = (await request.json().catch(() => null)) as DeleteRequestBody | null
+
+  return typeof input?.confirmationText === "string"
+    ? input.confirmationText
+    : undefined
 }
 
 export async function GET(
@@ -157,6 +183,28 @@ export async function PUT(
 
     return successResponse(deceased, requestId)
   } catch (error) {
+    return handleError(error, requestId)
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  context: DeceasedRouteContext,
+) {
+  const requestId = crypto.randomUUID()
+
+  try {
+    const deceasedId = await authorizeAndParseDeceasedId(
+      context,
+      PERMISSION.MANAGE_OPERATIONAL_RECORDS,
+    )
+    const confirmationText = await readDeleteBody(request)
+
+    await deleteDeceased(deceasedId, confirmationText)
+
+    return deleteSuccessResponse(requestId)
+  } catch (error) {
+
     return handleError(error, requestId)
   }
 }

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -41,7 +41,7 @@ const ADMIN_NAV_ITEMS: readonly AdminNavItem[] = [
   },
   {
     href: "/burial-spaces",
-    label: "Sepulturas e jázigos",
+    label: "Sepulturas e jazigos",
     description: "Cadastro",
     permissions: [PERMISSION.MANAGE_OPERATIONAL_RECORDS],
   },

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 
@@ -40,7 +40,7 @@ export function DeactivateUserDialog({
   async function handleConfirm() {
     if (user.status === USER_STATUS.INACTIVE) {
       setErrorMessage(null)
-      setSuccessMessage("Usuário já esta inativo.")
+      setSuccessMessage("Usuário já está inativo.")
       return
     }
 

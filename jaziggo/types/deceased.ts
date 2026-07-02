@@ -2,9 +2,11 @@ import type { PaginationParams } from "./api"
 
 export type IsoDateString = string
 export type IsoDateTimeString = string
+export type DocumentType = "CPF" | "RG"
 
 interface DeceasedInputFields {
   fullName: string
+  documentType?: DocumentType
   document?: string
   birthDate?: IsoDateString
   notes?: string
@@ -37,6 +39,7 @@ export interface DeceasedListItemDto {
   id: string
   internalCode: string
   fullName: string
+  documentType?: DocumentType
   documentMasked?: string
   deathDate?: IsoDateString
   burialDate?: IsoDateString
@@ -55,6 +58,7 @@ export interface DeceasedDuplicateCandidateDto {
   id: string
   internalCode: string
   fullName: string
+  documentType?: DocumentType
   documentMasked?: string
   birthDate?: IsoDateString
   deathDate?: IsoDateString
@@ -70,5 +74,6 @@ export interface DeceasedListFilters extends PaginationParams {
 }
 
 export interface DeceasedExactDocumentFilter extends PaginationParams {
+  documentType: DocumentType
   document: string
 }

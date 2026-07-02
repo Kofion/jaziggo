@@ -1,4 +1,4 @@
-import Link from "next/link"
+﻿import Link from "next/link"
 
 import { ActionLink } from "@/components/ui/action-link"
 
@@ -115,7 +115,7 @@ export async function DeceasedReportTable(props: DeceasedReportTableProps) {
         title="Nenhum falecido encontrado"
         description={
           report.emptyMessage ??
-          "Não ha falecidos cadastrados para o período selecionado."
+          "Não há falecidos cadastrados para o período selecionado."
         }
       />
     )

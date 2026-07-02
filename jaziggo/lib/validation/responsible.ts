@@ -6,14 +6,14 @@ import {
   requiredTrimmedStringSchema,
 } from "./common"
 import {
-  normalizeDocument,
+  documentTypeSchema,
+  normalizedDocumentSchema,
+  validateDocumentByType,
+} from "./document"
+import {
   normalizePhone,
   normalizeSearchName,
 } from "./normalize"
-
-const normalizedDocumentSchema = requiredTrimmedStringSchema
-  .transform(normalizeDocument)
-  .pipe(z.string().min(1))
 
 const normalizedPhoneSchema = requiredTrimmedStringSchema
   .transform(normalizePhone)
@@ -24,6 +24,7 @@ const normalizedEmailSchema = requiredTrimmedStringSchema
   .transform((email) => email.toLowerCase())
 
 const responsibleContactFields = {
+  documentType: documentTypeSchema.optional(),
   document: normalizedDocumentSchema.optional(),
   phone: normalizedPhoneSchema.optional(),
   email: normalizedEmailSchema.optional(),
@@ -31,6 +32,7 @@ const responsibleContactFields = {
 }
 
 type ResponsibleContacts = {
+  documentType?: "CPF" | "RG"
   document?: string
   phone?: string
   email?: string
@@ -58,7 +60,10 @@ export const createResponsibleSchema = z
     ...responsibleContactFields,
   })
   .strict()
-  .superRefine(requireContact)
+  .superRefine((value, context) => {
+    validateDocumentByType(value, context)
+    requireContact(value, context)
+  })
 
 export const updateResponsibleSchema = z
   .object({
@@ -67,6 +72,8 @@ export const updateResponsibleSchema = z
   })
   .strict()
   .superRefine((value, context) => {
+    validateDocumentByType(value, context)
+
     if (Object.keys(value).length === 0) {
       context.addIssue({
         code: "custom",
@@ -88,6 +95,7 @@ export const responsibleListFiltersSchema = paginationSchema
 
 const responsibleDocumentSearchSchema = paginationSchema
   .extend({
+    documentType: documentTypeSchema,
     document: normalizedDocumentSchema,
     phone: z.never().optional(),
   })
@@ -95,6 +103,7 @@ const responsibleDocumentSearchSchema = paginationSchema
 
 const responsiblePhoneSearchSchema = paginationSchema
   .extend({
+    documentType: z.never().optional(),
     document: z.never().optional(),
     phone: normalizedPhoneSchema,
   })

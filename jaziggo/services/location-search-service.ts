@@ -166,13 +166,8 @@ function locationKeyFilter(
   key: string,
   value: string,
 ): Prisma.BurialSpaceWhereInput {
-  const token = `${key}=${encodeURIComponent(value)}`
-
   return {
-    OR: [
-      { locationKey: { contains: `${token}|` } },
-      { locationKey: { endsWith: token } },
-    ],
+    locationKey: { contains: `${key}=${encodeURIComponent(value)}` },
   }
 }
 
@@ -303,7 +298,10 @@ export async function searchLocations(
               },
         burialSpace: {
           is: {
-            identifier: burialSpaceIdentifier,
+            identifier:
+              burialSpaceIdentifier === undefined
+                ? undefined
+                : { contains: burialSpaceIdentifier },
             AND:
               burialSpaceFilters.length === 0
                 ? undefined
@@ -347,13 +345,14 @@ export async function searchLocationsByDocument(
         throw LocationSearchServiceError.validation()
       }
 
-      const { page, pageSize } = parsedInput.data
+      const { documentType, page, pageSize } = parsedInput.data
       const where: Prisma.BurialLinkWhereInput = {
         status: "ACTIVE",
         ...(parsedInput.data.deceasedDocument !== undefined
           ? {
               deceased: {
                 is: {
+                  documentType,
                   document: parsedInput.data.deceasedDocument,
                 },
               },
@@ -361,6 +360,7 @@ export async function searchLocationsByDocument(
           : {
               responsible: {
                 is: {
+                  documentType,
                   document: parsedInput.data.responsibleDocument,
                 },
               },

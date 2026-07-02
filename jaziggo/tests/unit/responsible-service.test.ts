@@ -16,6 +16,7 @@ const prismaMock = vi.hoisted(() => ({
     count: vi.fn(),
     create: vi.fn(),
     findMany: vi.fn(),
+    findFirst: vi.fn(),
     findUnique: vi.fn(),
     update: vi.fn(),
   },
@@ -87,6 +88,7 @@ const {
 type ResponsibleRecord = {
   id: string
   fullName: string
+  documentType: "CPF" | "RG" | null
   document: string | null
   phone: string | null
   email: string | null
@@ -116,6 +118,7 @@ function responsibleRecord(
   return {
     id: responsibleId,
     fullName: "Maria Responsavel",
+    documentType: "CPF",
     document: "12345678900",
     phone: "11987654321",
     email: "maria@example.com",
@@ -166,6 +169,8 @@ describe("ResponsibleService", () => {
     prismaMock.responsible.count.mockReset()
     prismaMock.responsible.create.mockReset()
     prismaMock.responsible.findMany.mockReset()
+    prismaMock.responsible.findFirst.mockReset()
+    prismaMock.responsible.findFirst.mockResolvedValue(null)
     prismaMock.responsible.findUnique.mockReset()
     prismaMock.responsible.update.mockReset()
     transactionMock.burialSpace.findUnique.mockReset()
@@ -183,6 +188,7 @@ describe("ResponsibleService", () => {
   it("creates a responsible with minimum contact data and returns a list DTO", async () => {
     prismaMock.responsible.create.mockResolvedValue(
       responsibleRecord({
+        documentType: null,
         document: null,
         email: null,
         address: null,
@@ -207,6 +213,7 @@ describe("ResponsibleService", () => {
         id: true,
         fullName: true,
         document: true,
+        documentType: true,
       },
     })
     expect(result).toEqual<ResponsibleListItemDto>({
@@ -239,6 +246,7 @@ describe("ResponsibleService", () => {
         responsibleRecord({
           id: "00000000-0000-4000-8000-000000000135",
           fullName: "Maria Outra",
+          documentType: null,
           document: null,
         }),
       ],
@@ -256,6 +264,7 @@ describe("ResponsibleService", () => {
         {
           id: responsibleId,
           fullName: "Maria Responsavel",
+          documentType: "CPF",
           documentMasked: "*******8900",
         },
         {
@@ -283,6 +292,7 @@ describe("ResponsibleService", () => {
           id: true,
           fullName: true,
           document: true,
+        documentType: true,
         },
         orderBy: [{ searchName: "asc" }, { id: "asc" }],
         skip: 10,
@@ -313,7 +323,8 @@ describe("ResponsibleService", () => {
     expect(result).toEqual<ResponsibleDetailDto>({
       id: responsibleId,
       fullName: "Maria Responsavel",
-      documentMasked: "*******8900",
+      documentType: "CPF",
+          documentMasked: "*******8900",
       phone: "11987654321",
       email: "maria@example.com",
       address: "Rua Central, 100",

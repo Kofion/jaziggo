@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 
@@ -45,14 +45,14 @@ const TARGET_STATUS_DESCRIPTIONS = {
 
 function conflictMessage(targetStatus: ChangeableBurialSpaceStatus) {
   if (targetStatus === BURIAL_SPACE_STATUS.RESERVED) {
-    return "Não e possível reservar um espaço com vínculo ativo. Encerre os vínculos ativos antes de alterar para RESERVED."
+    return "Não é possível reservar um espaço com vínculo ativo. Encerre os vínculos ativos antes de alterar para RESERVED."
   }
 
   if (targetStatus === BURIAL_SPACE_STATUS.INACTIVE) {
-    return "Não e possível inativar um espaço com vínculo ativo. Encerre os vínculos ativos antes de alterar para INACTIVE."
+    return "Não é possível inativar um espaço com vínculo ativo. Encerre os vínculos ativos antes de alterar para INACTIVE."
   }
 
-  return "Não e possível marcar como disponível enquanto houver vínculo ativo. Encerre os vínculos ativos antes da alteracao."
+  return "Não é possível marcar como disponível enquanto houver vínculo ativo. Encerre os vínculos ativos antes da alteração."
 }
 
 function statusSummary(status: BurialSpaceStatus) {
@@ -85,7 +85,7 @@ export function ChangeStatusDialog({
   async function handleConfirm() {
     if (space.status === targetStatus) {
       setErrorMessage(null)
-      setSuccessMessage(`O espaço já esta com status ${targetStatusLabel}.`)
+      setSuccessMessage(`O espaço já está com status ${targetStatusLabel}.`)
       return
     }
 

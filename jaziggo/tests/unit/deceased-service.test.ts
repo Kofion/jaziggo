@@ -16,6 +16,7 @@ const prismaMock = vi.hoisted(() => ({
     count: vi.fn(),
     create: vi.fn(),
     findMany: vi.fn(),
+    findFirst: vi.fn(),
     findUnique: vi.fn(),
     update: vi.fn(),
   },
@@ -74,6 +75,7 @@ type DeceasedRecord = {
   id: string
   internalCode: string
   fullName: string
+  documentType: "CPF" | "RG" | null
   document: string | null
   birthDate: Date | null
   deathDate: Date | null
@@ -98,7 +100,8 @@ function deceasedRecord(
     id: deceasedId,
     internalCode: generatedInternalCode,
     fullName: "Jose da Silva",
-    document: "12345678900",
+    documentType: "CPF",
+        document: "52998224725",
     birthDate: new Date("1940-01-05T00:00:00.000Z"),
     deathDate: new Date("2026-01-10T00:00:00.000Z"),
     burialDate: new Date("2026-01-12T00:00:00.000Z"),
@@ -138,6 +141,8 @@ describe("DeceasedService", () => {
     prismaMock.deceased.count.mockReset()
     prismaMock.deceased.create.mockReset()
     prismaMock.deceased.findMany.mockReset()
+    prismaMock.deceased.findFirst.mockReset()
+    prismaMock.deceased.findFirst.mockResolvedValue(null)
     prismaMock.deceased.findUnique.mockReset()
     prismaMock.deceased.update.mockReset()
     generateUniqueInternalCodeMock.mockReset()
@@ -151,7 +156,8 @@ describe("DeceasedService", () => {
 
     const result = await createDeceased({
       fullName: " Jose da Silva ",
-      document: " 123.456.789-00 ",
+      documentType: "CPF",
+      document: " 529.982.247-25 ",
       birthDate: "1940-01-05",
       deathDate: "2026-01-10",
       burialDate: "2026-01-12",
@@ -165,7 +171,8 @@ describe("DeceasedService", () => {
     expect(prismaMock.deceased.create).toHaveBeenCalledWith({
       data: {
         fullName: "Jose da Silva",
-        document: "12345678900",
+        documentType: "CPF",
+        document: "52998224725",
         birthDate: new Date("1940-01-05T00:00:00.000Z"),
         deathDate: new Date("2026-01-10T00:00:00.000Z"),
         burialDate: new Date("2026-01-12T00:00:00.000Z"),
@@ -184,7 +191,8 @@ describe("DeceasedService", () => {
       id: deceasedId,
       internalCode: generatedInternalCode,
       fullName: "Jose da Silva",
-      documentMasked: "*******8900",
+      documentType: "CPF",
+        documentMasked: "*******4725",
       birthDate: "1940-01-05",
       deathDate: "2026-01-10",
       burialDate: "2026-01-12",
@@ -200,6 +208,7 @@ describe("DeceasedService", () => {
   it("creates historical incomplete records when dates are unknown", async () => {
     prismaMock.deceased.create.mockResolvedValue(
       deceasedRecord({
+        documentType: null,
         document: null,
         birthDate: null,
         deathDate: null,
@@ -321,7 +330,8 @@ describe("DeceasedService", () => {
           id: deceasedId,
           internalCode: generatedInternalCode,
           fullName: "Jose da Silva",
-          documentMasked: "*******8900",
+          documentType: "CPF",
+          documentMasked: "*******4725",
           deathDate: "2026-01-10",
           burialDate: "2026-01-12",
           historicalDataIncomplete: false,
@@ -344,14 +354,15 @@ describe("DeceasedService", () => {
     ])
 
     const result = await searchDeceasedByDocument({
-      document: " 123.456.789-00 ",
+      documentType: "CPF",
+      document: " 529.982.247-25 ",
       page: 1,
       pageSize: 25,
     })
 
     expect(prismaMock.deceased.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { document: "12345678900" },
+        where: { document: "52998224725", documentType: "CPF" },
       }),
     )
     expect(result.items).toEqual<DeceasedListItemDto[]>([
@@ -359,7 +370,8 @@ describe("DeceasedService", () => {
         id: deceasedId,
         internalCode: generatedInternalCode,
         fullName: "Jose da Silva",
-        documentMasked: "*******8900",
+        documentType: "CPF",
+      documentMasked: "*******4725",
         deathDate: "2026-01-10",
         burialDate: "2026-01-12",
         historicalDataIncomplete: false,
@@ -374,6 +386,7 @@ describe("DeceasedService", () => {
       deceasedRecord({
         id: otherDeceasedId,
         internalCode: "JZG-20260626-ZYXWVU654321",
+        documentType: null,
         document: null,
         birthDate: null,
         historicalDataIncomplete: true,
@@ -383,7 +396,8 @@ describe("DeceasedService", () => {
     const result = await checkDeceasedDuplicates(
       {
         fullName: " Jose da Silva ",
-        document: "123.456.789-00",
+        documentType: "CPF",
+        document: "529.982.247-25",
         deathDate: "2026-01-10",
       },
       { excludeDeceasedId: otherDeceasedId },
@@ -394,7 +408,7 @@ describe("DeceasedService", () => {
         searchName: "jose da silva",
         id: { not: otherDeceasedId },
         OR: [
-          { document: "12345678900" },
+          { document: "52998224725", documentType: "CPF" },
           { deathDate: new Date("2026-01-10T00:00:00.000Z") },
         ],
       },
@@ -413,7 +427,8 @@ describe("DeceasedService", () => {
         id: deceasedId,
         internalCode: generatedInternalCode,
         fullName: "Jose da Silva",
-        documentMasked: "*******8900",
+        documentType: "CPF",
+        documentMasked: "*******4725",
         birthDate: "1940-01-05",
         deathDate: "2026-01-10",
         burialDate: "2026-01-12",
@@ -448,7 +463,8 @@ describe("DeceasedService", () => {
     expect(result).toMatchObject({
       id: deceasedId,
       internalCode: generatedInternalCode,
-      documentMasked: "*******8900",
+      documentType: "CPF",
+      documentMasked: "*******4725",
       links: [
         {
           id: burialLinkId,
@@ -464,6 +480,7 @@ describe("DeceasedService", () => {
   })
 
   it("updates dates and maps missing records to not found", async () => {
+    prismaMock.deceased.findUnique.mockResolvedValue({ document: "52998224725" })
     prismaMock.deceased.update.mockResolvedValue(
       deceasedRecord({
         deathDate: null,
@@ -476,7 +493,8 @@ describe("DeceasedService", () => {
     await expect(
       updateDeceased(deceasedId, {
         fullName: " Jose da Silva ",
-        document: "12345678900",
+        documentType: "CPF",
+        document: "52998224725",
         datesUnknown: true,
       }),
     ).resolves.toMatchObject({
@@ -491,7 +509,8 @@ describe("DeceasedService", () => {
         data: expect.objectContaining({
           fullName: "Jose da Silva",
           searchName: "jose da silva",
-          document: "12345678900",
+          documentType: "CPF",
+        document: "52998224725",
           datesUnknown: true,
           historicalDataIncomplete: true,
         }),

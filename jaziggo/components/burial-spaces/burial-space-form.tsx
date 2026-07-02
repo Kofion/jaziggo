@@ -1,5 +1,6 @@
-"use client"
+﻿"use client"
 
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useId, useState, type FormEvent } from "react"
 
@@ -22,6 +23,7 @@ type BurialSpaceFormProps = Readonly<{
   mode: BurialSpaceFormMode
   space?: BurialSpaceListItemDto
   onSuccess?: (space: BurialSpaceListItemDto) => void
+  cancelHref?: string
   className?: string
 }>
 
@@ -53,8 +55,8 @@ const LOCATION_FIELDS = [
 const FORM_COPY = {
   create: {
     title: "Novo espaço",
-    description: "Cadastre uma sepultura ou jázigo com identificação, localização e capacidade.",
-    submitLabel: "Criar espaço",
+    description: "Cadastre uma sepultura ou jazigo com identificação, localização e capacidade.",
+    submitLabel: "Cadastrar espaço",
     pendingLabel: "Criando...",
     successMessage: "Espaço criado com sucesso.",
     errorMessage: "Não foi possível criar o espaço. Revise os dados e tente novamente.",
@@ -62,7 +64,7 @@ const FORM_COPY = {
   edit: {
     title: "Editar espaço",
     description: "Atualize dados cadastrais, localização e capacidade configurada.",
-    submitLabel: "Salvar alteracoes",
+    submitLabel: "Salvar alterações",
     pendingLabel: "Salvando...",
     successMessage: "Espaço atualizado com sucesso.",
     errorMessage: "Não foi possível atualizar o espaço. Revise os dados e tente novamente.",
@@ -126,6 +128,7 @@ export function BurialSpaceForm({
   mode,
   space,
   onSuccess,
+  cancelHref,
   className,
 }: BurialSpaceFormProps) {
   const router = useRouter()
@@ -180,7 +183,7 @@ export function BurialSpaceForm({
 
     if (!Number.isInteger(parsedCapacity) || parsedCapacity < 1) {
       setSuccessMessage(null)
-      setErrorMessage("Informe uma capacidade positiva para jázigos.")
+      setErrorMessage("Informe uma capacidade positiva para jazigos.")
       return
     }
 
@@ -220,11 +223,16 @@ export function BurialSpaceForm({
 
       setSuccessMessage(copy.successMessage)
       onSuccess?.(body.data)
-      router.refresh()
 
       if (mode === "create") {
         resetCreateState(form)
       }
+
+      if (mode === "edit" && cancelHref) {
+        router.push(cancelHref)
+      }
+
+      router.refresh()
     } catch {
       setErrorMessage(copy.errorMessage)
     } finally {
@@ -378,10 +386,18 @@ export function BurialSpaceForm({
         </div>
       </fieldset>
 
-      <div className="flex justify-end">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+        {mode === "edit" && cancelHref ? (
+          <Link
+            className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-red-600 px-4 text-sm font-semibold text-white hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 sm:w-auto"
+            href={cancelHref}
+          >
+            Cancelar alterações
+          </Link>
+        ) : null}
         <button
           aria-busy={pending}
-          className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-zinc-950 px-4 text-sm font-semibold text-white hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 disabled:cursor-not-allowed disabled:bg-zinc-400 sm:w-auto"
+          className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 disabled:cursor-not-allowed disabled:bg-zinc-400 sm:w-auto"
           disabled={pending}
           type="submit"
         >

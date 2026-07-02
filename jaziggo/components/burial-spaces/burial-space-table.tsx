@@ -1,4 +1,4 @@
-import { ActionLink } from "@/components/ui/action-link"
+﻿import { ActionLink } from "@/components/ui/action-link"
 import type {
   BurialSpaceListItemDto,
   BurialSpaceStatus,
@@ -58,7 +58,7 @@ export function BurialSpaceTable({ spaces }: BurialSpaceTableProps) {
   return (
     <div className="overflow-x-auto rounded-md border border-zinc-200 bg-white">
       <table className="min-w-full divide-y divide-zinc-200 text-sm">
-        <caption className="sr-only">Sepulturas e jázigos cadastrados</caption>
+        <caption className="sr-only">Sepulturas e jazigos cadastrados</caption>
         <thead className="bg-zinc-50 text-left text-xs font-semibold uppercase text-zinc-600">
           <tr>
             <th className="px-4 py-3" scope="col">

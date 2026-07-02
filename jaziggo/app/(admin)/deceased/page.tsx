@@ -1,9 +1,9 @@
-import type { Metadata } from "next"
+﻿import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { Suspense } from "react"
 import { z } from "zod"
 
-import { DeceasedForm } from "@/components/deceased/deceased-form"
+import { DeceasedRegistrationWorkflow } from "@/components/deceased/deceased-registration-workflow"
 import { DeceasedTable } from "@/components/deceased/deceased-table"
 import { EmptyState } from "@/components/ui/empty-state"
 import { ErrorMessage } from "@/components/ui/error-message"
@@ -36,6 +36,10 @@ const deceasedListQuerySchema = deceasedListFiltersSchema.pick({
   burialDate: true,
 })
 
+function shouldKeepQueryValue(key: string, value: string) {
+  return key === "page" || key === "pageSize" || value.trim().length > 0
+}
+
 function normalizeSearchParams(params: Record<string, string | string[] | undefined>) {
   const normalized: Record<string, string> = {}
 
@@ -43,14 +47,14 @@ function normalizeSearchParams(params: Record<string, string | string[] | undefi
     if (Array.isArray(value)) {
       const firstValue = value.at(0)
 
-      if (firstValue !== undefined) {
+      if (firstValue !== undefined && shouldKeepQueryValue(key, firstValue)) {
         normalized[key] = firstValue
       }
 
       continue
     }
 
-    if (value !== undefined) {
+    if (value !== undefined && shouldKeepQueryValue(key, value)) {
       normalized[key] = value
     }
   }
@@ -162,7 +166,7 @@ export default async function DeceasedPage({ searchParams }: DeceasedPageProps) 
       </header>
 
       <section className="space-y-4">
-        <DeceasedForm mode="create" />
+        <DeceasedRegistrationWorkflow />
       </section>
 
       <form
@@ -243,7 +247,7 @@ export default async function DeceasedPage({ searchParams }: DeceasedPageProps) 
         <Suspense
           fallback={
             <LoadingState
-              description="A lista de falecidos esta sendo consultada."
+              description="A lista de falecidos está sendo consultada."
               label="Carregando falecidos"
               rows={4}
             />

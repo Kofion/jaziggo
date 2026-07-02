@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useMemo, useState } from "react"
 
@@ -137,7 +137,7 @@ export function LocationResults({
 
       {documentSearchPending ? (
         <LoadingState
-          description="A busca por documento esta em andamento sem persistir o valor informado na URL."
+          description="A busca por documento está em andamento sem persistir o valor informado na URL."
           label="Buscando localização"
           rows={3}
         />

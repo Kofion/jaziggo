@@ -1,13 +1,16 @@
 import type { PaginationParams } from "./api"
 
+export type DocumentType = "CPF" | "RG"
+
 interface ResponsibleContactFields {
+  documentType?: DocumentType
   document?: string
   phone?: string
   email?: string
   address?: string
 }
 
-type ResponsibleContactField = keyof ResponsibleContactFields
+type ResponsibleContactField = keyof Omit<ResponsibleContactFields, "documentType">
 
 type RequiredResponsibleContact = ResponsibleContactFields &
   {
@@ -25,6 +28,7 @@ export type UpdateResponsibleInput = CreateResponsibleInput
 export interface ResponsibleListItemDto {
   id: string
   fullName: string
+  documentType?: DocumentType
   documentMasked?: string
 }
 
@@ -43,8 +47,8 @@ export interface ResponsibleListFilters extends PaginationParams {
 
 export type ResponsibleSensitiveSearchFilters = PaginationParams &
   (
-    | { document: string; phone?: never }
-    | { document?: never; phone: string }
+    | { documentType: DocumentType; document: string; phone?: never }
+    | { documentType?: never; document?: never; phone: string }
   )
 
 export const RESPONSIBLE_LINK_TYPE = {

@@ -1,9 +1,10 @@
-import "server-only"
+﻿import "server-only"
 
 import type {
   DeceasedDetailDto,
   DeceasedDuplicateCandidateDto,
   DeceasedListItemDto,
+  DocumentType,
   IsoDateString,
   IsoDateTimeString,
 } from "../../types/deceased"
@@ -16,6 +17,7 @@ interface DeceasedListDtoSource {
   internalCode: string
   fullName: string
   document: string | null
+  documentType: DocumentType | null
   deathDate: DateLike | null
   burialDate: DateLike | null
   historicalDataIncomplete: boolean
@@ -63,6 +65,7 @@ export function toDeceasedListItemDto(deceased: DeceasedListDtoSource): Deceased
     internalCode: deceased.internalCode,
     fullName: deceased.fullName,
     historicalDataIncomplete: deceased.historicalDataIncomplete,
+    ...(deceased.documentType ? { documentType: deceased.documentType } : {}),
     ...(documentMasked ? { documentMasked } : {}),
     ...(deathDate ? { deathDate } : {}),
     ...(burialDate ? { burialDate } : {}),

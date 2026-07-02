@@ -26,6 +26,7 @@ const RESPONSIBLE_LIST_DTO_SELECT = {
   id: true,
   fullName: true,
   document: true,
+  documentType: true,
 } as const satisfies Prisma.ResponsibleSelect
 
 interface ResponsiblePageResponse extends PaginationMeta {
@@ -116,7 +117,10 @@ export async function POST(request: NextRequest) {
 
   const where: Prisma.ResponsibleWhereInput =
     "document" in parsedInput.data
-      ? { document: parsedInput.data.document }
+      ? {
+          documentType: parsedInput.data.documentType,
+          document: parsedInput.data.document,
+        }
       : { phone: parsedInput.data.phone }
 
   try {

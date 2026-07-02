@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+﻿import type { Metadata } from "next"
 
 import { LoginForm } from "../../../components/forms/login-form"
 

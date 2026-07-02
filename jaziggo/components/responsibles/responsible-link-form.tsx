@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useId, useState, type FormEvent } from "react"
 
@@ -13,13 +13,15 @@ import {
 
 type ResponsibleLinkFormProps = Readonly<{
   responsibleId?: string
+  deceasedId?: string
+  burialSpaceId?: string
   onSuccess?: (link: ResponsibleLinkDto) => void
   className?: string
 }>
 
 const LINK_TYPE_OPTIONS = [
   { label: "Falecido", value: RESPONSIBLE_LINK_TYPE.DECEASED },
-  { label: "Sepultura ou jázigo", value: RESPONSIBLE_LINK_TYPE.BURIAL_SPACE },
+  { label: "Sepultura ou jazigo", value: RESPONSIBLE_LINK_TYPE.BURIAL_SPACE },
 ] as const satisfies ReadonlyArray<{
   label: string
   value: ResponsibleLinkType
@@ -78,14 +80,22 @@ function errorMessageForResponse(
 
 export function ResponsibleLinkForm({
   responsibleId,
+  deceasedId,
+  burialSpaceId,
   onSuccess,
   className,
 }: ResponsibleLinkFormProps) {
   const formId = useId()
   const errorId = useId()
   const successId = useId()
+  const fixedTargetId = deceasedId ?? burialSpaceId
+  const fixedLinkType = deceasedId
+    ? RESPONSIBLE_LINK_TYPE.DECEASED
+    : burialSpaceId
+      ? RESPONSIBLE_LINK_TYPE.BURIAL_SPACE
+      : undefined
   const [linkType, setLinkType] = useState<ResponsibleLinkType>(
-    RESPONSIBLE_LINK_TYPE.DECEASED,
+    fixedLinkType ?? RESPONSIBLE_LINK_TYPE.DECEASED,
   )
   const [pending, setPending] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -96,10 +106,11 @@ export function ResponsibleLinkForm({
   ]
     .filter(Boolean)
     .join(" ")
+  const effectiveLinkType = fixedLinkType ?? linkType
   const targetLabel =
-    linkType === RESPONSIBLE_LINK_TYPE.DECEASED
+    effectiveLinkType === RESPONSIBLE_LINK_TYPE.DECEASED
       ? "ID do falecido"
-      : "ID da sepultura ou jázigo"
+      : "ID da sepultura ou jazigo"
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -107,7 +118,7 @@ export function ResponsibleLinkForm({
     const form = event.currentTarget
     const formData = new FormData(form)
     const selectedResponsibleId = responsibleId ?? fieldValue(formData, "responsibleId")
-    const targetId = fieldValue(formData, "targetId")
+    const targetId = fixedTargetId ?? fieldValue(formData, "targetId")
 
     if (selectedResponsibleId.length === 0 || targetId.length === 0) {
       setSuccessMessage(null)
@@ -115,7 +126,7 @@ export function ResponsibleLinkForm({
       return
     }
 
-    const payload = buildPayload(selectedResponsibleId, linkType, targetId)
+    const payload = buildPayload(selectedResponsibleId, effectiveLinkType, targetId)
 
     setPending(true)
     setErrorMessage(null)
@@ -147,7 +158,10 @@ export function ResponsibleLinkForm({
       setSuccessMessage("Vínculo criado com sucesso.")
       onSuccess?.(body.data)
       form.reset()
-      setLinkType(RESPONSIBLE_LINK_TYPE.DECEASED)
+
+      if (!fixedLinkType) {
+        setLinkType(RESPONSIBLE_LINK_TYPE.DECEASED)
+      }
     } catch {
       setErrorMessage(
         "Não foi possível criar o vínculo. Revise os dados e tente novamente.",
@@ -169,7 +183,7 @@ export function ResponsibleLinkForm({
           Vincular responsável
         </h2>
         <p className="text-sm leading-6 text-zinc-600">
-          Associe o responsável a um falecido ou a uma sepultura ou jázigo existente.
+          Associe o responsável a um falecido ou a uma sepultura ou jazigo existente.
         </p>
       </div>
 
@@ -209,47 +223,51 @@ export function ResponsibleLinkForm({
           </div>
         )}
 
-        <div>
-          <label
-            className="mb-2 block text-sm font-medium text-zinc-800"
-            htmlFor={`${formId}-linkType`}
-          >
-            Tipo de alvo
-          </label>
-          <select
-            className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
-            id={`${formId}-linkType`}
-            name="linkType"
-            onChange={(event) => {
-              setLinkType(event.currentTarget.value as ResponsibleLinkType)
-            }}
-            required
-            value={linkType}
-          >
-            {LINK_TYPE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
+        {fixedLinkType ? null : (
+          <div>
+            <label
+              className="mb-2 block text-sm font-medium text-zinc-800"
+              htmlFor={`${formId}-linkType`}
+            >
+              Tipo de alvo
+            </label>
+            <select
+              className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
+              id={`${formId}-linkType`}
+              name="linkType"
+              onChange={(event) => {
+                setLinkType(event.currentTarget.value as ResponsibleLinkType)
+              }}
+              required
+              value={linkType}
+            >
+              {LINK_TYPE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
-        <div>
-          <label
-            className="mb-2 block text-sm font-medium text-zinc-800"
-            htmlFor={`${formId}-targetId`}
-          >
-            {targetLabel}
-          </label>
-          <input
-            autoComplete="off"
-            className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 font-mono text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
-            id={`${formId}-targetId`}
-            name="targetId"
-            required
-            type="text"
-          />
-        </div>
+        {fixedTargetId ? null : (
+          <div>
+            <label
+              className="mb-2 block text-sm font-medium text-zinc-800"
+              htmlFor={`${formId}-targetId`}
+            >
+              {targetLabel}
+            </label>
+            <input
+              autoComplete="off"
+              className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 font-mono text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
+              id={`${formId}-targetId`}
+              name="targetId"
+              required
+              type="text"
+            />
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end">

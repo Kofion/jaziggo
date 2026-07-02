@@ -1,11 +1,15 @@
-import type { Metadata } from "next"
+﻿import type { Metadata } from "next"
 import { redirect } from "next/navigation"
+
+import { ResponsibleForm } from "@/components/responsibles/responsible-form"
 
 import { ActionLink } from "@/components/ui/action-link"
 import { EmptyState } from "@/components/ui/empty-state"
 import { ErrorMessage } from "@/components/ui/error-message"
+import { RecordDangerActions } from "@/components/ui/record-danger-actions"
 import { getCurrentActiveUser } from "@/lib/auth/session"
 import {
+  countResponsibleLinks,
   getResponsibleById,
   ResponsibleServiceError,
 } from "@/services/responsible-service"
@@ -22,11 +26,12 @@ export const metadata: Metadata = {
 
 type ResponsibleDetailPageProps = Readonly<{
   params: Promise<{ id: string }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }>
 
 const LINK_TYPE_LABELS = {
   DECEASED: "Falecido",
-  BURIAL_SPACE: "Sepultura ou jázigo",
+  BURIAL_SPACE: "Sepultura ou jazigo",
 } as const satisfies Record<ResponsibleLinkType, string>
 
 const LINK_STATUS_LABELS = {
@@ -162,7 +167,10 @@ function ResponsibleLinkTable({
   )
 }
 
-async function ResponsibleDetail({ id }: Readonly<{ id: string }>) {
+async function ResponsibleDetail({
+  id,
+  isEditing,
+}: Readonly<{ id: string; isEditing: boolean }>) {
   let responsible: ResponsibleDetailDto
 
   try {
@@ -182,6 +190,28 @@ async function ResponsibleDetail({ id }: Readonly<{ id: string }>) {
         message="Tente novamente em instantes. Se o problema persistir, informe o suporte interno."
         title="Erro ao carregar responsável"
       />
+    )
+  }
+
+  if (isEditing) {
+    const linkCount = await countResponsibleLinks(id)
+
+    return (
+      <div className="space-y-6">
+        <ResponsibleForm
+          cancelHref={`/responsibles/${id}`}
+          mode="edit"
+          responsible={responsible}
+        />
+        <RecordDangerActions
+          afterDeleteHref="/responsibles"
+          deleteEndpoint={`/api/v1/responsibles/${id}`}
+          entityLabel="responsável"
+          entityName={responsible.fullName}
+          hasLinks={linkCount > 0}
+          unlinkEndpoint={`/api/v1/responsibles/${id}/links`}
+        />
+      </div>
     )
   }
 
@@ -207,6 +237,7 @@ async function ResponsibleDetail({ id }: Readonly<{ id: string }>) {
 
 export default async function ResponsibleDetailPage({
   params,
+  searchParams,
 }: ResponsibleDetailPageProps) {
   const currentUser = await getCurrentActiveUser()
 
@@ -215,11 +246,17 @@ export default async function ResponsibleDetailPage({
   }
 
   const { id } = await params
-
+  const query = await searchParams
+  const isEditing = query.edit === "1"
   return (
     <div className="space-y-6">
       <header className="space-y-3">
-        <ActionLink href="/responsibles" variant="back">Voltar para responsáveis</ActionLink>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <ActionLink href="/responsibles" variant="back">Voltar para responsáveis</ActionLink>
+          {!isEditing ? (
+            <ActionLink href={`/responsibles/${id}?edit=1`}>Editar informações</ActionLink>
+          ) : null}
+        </div>
         <div>
           <p className="text-sm font-medium text-zinc-500">Operação cemiterial</p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">
@@ -231,7 +268,7 @@ export default async function ResponsibleDetailPage({
         </div>
       </header>
 
-      <ResponsibleDetail id={id} />
+      <ResponsibleDetail id={id} isEditing={isEditing} />
     </div>
   )
 }

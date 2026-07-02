@@ -1,9 +1,16 @@
 "use client"
 
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useId, useState, type FormEvent } from "react"
 
 import { DuplicateReview } from "@/components/deceased/duplicate-review"
+import {
+  DocumentInputFields,
+  isDocumentLengthValid,
+  onlyDocumentDigits,
+  type DocumentType,
+} from "@/components/ui/document-input-fields"
 import { ErrorMessage } from "@/components/ui/error-message"
 import type { ApiEnvelope, PaginationMeta } from "@/types/api"
 import type {
@@ -18,11 +25,13 @@ type DeceasedFormProps = Readonly<{
   mode: DeceasedFormMode
   deceased?: DeceasedDetailDto
   onSuccess?: (deceased: DeceasedDetailDto) => void
+  cancelHref?: string
   className?: string
 }>
 
 type DeceasedFormPayload = {
   fullName: string
+  documentType?: DocumentType
   document?: string
   birthDate?: string
   deathDate?: string
@@ -39,8 +48,8 @@ const FORM_COPY = {
   create: {
     title: "Novo falecido",
     description:
-      "Cadastre o falecido com nome, datas disponíveis e indicação explicita quando as datas forem desconhecidas.",
-    submitLabel: "Criar falecido",
+      "Cadastre o falecido com nome, datas disponíveis e indicação explícita quando as datas forem desconhecidas.",
+    submitLabel: "Cadastrar falecido",
     pendingLabel: "Criando...",
     successMessage: "Falecido criado com sucesso.",
     errorMessage:
@@ -50,7 +59,7 @@ const FORM_COPY = {
     title: "Editar falecido",
     description:
       "Atualize os dados administrativos do falecido preservando a indicação histórica quando aplicável.",
-    submitLabel: "Salvar alteracoes",
+    submitLabel: "Salvar alterações",
     pendingLabel: "Salvando...",
     successMessage: "Falecido atualizado com sucesso.",
     errorMessage:
@@ -100,11 +109,19 @@ function deceasedEndpoint(mode: DeceasedFormMode, deceased?: DeceasedDetailDto) 
   return `/api/v1/deceased/${encodeURIComponent(deceased.id)}`
 }
 
+function selectedDocumentType(formData: FormData): DocumentType | undefined {
+  const value = fieldValue(formData, "documentType")
+
+  return value === "CPF" || value === "RG" ? value : undefined
+}
+
 function buildPayload(formData: FormData): DeceasedFormPayload {
   const datesUnknown = checkboxValue(formData, "datesUnknown")
+  const document = optionalFieldValue(formData, "document")
+  const documentType = document ? selectedDocumentType(formData) : undefined
   const payload: DeceasedFormPayload = {
     fullName: fieldValue(formData, "fullName"),
-    document: optionalFieldValue(formData, "document"),
+    ...(document ? { document: onlyDocumentDigits(document), documentType } : {}),
     birthDate: optionalFieldValue(formData, "birthDate"),
     notes: optionalFieldValue(formData, "notes"),
   }
@@ -126,6 +143,12 @@ function buildPayload(formData: FormData): DeceasedFormPayload {
 function validatePayload(payload: DeceasedFormPayload) {
   if (payload.fullName.length === 0) {
     return "Informe o nome completo do falecido."
+  }
+
+  if (payload.document && (!payload.documentType || !isDocumentLengthValid(payload.documentType, payload.document))) {
+    return payload.documentType === "CPF"
+      ? "Informe um CPF válido com 11 números."
+      : "Informe um RG válido usando apenas números."
   }
 
   if (payload.datesUnknown === true) {
@@ -159,6 +182,7 @@ export function DeceasedForm({
   mode,
   deceased,
   onSuccess,
+  cancelHref,
   className,
 }: DeceasedFormProps) {
   const router = useRouter()
@@ -217,18 +241,27 @@ export function DeceasedForm({
       const body = await readJsonEnvelope<DeceasedDetailDto>(response)
 
       if (!response.ok || !body?.success) {
-        setErrorMessage(copy.errorMessage)
+        setErrorMessage(
+          response.status === 409
+            ? "Já existe um cadastro com esse tipo e número de documento."
+            : copy.errorMessage,
+        )
         return
       }
 
       setSuccessMessage(copy.successMessage)
       resetDuplicateReview()
       onSuccess?.(body.data)
-      router.refresh()
 
       if (mode === "create" && form) {
         resetCreateState(form)
       }
+
+      if (mode === "edit" && cancelHref) {
+        router.push(cancelHref)
+      }
+
+      router.refresh()
     } catch {
       setErrorMessage(copy.errorMessage)
     } finally {
@@ -248,7 +281,11 @@ export function DeceasedForm({
     const body = await readJsonEnvelope<DuplicatePageResponse>(response)
 
     if (!response.ok || !body?.success) {
-      throw new Error("Unable to check duplicates")
+      throw new Error(
+        response.status === 422
+          ? "Revise os dados do falecido antes de verificar duplicidades."
+          : "Não foi possível revisar duplicidades. Tente novamente.",
+      )
     }
 
     const candidates = body.data.data.filter((candidate) => candidate.id !== deceased?.id)
@@ -285,8 +322,12 @@ export function DeceasedForm({
       }
 
       await submitPayload(payload as CreateDeceasedInput, form)
-    } catch {
-      setErrorMessage("Não foi possível revisar duplicidades. Tente novamente.")
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível revisar duplicidades. Tente novamente.",
+      )
     } finally {
       setPending(false)
     }
@@ -340,29 +381,14 @@ export function DeceasedForm({
           />
         </div>
 
-        <div>
-          <label
-            className="mb-2 block text-sm font-medium text-zinc-800"
-            htmlFor={`${formId}-document`}
-          >
-            Documento
-          </label>
-          <input
-            autoComplete="off"
-            className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
-            id={`${formId}-document`}
-            maxLength={40}
-            name="document"
-            placeholder={mode === "edit" ? "Informar novo documento" : undefined}
-            type="text"
+        <div className="sm:col-span-2">
+          <DocumentInputFields
+            baseId={formId}
+            currentDocumentMasked={deceased?.documentMasked}
+            currentDocumentType={deceased?.documentType}
+            editMode={mode === "edit"}
           />
-          {mode === "edit" ? (
-            <p className="mt-1 text-xs text-zinc-600">
-              Documento atual: {deceased?.documentMasked ?? "Não informado"}
-            </p>
-          ) : null}
         </div>
-
         <div>
           <label
             className="mb-2 block text-sm font-medium text-zinc-800"
@@ -456,10 +482,18 @@ export function DeceasedForm({
         pending={pending}
       />
 
-      <div className="flex justify-end">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+        {mode === "edit" && cancelHref ? (
+          <Link
+            className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-red-600 px-4 text-sm font-semibold text-white hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 sm:w-auto"
+            href={cancelHref}
+          >
+            Cancelar alterações
+          </Link>
+        ) : null}
         <button
           aria-busy={pending}
-          className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-zinc-950 px-4 text-sm font-semibold text-white hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 disabled:cursor-not-allowed disabled:bg-zinc-400 sm:w-auto"
+          className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 disabled:cursor-not-allowed disabled:bg-zinc-400 sm:w-auto"
           disabled={pending || duplicateCandidates.length > 0}
           type="submit"
         >

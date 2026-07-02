@@ -1,4 +1,4 @@
-import Link from "next/link"
+﻿import Link from "next/link"
 
 import { ActionLink } from "@/components/ui/action-link"
 
@@ -174,7 +174,7 @@ export async function BurialsPeriodReportTable(
         title="Nenhum sepultamento encontrado"
         description={
           report.emptyMessage ??
-          "Não ha sepultamentos para o período selecionado."
+          "Não há sepultamentos para o período selecionado."
         }
       />
     )

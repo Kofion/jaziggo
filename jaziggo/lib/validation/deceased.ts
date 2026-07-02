@@ -7,11 +7,12 @@ import {
   requiredTrimmedStringSchema,
   uuidSchema,
 } from "./common"
-import { normalizeDocument, normalizeSearchName } from "./normalize"
-
-const normalizedDocumentSchema = requiredTrimmedStringSchema
-  .transform(normalizeDocument)
-  .pipe(z.string().min(1))
+import {
+  documentTypeSchema,
+  normalizedDocumentSchema,
+  validateDocumentByType,
+} from "./document"
+import { normalizeSearchName } from "./normalize"
 
 const normalizedSearchNameSchema = requiredTrimmedStringSchema
   .transform(normalizeSearchName)
@@ -20,6 +21,7 @@ const normalizedSearchNameSchema = requiredTrimmedStringSchema
 const deceasedFieldsSchema = z
   .object({
     fullName: requiredTrimmedStringSchema,
+    documentType: documentTypeSchema.optional(),
     document: normalizedDocumentSchema.optional(),
     birthDate: optionalIsoDateSchema,
     deathDate: optionalIsoDateSchema,
@@ -83,12 +85,20 @@ function validateDeceasedDates(
   }
 }
 
+function validateDeceased(
+  value: z.infer<typeof deceasedFieldsSchema>,
+  context: z.RefinementCtx,
+): void {
+  validateDocumentByType(value, context)
+  validateDeceasedDates(value, context)
+}
+
 export const createDeceasedSchema = deceasedFieldsSchema.superRefine(
-  validateDeceasedDates,
+  validateDeceased,
 )
 
 export const updateDeceasedSchema = deceasedFieldsSchema.superRefine(
-  validateDeceasedDates,
+  validateDeceased,
 )
 
 export const deceasedListFiltersSchema = paginationSchema
@@ -103,6 +113,7 @@ export const deceasedListFiltersSchema = paginationSchema
 
 export const deceasedExactDocumentSearchSchema = paginationSchema
   .extend({
+    documentType: documentTypeSchema,
     document: normalizedDocumentSchema,
   })
   .strict()

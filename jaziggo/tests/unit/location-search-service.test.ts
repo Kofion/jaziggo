@@ -157,6 +157,7 @@ describe("LocationSearchService", () => {
     mockLocationPage([locationRecord()])
 
     const result = await searchLocationsByDocument({
+      documentType: "CPF",
       deceasedDocument: "123.456.789-00",
     })
 
@@ -169,6 +170,7 @@ describe("LocationSearchService", () => {
           status: "ACTIVE",
           deceased: {
             is: {
+              documentType: "CPF",
               document: fullDeceasedDocument,
             },
           },
@@ -197,6 +199,7 @@ describe("LocationSearchService", () => {
     mockLocationPage([locationRecord()])
 
     const result = await searchLocationsByDocument({
+      documentType: "CPF",
       responsibleDocument: "998.887.776-66",
     })
 
@@ -206,6 +209,7 @@ describe("LocationSearchService", () => {
           status: "ACTIVE",
           responsible: {
             is: {
+              documentType: "CPF",
               document: fullResponsibleDocument,
             },
           },
@@ -290,12 +294,38 @@ describe("LocationSearchService", () => {
     expect(result.items[1].locationDescription).not.toContain(": ,")
   })
 
+  it("accepts isolated and partial location filters", async () => {
+    mockLocationPage([locationRecord({ sector: "A1" })])
+
+    await searchLocations({
+      burialSpaceIdentifier: "JZG",
+      sector: " A ",
+    })
+
+    expect(prismaMock.burialLink.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          burialSpace: {
+            is: expect.objectContaining({
+              identifier: { contains: "JZG" },
+              AND: [
+                {
+                  locationKey: { contains: "sector=a" },
+                },
+              ],
+            }),
+          },
+        }),
+      }),
+    )
+  })
   it("logs empty and detail searches without full documents", async () => {
     mockLocationPage([])
 
     await expect(
       searchLocationsByDocument({
-        deceasedDocument: "123.456.789-00",
+        documentType: "CPF",
+      deceasedDocument: "123.456.789-00",
       }),
     ).resolves.toMatchObject({
       items: [],

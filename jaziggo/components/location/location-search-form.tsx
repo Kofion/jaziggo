@@ -4,6 +4,12 @@ import { useId, useState, type FormEvent } from "react"
 
 import { ErrorMessage } from "@/components/ui/error-message"
 import {
+  formatDocumentValue,
+  isDocumentLengthValid,
+  onlyDocumentDigits,
+  type DocumentType,
+} from "@/components/ui/document-input-fields"
+import {
   DOMAIN_ERROR_CODE,
   type ApiEnvelope,
   type PaginationMeta,
@@ -51,6 +57,14 @@ type LocationSearchFormProps = Readonly<{
   onDocumentSearchStart?: () => void
   onDocumentSearchEnd?: () => void
   className?: string
+}>
+
+const DOCUMENT_TYPE_OPTIONS = [
+  { label: "CPF", value: "CPF" },
+  { label: "RG", value: "RG" },
+] as const satisfies ReadonlyArray<{
+  label: string
+  value: DocumentType
 }>
 
 const DOCUMENT_TARGET_OPTIONS = [
@@ -106,6 +120,7 @@ export function LocationSearchForm({
   const successId = useId()
   const [documentTarget, setDocumentTarget] =
     useState<DocumentSearchTarget>("deceasedDocument")
+  const [documentType, setDocumentType] = useState<DocumentType>("CPF")
   const [documentValue, setDocumentValue] = useState("")
   const [pendingDocumentSearch, setPendingDocumentSearch] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -120,11 +135,21 @@ export function LocationSearchForm({
   async function handleDocumentSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    const selectedDocument = documentValue.trim()
+    const selectedDocument = onlyDocumentDigits(documentValue)
 
     if (selectedDocument.length === 0) {
+      const params = new URLSearchParams({ pageSize: String(initialFilters.pageSize) })
+      window.location.assign(`/location-search?${params.toString()}`)
+      return
+    }
+
+    if (!isDocumentLengthValid(documentType, selectedDocument)) {
       setSuccessMessage(null)
-      setErrorMessage("Informe o documento para executar a busca exata.")
+      setErrorMessage(
+        documentType === "CPF"
+          ? "Informe um CPF válido com 11 números."
+          : "Informe um RG válido usando apenas números.",
+      )
       return
     }
 
@@ -141,6 +166,7 @@ export function LocationSearchForm({
         },
         credentials: "same-origin",
         body: JSON.stringify({
+          documentType,
           [documentTarget]: selectedDocument,
           page: 1,
           pageSize: initialFilters.pageSize,
@@ -287,7 +313,7 @@ export function LocationSearchForm({
 
       <form
         aria-busy={pendingDocumentSearch}
-        className="grid gap-4 rounded-md border border-zinc-200 bg-white p-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)_auto]"
+        className="grid gap-4 rounded-md border border-zinc-200 bg-white p-4 lg:grid-cols-[minmax(0,0.8fr)_8rem_minmax(0,1.2fr)_auto]"
         onSubmit={handleDocumentSearch}
       >
         <div>
@@ -317,6 +343,31 @@ export function LocationSearchForm({
         <div>
           <label
             className="mb-2 block text-sm font-medium text-zinc-800"
+            htmlFor={`${formId}-documentType`}
+          >
+            Tipo
+          </label>
+          <select
+            className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
+            id={`${formId}-documentType`}
+            name="documentType"
+            onChange={(event) => {
+              const nextType = event.currentTarget.value as DocumentType
+              setDocumentType(nextType)
+              setDocumentValue((current) => formatDocumentValue(nextType, current))
+            }}
+            value={documentType}
+          >
+            {DOCUMENT_TYPE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label
+            className="mb-2 block text-sm font-medium text-zinc-800"
             htmlFor={`${formId}-document`}
           >
             Documento
@@ -325,11 +376,13 @@ export function LocationSearchForm({
             autoComplete="off"
             className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
             id={`${formId}-document`}
-            inputMode="text"
+            inputMode="numeric"
+            maxLength={documentType === "CPF" ? 14 : 17}
             name="document"
             onChange={(event) => {
-              setDocumentValue(event.currentTarget.value)
+              setDocumentValue(formatDocumentValue(documentType, event.currentTarget.value))
             }}
+            pattern="[0-9.\-]*"
             type="search"
             value={documentValue}
           />
