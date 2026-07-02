@@ -1197,18 +1197,14 @@ components:
     ResponsibleInput:
       type: object
       additionalProperties: false
-      required: [fullName]
+      required: [fullName, documentType, document]
       properties:
         fullName: { type: string, minLength: 1 }
+        documentType: { type: string, enum: [CPF, RG] }
         document: { type: string, minLength: 1 }
         phone: { type: string, minLength: 1 }
         email: { type: string, format: email }
         address: { type: string, minLength: 1 }
-      anyOf:
-        - required: [document]
-        - required: [phone]
-        - required: [email]
-        - required: [address]
     ResponsibleListItem:
       type: object
       required: [id, fullName]

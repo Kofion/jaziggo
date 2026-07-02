@@ -1,8 +1,9 @@
-﻿"use client"
+"use client"
 
 import { useId, useState, type FormEvent } from "react"
 
 import { ErrorMessage } from "@/components/ui/error-message"
+import { RequiredMark } from "@/components/ui/required-mark"
 import { DOMAIN_ERROR_CODE, type ApiEnvelope } from "@/types/api"
 import {
   RESPONSIBLE_LINK_TYPE,
@@ -210,7 +211,7 @@ export function ResponsibleLinkForm({
               className="mb-2 block text-sm font-medium text-zinc-800"
               htmlFor={`${formId}-responsibleId`}
             >
-              ID do responsável
+              ID do responsável<RequiredMark />
             </label>
             <input
               autoComplete="off"
@@ -229,7 +230,7 @@ export function ResponsibleLinkForm({
               className="mb-2 block text-sm font-medium text-zinc-800"
               htmlFor={`${formId}-linkType`}
             >
-              Tipo de alvo
+              Tipo de alvo<RequiredMark />
             </label>
             <select
               className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
@@ -256,7 +257,7 @@ export function ResponsibleLinkForm({
               className="mb-2 block text-sm font-medium text-zinc-800"
               htmlFor={`${formId}-targetId`}
             >
-              {targetLabel}
+              {targetLabel}<RequiredMark />
             </label>
             <input
               autoComplete="off"

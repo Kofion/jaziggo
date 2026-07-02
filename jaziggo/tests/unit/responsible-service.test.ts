@@ -185,11 +185,12 @@ describe("ResponsibleService", () => {
     withSerializableTransactionMock.mockClear()
   })
 
-  it("creates a responsible with minimum contact data and returns a list DTO", async () => {
+  it("creates a responsible with required document data and returns a list DTO", async () => {
     prismaMock.responsible.create.mockResolvedValue(
       responsibleRecord({
-        documentType: null,
-        document: null,
+        documentType: "RG",
+        document: "12345678900",
+        phone: null,
         email: null,
         address: null,
       }),
@@ -197,7 +198,8 @@ describe("ResponsibleService", () => {
 
     const result = await createResponsible({
       fullName: " Maria Responsavel ",
-      phone: " (11) 98765-4321 ",
+      documentType: "RG",
+      document: " 12345678900 ",
     })
 
     expect(requirePermissionMock).toHaveBeenCalledWith(
@@ -206,7 +208,8 @@ describe("ResponsibleService", () => {
     expect(prismaMock.responsible.create).toHaveBeenCalledWith({
       data: {
         fullName: "Maria Responsavel",
-        phone: "11987654321",
+        documentType: "RG",
+        document: "12345678900",
         searchName: "maria responsavel",
       },
       select: {
@@ -219,6 +222,8 @@ describe("ResponsibleService", () => {
     expect(result).toEqual<ResponsibleListItemDto>({
       id: responsibleId,
       fullName: "Maria Responsavel",
+      documentType: "RG",
+      documentMasked: "*******8900",
     })
     expect(result).not.toHaveProperty("phone")
     expect(result).not.toHaveProperty("email")

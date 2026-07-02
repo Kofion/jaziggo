@@ -25,6 +25,7 @@ export const documentOnlyResponsibleFixture = {
   id: "00000000-0000-4000-8000-000000004001",
   fullName: "Responsible Document Only",
   searchName: "responsible document only",
+  documentType: "RG",
   document: "11122233344",
 } as const satisfies ResponsiblePersistenceFixture
 
@@ -32,6 +33,8 @@ export const phoneOnlyResponsibleFixture = {
   id: "00000000-0000-4000-8000-000000004002",
   fullName: "Responsible Phone Only",
   searchName: "responsible phone only",
+  documentType: "RG",
+  document: "44455566677",
   phone: "11988887777",
 } as const satisfies ResponsiblePersistenceFixture
 
@@ -39,6 +42,8 @@ export const emailOnlyResponsibleFixture = {
   id: "00000000-0000-4000-8000-000000004003",
   fullName: "Responsible Email Only",
   searchName: "responsible email only",
+  documentType: "RG",
+  document: "55566677788",
   email: "responsible.email@jaziggo.test",
 } as const satisfies ResponsiblePersistenceFixture
 
@@ -46,6 +51,8 @@ export const addressOnlyResponsibleFixture = {
   id: "00000000-0000-4000-8000-000000004004",
   fullName: "Responsible Address Only",
   searchName: "responsible address only",
+  documentType: "RG",
+  document: "66677788899",
   address: "Test administrative address",
 } as const satisfies ResponsiblePersistenceFixture
 
@@ -53,6 +60,7 @@ export const homonymResponsibleFixture = {
   id: "00000000-0000-4000-8000-000000004005",
   fullName: "Alex Responsible",
   searchName: "alex responsible",
+  documentType: "RG",
   document: "22233344455",
   phone: "21977776666",
   email: "alex.one@jaziggo.test",
@@ -63,6 +71,7 @@ export const homonymResponsibleWithDifferentContactFixture = {
   id: "00000000-0000-4000-8000-000000004006",
   fullName: "Alex Responsible",
   searchName: "alex responsible",
+  documentType: "RG",
   document: "33344455566",
   phone: "31966665555",
   email: "alex.two@jaziggo.test",

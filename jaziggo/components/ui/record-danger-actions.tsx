@@ -1,10 +1,11 @@
-﻿"use client"
+"use client"
 
 import { useId, useState } from "react"
 import { useRouter } from "next/navigation"
 
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { ErrorMessage } from "@/components/ui/error-message"
+import { RequiredMark } from "@/components/ui/required-mark"
 
 type RecordDangerActionsProps = Readonly<{
   entityLabel: string
@@ -148,7 +149,7 @@ export function RecordDangerActions({
           </div>
           <div>
             <label className="mb-2 block text-sm font-medium text-zinc-800" htmlFor={confirmId}>
-              Confirmação
+              Confirmação<RequiredMark />
             </label>
             <input
               autoComplete="off"

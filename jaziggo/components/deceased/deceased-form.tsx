@@ -12,6 +12,7 @@ import {
   type DocumentType,
 } from "@/components/ui/document-input-fields"
 import { ErrorMessage } from "@/components/ui/error-message"
+import { RequiredMark } from "@/components/ui/required-mark"
 import type { ApiEnvelope, PaginationMeta } from "@/types/api"
 import type {
   CreateDeceasedInput,
@@ -367,7 +368,7 @@ export function DeceasedForm({
             className="mb-2 block text-sm font-medium text-zinc-800"
             htmlFor={`${formId}-fullName`}
           >
-            Nome completo
+            Nome completo<RequiredMark />
           </label>
           <input
             autoComplete="off"
@@ -410,7 +411,7 @@ export function DeceasedForm({
             className="mb-2 block text-sm font-medium text-zinc-800"
             htmlFor={`${formId}-deathDate`}
           >
-            Falecimento
+            Falecimento<RequiredMark />
           </label>
           <input
             className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20 disabled:bg-zinc-100 disabled:text-zinc-500"
@@ -427,7 +428,7 @@ export function DeceasedForm({
             className="mb-2 block text-sm font-medium text-zinc-800"
             htmlFor={`${formId}-burialDate`}
           >
-            Sepultamento
+            Sepultamento<RequiredMark />
           </label>
           <input
             className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20 disabled:bg-zinc-100 disabled:text-zinc-500"
@@ -451,7 +452,7 @@ export function DeceasedForm({
           type="checkbox"
         />
         <span>
-          Datas de falecimento e sepultamento desconhecidas para registro histórico.
+          Datas de falecimento e sepultamento desconhecidas para registro histórico.<RequiredMark />
         </span>
       </label>
 

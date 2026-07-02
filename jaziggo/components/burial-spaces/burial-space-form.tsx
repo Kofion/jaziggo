@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useId, useState, type FormEvent } from "react"
 
 import { ErrorMessage } from "@/components/ui/error-message"
+import { RequiredMark } from "@/components/ui/required-mark"
 import type { ApiEnvelope } from "@/types/api"
 import {
   BURIAL_SPACE_STATUS,
@@ -274,7 +275,7 @@ export function BurialSpaceForm({
             className="mb-2 block text-sm font-medium text-zinc-800"
             htmlFor={`${formId}-identifier`}
           >
-            Identificação
+            Identificação<RequiredMark />
           </label>
           <input
             className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
@@ -289,7 +290,7 @@ export function BurialSpaceForm({
 
         <div>
           <label className="mb-2 block text-sm font-medium text-zinc-800" htmlFor={`${formId}-type`}>
-            Tipo
+            Tipo<RequiredMark />
           </label>
           <select
             className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
@@ -319,7 +320,7 @@ export function BurialSpaceForm({
             className="mb-2 block text-sm font-medium text-zinc-800"
             htmlFor={`${formId}-capacity`}
           >
-            Capacidade
+            Capacidade<RequiredMark />
           </label>
           <input
             className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20 read-only:bg-zinc-100 read-only:text-zinc-600"
@@ -343,7 +344,7 @@ export function BurialSpaceForm({
               className="mb-2 block text-sm font-medium text-zinc-800"
               htmlFor={`${formId}-status`}
             >
-              Status inicial
+              Status inicial<RequiredMark />
             </label>
             <select
               className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
@@ -363,7 +364,7 @@ export function BurialSpaceForm({
       </div>
 
       <fieldset className="space-y-4">
-        <legend className="text-sm font-semibold text-zinc-950">Localização</legend>
+        <legend className="text-sm font-semibold text-zinc-950">Localização<RequiredMark /></legend>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {LOCATION_FIELDS.map((field) => (
             <div key={field.name}>

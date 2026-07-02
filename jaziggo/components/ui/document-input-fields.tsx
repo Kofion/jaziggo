@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 
+import { RequiredMark } from "@/components/ui/required-mark"
+
 export type DocumentType = "CPF" | "RG"
 
 type DocumentInputFieldsProps = Readonly<{
@@ -9,6 +11,7 @@ type DocumentInputFieldsProps = Readonly<{
   currentDocumentMasked?: string
   currentDocumentType?: DocumentType
   editMode?: boolean
+  required?: boolean
 }>
 
 const DOCUMENT_TYPE_LABELS = {
@@ -74,11 +77,13 @@ export function DocumentInputFields({
   currentDocumentMasked,
   currentDocumentType,
   editMode = false,
+  required = false,
 }: DocumentInputFieldsProps) {
   const [documentType, setDocumentType] = useState<DocumentType>(
     currentDocumentType ?? "CPF",
   )
   const [documentValue, setDocumentValue] = useState("")
+  const documentInputRequired = required && (!editMode || !currentDocumentMasked)
 
   return (
     <div className="grid gap-3 sm:grid-cols-[8rem_minmax(0,1fr)]">
@@ -87,12 +92,13 @@ export function DocumentInputFields({
           className="mb-2 block text-sm font-medium text-zinc-800"
           htmlFor={`${baseId}-documentType`}
         >
-          Tipo
+          Tipo{required ? <RequiredMark /> : null}
         </label>
         <select
           className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
           id={`${baseId}-documentType`}
           name="documentType"
+          required={required}
           onChange={(event) => {
             const nextType = event.currentTarget.value as DocumentType
             setDocumentType(nextType)
@@ -113,7 +119,7 @@ export function DocumentInputFields({
           className="mb-2 block text-sm font-medium text-zinc-800"
           htmlFor={`${baseId}-document`}
         >
-          Documento
+          Documento{required ? <RequiredMark /> : null}
         </label>
         <input
           autoComplete="off"
@@ -126,6 +132,7 @@ export function DocumentInputFields({
             setDocumentValue(formatDocumentValue(documentType, event.currentTarget.value))
           }}
           pattern="[0-9.\-]*"
+          required={documentInputRequired}
           placeholder={editMode ? "Informar novo documento" : undefined}
           type="text"
           value={documentValue}

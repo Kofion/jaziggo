@@ -1,8 +1,9 @@
-﻿"use client"
+"use client"
 
 import { useId, useState, type FormEvent } from "react"
 
 import { ErrorMessage } from "@/components/ui/error-message"
+import { RequiredMark } from "@/components/ui/required-mark"
 import {
   DOMAIN_ERROR_CODE,
   type ApiEnvelope,
@@ -285,7 +286,7 @@ export function CreateLinkForm({
               className="mb-2 block text-sm font-medium text-zinc-800"
               htmlFor={`${formId}-deceasedId`}
             >
-              ID do falecido
+              ID do falecido<RequiredMark />
             </label>
             <input
               autoComplete="off"
@@ -309,7 +310,7 @@ export function CreateLinkForm({
               className="mb-2 block text-sm font-medium text-zinc-800"
               htmlFor={`${formId}-burialSpaceId`}
             >
-              ID da sepultura ou jazigo
+              ID da sepultura ou jazigo<RequiredMark />
             </label>
             <input
               autoComplete="off"

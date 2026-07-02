@@ -4,6 +4,7 @@ import { useId, useState } from "react"
 
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { ErrorMessage } from "@/components/ui/error-message"
+import { RequiredMark } from "@/components/ui/required-mark"
 import {
   DOMAIN_ERROR_CODE,
   type ApiEnvelope,
@@ -155,7 +156,7 @@ export function EndResponsibleLinkDialog({
               className="mb-2 block text-sm font-medium text-zinc-800"
               htmlFor={`${formId}-endedAt`}
             >
-              Data e hora do encerramento
+              Data e hora do encerramento<RequiredMark />
             </label>
             <input
               className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
@@ -175,7 +176,7 @@ export function EndResponsibleLinkDialog({
               className="mb-2 block text-sm font-medium text-zinc-800"
               htmlFor={`${formId}-endReason`}
             >
-              Motivo
+              Motivo<RequiredMark />
             </label>
             <textarea
               className="min-h-24 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
@@ -201,7 +202,7 @@ export function EndResponsibleLinkDialog({
               required
               type="checkbox"
             />
-            <span>Confirmo que o vínculo ativo deve ser encerrado e preservado no histórico.</span>
+            <span>Confirmo que o vínculo ativo deve ser encerrado e preservado no histórico.<RequiredMark /></span>
           </label>
         </div>
 

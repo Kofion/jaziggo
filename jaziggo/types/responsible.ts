@@ -10,20 +10,15 @@ interface ResponsibleContactFields {
   address?: string
 }
 
-type ResponsibleContactField = keyof Omit<ResponsibleContactFields, "documentType">
-
-type RequiredResponsibleContact = ResponsibleContactFields &
-  {
-    [Field in ResponsibleContactField]: Required<
-      Pick<ResponsibleContactFields, Field>
-    >
-  }[ResponsibleContactField]
-
-export type CreateResponsibleInput = RequiredResponsibleContact & {
+export type CreateResponsibleInput = ResponsibleContactFields & {
   fullName: string
+  documentType: DocumentType
+  document: string
 }
 
-export type UpdateResponsibleInput = CreateResponsibleInput
+export type UpdateResponsibleInput = ResponsibleContactFields & {
+  fullName?: string
+}
 
 export interface ResponsibleListItemDto {
   id: string

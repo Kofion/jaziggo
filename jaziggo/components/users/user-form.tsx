@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { useId, useState, type FormEvent } from "react"
 
 import { ErrorMessage } from "@/components/ui/error-message"
+import { RequiredMark } from "@/components/ui/required-mark"
 import type { ApiEnvelope } from "@/types/api"
 import {
   USER_ROLE,
@@ -186,7 +187,7 @@ export function UserForm({ mode, user, onSuccess, className }: UserFormProps) {
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-2 block text-sm font-medium text-zinc-800" htmlFor={`${formId}-name`}>
-            Nome
+            Nome<RequiredMark />
           </label>
           <input
             autoComplete="name"
@@ -202,7 +203,7 @@ export function UserForm({ mode, user, onSuccess, className }: UserFormProps) {
 
         <div>
           <label className="mb-2 block text-sm font-medium text-zinc-800" htmlFor={`${formId}-email`}>
-            E-mail
+            E-mail<RequiredMark />
           </label>
           <input
             autoComplete="email"
@@ -218,7 +219,7 @@ export function UserForm({ mode, user, onSuccess, className }: UserFormProps) {
 
         <div>
           <label className="mb-2 block text-sm font-medium text-zinc-800" htmlFor={`${formId}-role`}>
-            Perfil
+            Perfil<RequiredMark />
           </label>
           <select
             className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"

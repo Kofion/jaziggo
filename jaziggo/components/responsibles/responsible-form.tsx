@@ -11,6 +11,7 @@ import {
   type DocumentType,
 } from "@/components/ui/document-input-fields"
 import { ErrorMessage } from "@/components/ui/error-message"
+import { RequiredMark } from "@/components/ui/required-mark"
 import type { ApiEnvelope } from "@/types/api"
 import type {
   CreateResponsibleInput,
@@ -123,6 +124,7 @@ export function ResponsibleForm({
   const [pending, setPending] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const documentRequired = mode === "create" || !responsible?.documentMasked
   const describedBy = [
     errorMessage ? errorId : undefined,
     successMessage ? successId : undefined,
@@ -157,6 +159,12 @@ export function ResponsibleForm({
     if (fullName.length === 0) {
       setSuccessMessage(null)
       setErrorMessage("Informe o nome completo do responsável.")
+      return
+    }
+
+    if (documentRequired && !payload.document) {
+      setSuccessMessage(null)
+      setErrorMessage("Informe o documento do responsável.")
       return
     }
 
@@ -257,7 +265,7 @@ export function ResponsibleForm({
             className="mb-2 block text-sm font-medium text-zinc-800"
             htmlFor={`${formId}-fullName`}
           >
-            Nome completo
+            Nome completo<RequiredMark />
           </label>
           <input
             autoComplete="name"
@@ -277,6 +285,7 @@ export function ResponsibleForm({
             currentDocumentMasked={responsible?.documentMasked}
             currentDocumentType={responsible?.documentType}
             editMode={mode === "edit"}
+            required={documentRequired}
           />
         </div>
         <div>

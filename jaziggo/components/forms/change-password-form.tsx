@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation"
 import { useState, type FormEvent } from "react"
 
+import { RequiredMark } from "@/components/ui/required-mark"
 import { getHomePathForRole } from "@/lib/auth/routes"
 import type { ApiEnvelope } from "@/types/api"
 import type { UserDto } from "@/types/user"
@@ -67,7 +68,7 @@ export function ChangePasswordForm() {
           className="mb-2 block text-sm font-medium text-slate-100"
           htmlFor="password"
         >
-          Nova senha
+          Nova senha<RequiredMark />
         </label>
         <input
           autoComplete="new-password"
@@ -86,7 +87,7 @@ export function ChangePasswordForm() {
           className="mb-2 block text-sm font-medium text-slate-100"
           htmlFor="passwordConfirmation"
         >
-          Confirmar senha
+          Confirmar senha<RequiredMark />
         </label>
         <input
           autoComplete="new-password"

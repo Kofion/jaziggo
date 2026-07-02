@@ -31,39 +31,17 @@ const responsibleContactFields = {
   address: optionalTrimmedStringSchema,
 }
 
-type ResponsibleContacts = {
-  documentType?: "CPF" | "RG"
-  document?: string
-  phone?: string
-  email?: string
-  address?: string
-}
-
-function requireContact(
-  value: ResponsibleContacts,
-  context: z.RefinementCtx,
-): void {
-  if (value.document || value.phone || value.email || value.address) {
-    return
-  }
-
-  context.addIssue({
-    code: "custom",
-    message: "Provide at least one document, phone, email, or address",
-    path: ["document"],
-  })
-}
-
 export const createResponsibleSchema = z
   .object({
     fullName: requiredTrimmedStringSchema,
-    ...responsibleContactFields,
+    documentType: documentTypeSchema,
+    document: normalizedDocumentSchema,
+    phone: normalizedPhoneSchema.optional(),
+    email: normalizedEmailSchema.optional(),
+    address: optionalTrimmedStringSchema,
   })
   .strict()
-  .superRefine((value, context) => {
-    validateDocumentByType(value, context)
-    requireContact(value, context)
-  })
+  .superRefine(validateDocumentByType)
 
 export const updateResponsibleSchema = z
   .object({
