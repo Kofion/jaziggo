@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next"
+import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { Suspense } from "react"
 
@@ -156,7 +156,7 @@ export default async function ResponsiblesPage({
           Responsáveis
         </h1>
         <p className="max-w-3xl text-sm leading-6 text-zinc-600">
-          Consulte responsáveis administrativos por nome. A listagem mantem
+          Consulte responsáveis administrativos por nome. A listagem mantém
           contatos fora da tela e exibe documentos somente mascarados.
         </p>
       </header>

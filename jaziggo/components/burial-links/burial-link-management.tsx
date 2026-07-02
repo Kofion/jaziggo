@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -41,7 +41,7 @@ const DATE_TIME_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
 
 function formatDate(value: string | undefined) {
   if (!value) {
-    return "NÃ£o informada"
+    return "Não informada"
   }
 
   return DATE_FORMATTER.format(new Date(`${value}T00:00:00.000Z`))
@@ -49,7 +49,7 @@ function formatDate(value: string | undefined) {
 
 function formatDateTime(value: string | undefined) {
   if (!value) {
-    return "NÃ£o informado"
+    return "Não informado"
   }
 
   return DATE_TIME_FORMATTER.format(new Date(value))
@@ -100,24 +100,24 @@ export function BurialLinkManagement({
 
       {rows.length === 0 ? (
         <EmptyState
-          title="Nenhum vÃ­nculo de sepultamento"
-          description="Crie o primeiro vÃ­nculo usando o formulÃ¡rio acima."
+          title="Nenhum vínculo de sepultamento"
+          description="Crie o primeiro vínculo usando o formulário acima."
         />
       ) : (
         <div className="overflow-x-auto rounded-md border border-zinc-200 bg-white">
           <table className="min-w-full divide-y divide-zinc-200 text-sm">
-            <caption className="sr-only">Gerenciamento de vÃ­nculos de sepultamento</caption>
+            <caption className="sr-only">Gerenciamento de vínculos de sepultamento</caption>
             <thead className="bg-zinc-50 text-left text-xs font-semibold uppercase text-zinc-600">
               <tr>
                 <th className="px-4 py-3" scope="col">Status</th>
                 {showDeceasedColumn ? <th className="px-4 py-3" scope="col">Falecido</th> : null}
-                {showSpaceColumn ? <th className="px-4 py-3" scope="col">EspaÃ§o</th> : null}
-                <th className="px-4 py-3" scope="col">ResponsÃ¡vel</th>
+                {showSpaceColumn ? <th className="px-4 py-3" scope="col">Espaço</th> : null}
+                <th className="px-4 py-3" scope="col">Responsável</th>
                 <th className="px-4 py-3" scope="col">Data de sepultamento</th>
                 <th className="px-4 py-3" scope="col">Criado em</th>
                 <th className="px-4 py-3" scope="col">Encerramento</th>
                 <th className="px-4 py-3" scope="col">Motivo</th>
-                <th className="px-4 py-3" scope="col">AÃ§Ãµes</th>
+                <th className="px-4 py-3" scope="col">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
@@ -137,15 +137,15 @@ export function BurialLinkManagement({
                     <td className="px-4 py-3 font-mono text-xs text-zinc-700">{link.burialSpaceId}</td>
                   ) : null}
                   <td className="px-4 py-3 font-mono text-xs text-zinc-700">
-                    {link.responsibleId ?? "NÃ£o informado"}
+                    {link.responsibleId ?? "Não informado"}
                   </td>
                   <td className="px-4 py-3 text-zinc-700">{formatDate(link.burialDate)}</td>
                   <td className="px-4 py-3 text-zinc-700">{formatDateTime(link.createdAt)}</td>
                   <td className="px-4 py-3 text-zinc-700">
-                    {link.status === "ENDED" ? formatDateTime(link.endedAt) : "VÃ­nculo ativo"}
+                    {link.status === "ENDED" ? formatDateTime(link.endedAt) : "Vínculo ativo"}
                   </td>
                   <td className="max-w-sm px-4 py-3 text-zinc-700">
-                    {link.status === "ENDED" ? link.endReason : "NÃ£o se aplica"}
+                    {link.status === "ENDED" ? link.endReason : "Não se aplica"}
                   </td>
                   <td className="px-4 py-3">
                     {link.status === "ACTIVE" ? (
@@ -156,10 +156,10 @@ export function BurialLinkManagement({
                         }}
                         type="button"
                       >
-                        Encerrar vÃ­nculo
+                        Encerrar vínculo
                       </button>
                     ) : (
-                      <span className="text-xs text-zinc-500">HistÃ³rico</span>
+                      <span className="text-xs text-zinc-500">Histórico</span>
                     )}
                   </td>
                 </tr>
@@ -187,7 +187,3 @@ export function BurialLinkManagement({
     </section>
   )
 }
-
-
-
-

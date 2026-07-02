@@ -1,4 +1,4 @@
-﻿import { argon2id, hash } from "argon2";
+import { argon2id, hash } from "argon2";
 import { loadEnvConfig } from "@next/env";
 import type { PrismaClient } from "@prisma/client";
 import { NextRequest } from "next/server";
@@ -37,6 +37,8 @@ type UserGet = typeof import("../../app/api/v1/users/[id]/route").GET;
 type UserPut = typeof import("../../app/api/v1/users/[id]/route").PUT;
 type UserDeactivatePatch =
   typeof import("../../app/api/v1/users/[id]/deactivate/route").PATCH;
+type UserResetPasswordPatch =
+  typeof import("../../app/api/v1/users/[id]/reset-password/route").PATCH;
 
 interface UserPageResponse extends PaginationMeta {
   data: UserDto[];
@@ -48,6 +50,7 @@ interface UserRoutes {
   userGet: UserGet;
   userPut: UserPut;
   userDeactivatePatch: UserDeactivatePatch;
+  userResetPasswordPatch: UserResetPasswordPatch;
 }
 
 interface UserRouteContext {
@@ -61,6 +64,7 @@ const integrationAdminUser = {
   email: "admin@users-api.integration.test",
   role: USER_ROLE.ADMIN,
   status: USER_STATUS.ACTIVE,
+  mustChangePassword: false,
 } as const satisfies UserDto;
 const integrationEmployeeUser = {
   id: "00000000-0000-4000-8000-000000000102",
@@ -68,6 +72,7 @@ const integrationEmployeeUser = {
   email: "employee@users-api.integration.test",
   role: USER_ROLE.EMPLOYEE,
   status: USER_STATUS.ACTIVE,
+  mustChangePassword: false,
 } as const satisfies UserDto;
 const integrationInactiveEmployeeUser = {
   id: "00000000-0000-4000-8000-000000000103",
@@ -75,6 +80,7 @@ const integrationInactiveEmployeeUser = {
   email: "inactive.employee@users-api.integration.test",
   role: USER_ROLE.EMPLOYEE,
   status: USER_STATUS.INACTIVE,
+  mustChangePassword: false,
 } as const satisfies UserDto;
 
 let prisma: PrismaClient;
@@ -156,6 +162,7 @@ async function seedUsers(): Promise<void> {
         passwordHash: fixturePasswordHash,
         role: USER_ROLE.ADMIN,
         status: USER_STATUS.ACTIVE,
+        mustChangePassword: false,
       },
       {
         id: integrationEmployeeUser.id,
@@ -164,6 +171,7 @@ async function seedUsers(): Promise<void> {
         passwordHash: fixturePasswordHash,
         role: USER_ROLE.EMPLOYEE,
         status: USER_STATUS.ACTIVE,
+        mustChangePassword: false,
       },
       {
         id: integrationInactiveEmployeeUser.id,
@@ -172,16 +180,18 @@ async function seedUsers(): Promise<void> {
         passwordHash: fixturePasswordHash,
         role: USER_ROLE.EMPLOYEE,
         status: USER_STATUS.INACTIVE,
+        mustChangePassword: false,
       },
     ],
   });
 }
 
 async function loadRoutes(): Promise<UserRoutes> {
-  const [usersRoute, userRoute, deactivateRoute] = await Promise.all([
+  const [usersRoute, userRoute, deactivateRoute, resetPasswordRoute] = await Promise.all([
     import("../../app/api/v1/users/route"),
     import("../../app/api/v1/users/[id]/route"),
     import("../../app/api/v1/users/[id]/deactivate/route"),
+    import("../../app/api/v1/users/[id]/reset-password/route"),
   ]);
 
   return {
@@ -190,6 +200,7 @@ async function loadRoutes(): Promise<UserRoutes> {
     userGet: userRoute.GET,
     userPut: userRoute.PUT,
     userDeactivatePatch: deactivateRoute.PATCH,
+    userResetPasswordPatch: resetPasswordRoute.PATCH,
   };
 }
 
@@ -223,7 +234,6 @@ describe("users API integration", () => {
       jsonRequest("/api/v1/users", "POST", {
         name: " Created Integration User ",
         email: "CREATED.USER@users-api.integration.test",
-        password: "created-user-password",
         role: USER_ROLE.EMPLOYEE,
       }),
     );
@@ -237,6 +247,7 @@ describe("users API integration", () => {
         email: "created.user@users-api.integration.test",
         role: USER_ROLE.EMPLOYEE,
         status: USER_STATUS.ACTIVE,
+        mustChangePassword: true,
       },
     });
     expectRequestId(createBody);
@@ -248,7 +259,7 @@ describe("users API integration", () => {
 
     expect(persistedCreatedUser.email).toBe("created.user@users-api.integration.test");
     expect(persistedCreatedUser.passwordHash).toEqual(expect.any(String));
-    expect(persistedCreatedUser.passwordHash).not.toBe("created-user-password");
+    expect(persistedCreatedUser.mustChangePassword).toBe(true);
 
     const listResponse = await routes.usersGet(
       new NextRequest(requestUrl("/api/v1/users?role=EMPLOYEE&status=ACTIVE"), {
@@ -329,6 +340,36 @@ describe("users API integration", () => {
       status: USER_STATUS.ACTIVE,
     });
 
+
+    await prisma.user.update({
+      where: { id: createBody.data.id },
+      data: { mustChangePassword: false },
+    });
+
+    const resetPasswordResponse = await routes.userResetPasswordPatch(
+      new NextRequest(requestUrl(`/api/v1/users/${createBody.data.id}/reset-password`), {
+        method: "PATCH",
+      }),
+      routeContext(createBody.data.id),
+    );
+    const resetPasswordBody =
+      await responseJson<SuccessEnvelope<{ acknowledged: true }>>(resetPasswordResponse);
+
+    expect(resetPasswordResponse.status).toBe(HTTP_STATUS.OK);
+    expect(resetPasswordBody).toMatchObject({
+      success: true,
+      data: { acknowledged: true },
+    });
+    expectRequestId(resetPasswordBody);
+
+    await expect(
+      prisma.user.findUniqueOrThrow({
+        where: { id: createBody.data.id },
+      }),
+    ).resolves.toMatchObject({
+      mustChangePassword: true,
+    });
+
     const deactivateResponse = await routes.userDeactivatePatch(
       new NextRequest(requestUrl(`/api/v1/users/${createBody.data.id}/deactivate`), {
         method: "PATCH",
@@ -361,7 +402,6 @@ describe("users API integration", () => {
       jsonRequest("/api/v1/users", "POST", {
         name: "Duplicate Administrator",
         email: integrationAdminUser.email.toUpperCase(),
-        password: "duplicate-password",
         role: USER_ROLE.ADMIN,
       }),
     );
@@ -387,7 +427,6 @@ describe("users API integration", () => {
       jsonRequest("/api/v1/users", "POST", {
         name: "Forbidden User",
         email: "forbidden.user@users-api.integration.test",
-        password: "forbidden-password",
         role: USER_ROLE.EMPLOYEE,
       }),
     );
@@ -403,6 +442,13 @@ describe("users API integration", () => {
       }),
       routeContext(integrationAdminUser.id),
     );
+
+    const resetPasswordResponse = await routes.userResetPasswordPatch(
+      new NextRequest(requestUrl(`/api/v1/users/${integrationAdminUser.id}/reset-password`), {
+        method: "PATCH",
+      }),
+      routeContext(integrationAdminUser.id),
+    );
     const deactivateResponse = await routes.userDeactivatePatch(
       new NextRequest(requestUrl(`/api/v1/users/${integrationAdminUser.id}/deactivate`), {
         method: "PATCH",
@@ -415,6 +461,7 @@ describe("users API integration", () => {
       createResponse,
       detailResponse,
       updateResponse,
+      resetPasswordResponse,
       deactivateResponse,
     ]) {
       const body = await responseJson<ErrorEnvelope>(response);
@@ -438,5 +485,3 @@ describe("users API integration", () => {
     ).resolves.toBeNull();
   });
 });
-
-

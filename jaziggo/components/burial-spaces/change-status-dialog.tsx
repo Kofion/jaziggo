@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useState } from "react"
 
@@ -38,9 +38,9 @@ const STATUS_LABELS = {
 } as const satisfies Record<BurialSpaceStatus, string>
 
 const TARGET_STATUS_DESCRIPTIONS = {
-  AVAILABLE: "O espaço ficara liberado para novos vínculos, respeitando capacidade e regras de ocupação.",
-  RESERVED: "O espaço ficara reservado e não aceitara novos vínculos enquanto permanecer assim.",
-  INACTIVE: "O espaço ficara inativo e não aceitara novos vínculos enquanto permanecer assim.",
+  AVAILABLE: "O espaço ficará liberado para novos vínculos, respeitando capacidade e regras de ocupação.",
+  RESERVED: "O espaço ficará reservado e não aceitará novos vínculos enquanto permanecer assim.",
+  INACTIVE: "O espaço ficará inativo e não aceitará novos vínculos enquanto permanecer assim.",
 } as const satisfies Record<ChangeableBurialSpaceStatus, string>
 
 function conflictMessage(targetStatus: ChangeableBurialSpaceStatus) {
@@ -180,7 +180,7 @@ export function ChangeStatusDialog({
         {errorMessage ? (
           <ErrorMessage
             message={errorMessage}
-            title="Alteracao de status não concluída"
+            title="Alteração de status não concluída"
           />
         ) : null}
 

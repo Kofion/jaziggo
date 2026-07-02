@@ -15,6 +15,7 @@ export interface ActiveAuthUser {
   email: string
   role: UserRole
   status: typeof USER_STATUS.ACTIVE
+  mustChangePassword: boolean
 }
 
 function isAllowedRole(value: unknown): value is UserRole {
@@ -37,6 +38,7 @@ export async function authenticateCredentials(
       name: true,
       email: true,
       passwordHash: true,
+      mustChangePassword: true,
       role: true,
       status: true,
     },
@@ -63,6 +65,7 @@ export async function authenticateCredentials(
     email: user.email,
     role: user.role,
     status: USER_STATUS.ACTIVE,
+    mustChangePassword: user.mustChangePassword,
   }
 }
 
@@ -75,6 +78,7 @@ export async function getActiveUserById(
       id: true,
       name: true,
       email: true,
+      mustChangePassword: true,
       role: true,
       status: true,
     },
@@ -94,5 +98,6 @@ export async function getActiveUserById(
     email: user.email,
     role: user.role,
     status: USER_STATUS.ACTIVE,
+    mustChangePassword: user.mustChangePassword,
   }
 }

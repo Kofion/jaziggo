@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useId, useState } from "react"
 
@@ -76,7 +76,7 @@ export function EndLinkDialog({
 
     if (burialLinkId.trim().length === 0) {
       setSuccessMessage(null)
-      setErrorMessage("Selecione um vínculo valido antes de encerrar.")
+      setErrorMessage("Selecione um vínculo válido antes de encerrar.")
       return
     }
 
@@ -90,7 +90,7 @@ export function EndLinkDialog({
 
     if (Number.isNaN(endedAtDate.getTime())) {
       setSuccessMessage(null)
-      setErrorMessage("Informe uma data de encerramento valida.")
+      setErrorMessage("Informe uma data de encerramento válida.")
       return
     }
 

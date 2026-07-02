@@ -34,6 +34,7 @@ const result = spawnSync(
     env: {
       ...process.env,
       REDOCLY_TELEMETRY: "off",
+      REDOCLY_SUPPRESS_UPDATE_NOTICE: "true",
     },
     stdio: "inherit",
   },

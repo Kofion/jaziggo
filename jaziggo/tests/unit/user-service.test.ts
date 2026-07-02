@@ -8,7 +8,6 @@ import {
   type UserDto,
 } from "@/types/user"
 import {
-  TEST_USER_PASSWORD,
   activeEmployeeUserFixture,
   adminUserFixture,
 } from "@/tests/fixtures/users"
@@ -25,6 +24,7 @@ const prismaMock = vi.hoisted(() => ({
 }))
 const hashPasswordMock = vi.hoisted(() => vi.fn())
 const requirePermissionMock = vi.hoisted(() => vi.fn())
+const requireRoleMock = vi.hoisted(() => vi.fn())
 
 vi.mock("server-only", () => ({}))
 
@@ -51,19 +51,23 @@ vi.mock("@prisma/client", () => {
 })
 
 vi.mock("@/lib/auth/password", () => ({
+  DEFAULT_FIRST_ACCESS_PASSWORD: "J@z1gg0_2026#",
   hashPassword: hashPasswordMock,
 }))
 
 vi.mock("@/lib/auth/permissions", () => ({
   requirePermission: requirePermissionMock,
+  requireRole: requireRoleMock,
 }))
 
 const {
   UserServiceError,
+  changeOwnPassword,
   createUser,
   deactivateUser,
   getUserById,
   listUsers,
+  resetUserPassword,
   updateUser,
 } = await import("@/services/user-service")
 
@@ -74,6 +78,7 @@ function userDto(overrides: Partial<UserDto> = {}): UserDto {
     email: overrides.email ?? adminUserFixture.email,
     role: overrides.role ?? adminUserFixture.role,
     status: overrides.status ?? adminUserFixture.status,
+    mustChangePassword: overrides.mustChangePassword ?? false,
   }
 }
 
@@ -94,7 +99,9 @@ describe("UserService", () => {
     prismaMock.user.update.mockReset()
     hashPasswordMock.mockReset()
     requirePermissionMock.mockReset()
+    requireRoleMock.mockReset()
     requirePermissionMock.mockResolvedValue(userDto())
+    requireRoleMock.mockResolvedValue(userDto())
   })
 
   it("creates users with normalized data and returns a DTO without password data", async () => {
@@ -110,16 +117,16 @@ describe("UserService", () => {
     const result = await createUser({
       name: " Active Employee ",
       email: " EMPLOYEE@EXAMPLE.COM ",
-      password: TEST_USER_PASSWORD,
       role: USER_ROLE.EMPLOYEE,
     })
 
-    expect(hashPasswordMock).toHaveBeenCalledWith(TEST_USER_PASSWORD)
+    expect(hashPasswordMock).toHaveBeenCalledWith("J@z1gg0_2026#")
     expect(prismaMock.user.create).toHaveBeenCalledWith({
       data: {
         name: "Active Employee",
         email: "employee@example.com",
         passwordHash: "hashed-password",
+        mustChangePassword: true,
         role: USER_ROLE.EMPLOYEE,
       },
       select: {
@@ -128,6 +135,7 @@ describe("UserService", () => {
         email: true,
         role: true,
         status: true,
+        mustChangePassword: true,
       },
     })
     expect(result).toEqual({
@@ -136,6 +144,7 @@ describe("UserService", () => {
       email: "employee@example.com",
       role: USER_ROLE.EMPLOYEE,
       status: USER_STATUS.ACTIVE,
+      mustChangePassword: false,
     })
     expect(result).not.toHaveProperty("password")
     expect(result).not.toHaveProperty("passwordHash")
@@ -146,7 +155,6 @@ describe("UserService", () => {
       createUser({
         name: "Invalid Role",
         email: "invalid@example.com",
-        password: TEST_USER_PASSWORD,
         role: "ATTENDANT" as typeof USER_ROLE.ADMIN,
       }),
     ).rejects.toMatchObject({
@@ -166,7 +174,6 @@ describe("UserService", () => {
       createUser({
         name: adminUserFixture.name,
         email: adminUserFixture.email,
-        password: TEST_USER_PASSWORD,
         role: USER_ROLE.ADMIN,
       }),
     ).rejects.toMatchObject({
@@ -210,6 +217,7 @@ describe("UserService", () => {
           email: true,
           role: true,
           status: true,
+          mustChangePassword: true,
         },
         orderBy: [{ name: "asc" }, { id: "asc" }],
         skip: 10,
@@ -272,6 +280,7 @@ describe("UserService", () => {
         email: true,
         role: true,
         status: true,
+        mustChangePassword: true,
       },
     })
   })
@@ -342,6 +351,51 @@ describe("UserService", () => {
     )
   })
 
+  it("resets passwords to the first access password and requires change on next login", async () => {
+    hashPasswordMock.mockResolvedValue("hashed-default-password")
+    prismaMock.user.update.mockResolvedValue({ id: activeEmployeeUserFixture.id })
+
+    await expect(resetUserPassword(activeEmployeeUserFixture.id)).resolves.toBeUndefined()
+
+    expect(hashPasswordMock).toHaveBeenCalledWith("J@z1gg0_2026#")
+    expect(prismaMock.user.update).toHaveBeenCalledWith({
+      where: { id: activeEmployeeUserFixture.id },
+      data: {
+        passwordHash: "hashed-default-password",
+        mustChangePassword: true,
+      },
+      select: { id: true },
+    })
+  })
+
+  it("lets the authenticated user define a non-default password", async () => {
+    hashPasswordMock.mockResolvedValue("hashed-new-password")
+    prismaMock.user.update.mockResolvedValue(userDto({ mustChangePassword: false }))
+
+    await expect(
+      changeOwnPassword({
+        password: "new-user-password",
+        passwordConfirmation: "new-user-password",
+      }),
+    ).resolves.toMatchObject({ mustChangePassword: false })
+
+    expect(prismaMock.user.update).toHaveBeenCalledWith({
+      where: { id: adminUserFixture.id },
+      data: {
+        passwordHash: "hashed-new-password",
+        mustChangePassword: false,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        status: true,
+        mustChangePassword: true,
+      },
+    })
+  })
+
   it("gets users by id without sensitive fields", async () => {
     prismaMock.user.findUnique.mockResolvedValue(userDto(activeEmployeeUserFixture))
 
@@ -356,6 +410,7 @@ describe("UserService", () => {
         email: true,
         role: true,
         status: true,
+        mustChangePassword: true,
       },
     })
   })

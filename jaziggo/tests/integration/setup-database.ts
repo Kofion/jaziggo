@@ -50,7 +50,7 @@ function runPrismaCommand(
     const child = spawn(prismaExecutable(), ["prisma", ...args], {
       cwd: options.cwd,
       env: options.env,
-      shell: false,
+      shell: process.platform === "win32",
       stdio: "inherit",
     });
 

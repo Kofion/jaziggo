@@ -1,4 +1,4 @@
-﻿import { loadEnvConfig } from "@next/env";
+import { loadEnvConfig } from "@next/env";
 import type { PrismaClient } from "@prisma/client";
 import { NextRequest } from "next/server";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
@@ -64,6 +64,7 @@ const integrationEmployeeUser = {
   email: "employee@burial-spaces-api.integration.test",
   role: USER_ROLE.EMPLOYEE,
   status: USER_STATUS.ACTIVE,
+  mustChangePassword: false,
 } as const satisfies UserDto;
 
 const occupiedJazigoId = "00000000-0000-4000-8000-000000003201";
@@ -154,6 +155,7 @@ async function seedBurialSpaces(): Promise<void> {
       passwordHash: "integration-test-password-hash",
       role: USER_ROLE.EMPLOYEE,
       status: USER_STATUS.ACTIVE,
+      mustChangePassword: false,
     },
   });
 

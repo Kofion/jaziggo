@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useRouter } from "next/navigation"
 import { useId, useState, type FormEvent } from "react"
@@ -30,7 +30,7 @@ const ROLE_OPTIONS = [
 const FORM_COPY = {
   create: {
     title: "Novo usuário",
-    description: "Cadastre uma conta interna autorizada a acessar o Jaziggo.",
+    description: "Cadastre uma conta interna autorizada. O primeiro acesso usa a senha padrão definida pela administração.",
     submitLabel: "Criar usuário",
     pendingLabel: "Criando...",
     successMessage: "Usuário criado com sucesso.",
@@ -101,7 +101,7 @@ export function UserForm({ mode, user, onSuccess, className }: UserFormProps) {
 
     if (!endpoint) {
       setSuccessMessage(null)
-      setErrorMessage("Selecione um usuário valido antes de editar.")
+      setErrorMessage("Selecione um usuário válido antes de editar.")
       return
     }
 
@@ -113,7 +113,6 @@ export function UserForm({ mode, user, onSuccess, className }: UserFormProps) {
         ? ({
             name: fieldValue(formData, "name"),
             email: fieldValue(formData, "email"),
-            password: fieldValue(formData, "password"),
             role,
           } satisfies CreateUserInput)
         : ({
@@ -235,26 +234,6 @@ export function UserForm({ mode, user, onSuccess, className }: UserFormProps) {
             ))}
           </select>
         </div>
-
-        {mode === "create" ? (
-          <div>
-            <label
-              className="mb-2 block text-sm font-medium text-zinc-800"
-              htmlFor={`${formId}-password`}
-            >
-              Senha inicial
-            </label>
-            <input
-              autoComplete="new-password"
-              className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
-              id={`${formId}-password`}
-              minLength={8}
-              name="password"
-              required
-              type="password"
-            />
-          </div>
-        ) : null}
       </div>
 
       <div className="flex justify-end">

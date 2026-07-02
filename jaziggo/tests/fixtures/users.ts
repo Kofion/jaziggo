@@ -17,6 +17,7 @@ export const adminUserFixture = {
   password: TEST_USER_PASSWORD,
   role: USER_ROLE.ADMIN,
   status: USER_STATUS.ACTIVE,
+  mustChangePassword: false,
 } as const satisfies UserFixture
 
 export const activeEmployeeUserFixture = {
@@ -26,6 +27,7 @@ export const activeEmployeeUserFixture = {
   password: TEST_USER_PASSWORD,
   role: USER_ROLE.EMPLOYEE,
   status: USER_STATUS.ACTIVE,
+  mustChangePassword: false,
 } as const satisfies UserFixture
 
 export const inactiveEmployeeUserFixture = {
@@ -35,4 +37,5 @@ export const inactiveEmployeeUserFixture = {
   password: TEST_USER_PASSWORD,
   role: USER_ROLE.EMPLOYEE,
   status: USER_STATUS.INACTIVE,
+  mustChangePassword: false,
 } as const satisfies UserFixture

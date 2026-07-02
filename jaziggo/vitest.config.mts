@@ -2,6 +2,10 @@ import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
 
+const cliArgs = process.argv.slice(2);
+const runsOnlyUnitTests = cliArgs.some((arg) => arg.includes("tests/unit"));
+const shouldResetIntegrationDatabase = !runsOnlyUnitTests;
+
 export default defineConfig({
   test: {
     projects: [
@@ -33,5 +37,8 @@ export default defineConfig({
       },
     ],
     passWithNoTests: true,
+    globalSetup: shouldResetIntegrationDatabase
+      ? ["./tests/integration/global-setup.ts"]
+      : undefined,
   },
 });

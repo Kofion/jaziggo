@@ -10,5 +10,9 @@ export default async function Home() {
     redirect("/login")
   }
 
+  if (user.mustChangePassword) {
+    redirect("/change-password")
+  }
+
   redirect(getHomePathForRole(user.role))
 }

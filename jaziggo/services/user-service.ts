@@ -3,8 +3,14 @@ import "server-only"
 import { Prisma } from "@prisma/client"
 import { z } from "zod"
 
-import { hashPassword } from "../lib/auth/password"
-import { requirePermission } from "../lib/auth/permissions"
+import {
+  DEFAULT_FIRST_ACCESS_PASSWORD,
+  hashPassword,
+} from "../lib/auth/password"
+import {
+  requirePermission,
+  requireRole,
+} from "../lib/auth/permissions"
 import { prisma } from "../lib/db/prisma"
 import { toUserDto } from "../lib/dto/user"
 import { paginationSchema } from "../lib/validation/pagination"
@@ -18,6 +24,7 @@ import { PERMISSION } from "../types/auth"
 import {
   USER_ROLE,
   USER_STATUS,
+  type ChangeOwnPasswordInput,
   type CreateUserInput,
   type UpdateUserInput,
   type UserDto,
@@ -39,10 +46,22 @@ const createUserSchema = z
   .object({
     name: z.string().trim().min(1),
     email: z.string().trim().toLowerCase().pipe(z.email()),
-    password: z.string().min(8),
     role: userRoleSchema,
   })
   .strict()
+
+const changeOwnPasswordSchema = z
+  .object({
+    password: z.string().min(8).max(1024),
+    passwordConfirmation: z.string().min(8).max(1024),
+  })
+  .strict()
+  .refine((value) => value.password === value.passwordConfirmation, {
+    message: "Password confirmation must match",
+  })
+  .refine((value) => value.password !== DEFAULT_FIRST_ACCESS_PASSWORD, {
+    message: "Password must be different from the first access password",
+  })
 
 const updateUserSchema = z
   .object({
@@ -75,6 +94,7 @@ const USER_DTO_SELECT = {
   email: true,
   role: true,
   status: true,
+  mustChangePassword: true,
 } as const satisfies Prisma.UserSelect
 
 type UserServiceErrorCode =
@@ -157,7 +177,7 @@ export async function createUser(
     throw UserServiceError.validation()
   }
 
-  const passwordHash = await hashPassword(parsedInput.data.password)
+  const passwordHash = await hashPassword(DEFAULT_FIRST_ACCESS_PASSWORD)
 
   try {
     const user = await prisma.user.create({
@@ -165,6 +185,7 @@ export async function createUser(
         name: parsedInput.data.name,
         email: parsedInput.data.email,
         passwordHash,
+        mustChangePassword: true,
         role: parsedInput.data.role,
       },
       select: USER_DTO_SELECT,
@@ -282,6 +303,57 @@ export async function deactivateUser(userId: string): Promise<void> {
   }
 }
 
+export async function resetUserPassword(userId: string): Promise<void> {
+  await requirePermission(PERMISSION.MANAGE_USERS)
+
+  const parsedUserId = userIdSchema.safeParse(userId)
+
+  if (!parsedUserId.success) {
+    throw UserServiceError.validation()
+  }
+
+  const passwordHash = await hashPassword(DEFAULT_FIRST_ACCESS_PASSWORD)
+
+  try {
+    await prisma.user.update({
+      where: { id: parsedUserId.data },
+      data: {
+        passwordHash,
+        mustChangePassword: true,
+      },
+      select: { id: true },
+    })
+  } catch (error) {
+    if (isRecordNotFoundError(error)) {
+      throw UserServiceError.notFound()
+    }
+
+    throw error
+  }
+}
+
+export async function changeOwnPassword(
+  input: ChangeOwnPasswordInput,
+): Promise<UserDto> {
+  const currentUser = await requireRole(USER_ROLE.ADMIN, USER_ROLE.EMPLOYEE)
+  const parsedInput = changeOwnPasswordSchema.safeParse(input)
+
+  if (!parsedInput.success) {
+    throw UserServiceError.validation()
+  }
+
+  const passwordHash = await hashPassword(parsedInput.data.password)
+  const user = await prisma.user.update({
+    where: { id: currentUser.id },
+    data: {
+      passwordHash,
+      mustChangePassword: false,
+    },
+    select: USER_DTO_SELECT,
+  })
+
+  return toUserDto(user)
+}
 export async function getUserById(userId: string): Promise<UserDto> {
   await requirePermission(PERMISSION.MANAGE_USERS)
 

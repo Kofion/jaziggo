@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next"
+import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { Suspense } from "react"
 import { z } from "zod"
@@ -185,7 +185,7 @@ export default async function LocationSearchPage({
         <Suspense
           fallback={
             <LoadingState
-              description="Os resultados de localização estáo sendo consultados."
+              description="Os resultados de localização estão sendo consultados."
               label="Carregando localizações"
               rows={4}
             />

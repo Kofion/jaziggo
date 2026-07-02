@@ -62,6 +62,7 @@ const integrationEmployeeUser = {
   email: "employee@location-search-api.integration.test",
   role: USER_ROLE.EMPLOYEE,
   status: USER_STATUS.ACTIVE,
+  mustChangePassword: false,
 } as const satisfies UserDto;
 
 const locatedDeceasedId = "00000000-0000-4000-8000-000000006701";
@@ -71,8 +72,8 @@ const homonymBurialSpaceId = "00000000-0000-4000-8000-000000005702";
 const responsibleId = "00000000-0000-4000-8000-000000003701";
 const locatedBurialLinkId = "00000000-0000-4000-8000-000000007701";
 const homonymBurialLinkId = "00000000-0000-4000-8000-000000007702";
-const deceasedDocument = "14770199001";
-const responsibleDocument = "14770188001";
+const deceasedDocument = "14770199015";
+const responsibleDocument = "14770188080";
 
 let prisma: PrismaClient;
 let routes: LocationRoutes;
@@ -123,8 +124,8 @@ function expectNoFullDocuments(value: unknown): void {
 function expectLocationItemHasOnlyMaskedDocuments(item: LocationSearchItemDto): void {
   expect(item).not.toHaveProperty("deceasedDocument");
   expect(item).not.toHaveProperty("responsibleDocument");
-  expect(item.deceasedDocumentMasked).toEqual(expect.stringContaining("9001"));
-  expect(item.responsibleDocumentMasked).toEqual(expect.stringContaining("8001"));
+  expect(item.deceasedDocumentMasked).toEqual(expect.stringContaining("9015"));
+  expect(item.responsibleDocumentMasked).toEqual(expect.stringContaining("8080"));
 }
 
 async function seedLocationSearch(): Promise<void> {
@@ -175,6 +176,7 @@ async function seedLocationSearch(): Promise<void> {
       passwordHash: "integration-test-password-hash",
       role: USER_ROLE.EMPLOYEE,
       status: USER_STATUS.ACTIVE,
+      mustChangePassword: false,
     },
   });
 
@@ -221,6 +223,7 @@ async function seedLocationSearch(): Promise<void> {
         internalCode: "INT-T147-DEC-1",
         fullName: "INT-T147 Maria Silva",
         searchName: "int-t147 maria silva",
+        documentType: "CPF",
         document: deceasedDocument,
         deathDate: new Date("2025-08-10T00:00:00.000Z"),
         burialDate: new Date("2025-08-12T00:00:00.000Z"),
@@ -343,6 +346,7 @@ describe("location search API integration", () => {
     const searchPath = "/api/v1/location-search/by-document";
     const response = await routes.locationSearchByDocumentPost(
       jsonRequest(searchPath, "POST", {
+        documentType: "CPF",
         deceasedDocument: deceasedDocument,
       }),
     );
@@ -356,9 +360,9 @@ describe("location search API integration", () => {
         data: [
           expect.objectContaining({
             deceasedId: locatedDeceasedId,
-            deceasedDocumentMasked: expect.stringContaining("9001"),
+            deceasedDocumentMasked: expect.stringContaining("9015"),
             responsibleName: "INT-T147 Responsible Silva",
-            responsibleDocumentMasked: expect.stringContaining("8001"),
+            responsibleDocumentMasked: expect.stringContaining("8080"),
           }),
         ],
       },
@@ -416,7 +420,7 @@ describe("location search API integration", () => {
       jsonRequest(
         `/api/v1/location-search/by-document?deceasedDocument=${deceasedDocument}`,
         "POST",
-        { deceasedDocument },
+        { documentType: "CPF", deceasedDocument },
       ),
     );
     const body = await responseJson<ErrorEnvelope>(response);

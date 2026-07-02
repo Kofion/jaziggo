@@ -54,6 +54,7 @@ interface UserRecord {
   passwordHash?: string
   role: UserRole
   status: UserStatus
+  mustChangePassword: boolean
 }
 
 function userRecord(overrides: Partial<UserRecord> = {}): UserRecord {
@@ -64,6 +65,7 @@ function userRecord(overrides: Partial<UserRecord> = {}): UserRecord {
     passwordHash: "stored-hash",
     role: USER_ROLE.ADMIN,
     status: USER_STATUS.ACTIVE,
+    mustChangePassword: false,
     ...overrides,
   }
 }
@@ -130,6 +132,7 @@ describe("auth data access", () => {
         email: "admin@example.com",
         role,
         status: USER_STATUS.ACTIVE,
+        mustChangePassword: false,
       })
 
       expect(findUniqueMock).toHaveBeenCalledWith({
@@ -139,6 +142,7 @@ describe("auth data access", () => {
           name: true,
           email: true,
           passwordHash: true,
+          mustChangePassword: true,
           role: true,
           status: true,
         },

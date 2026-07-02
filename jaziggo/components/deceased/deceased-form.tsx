@@ -221,7 +221,7 @@ export function DeceasedForm({
 
     if (!endpoint) {
       setSuccessMessage(null)
-      setErrorMessage("Selecione um falecido valido antes de editar.")
+      setErrorMessage("Selecione um falecido válido antes de editar.")
       return
     }
 

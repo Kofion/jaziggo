@@ -52,6 +52,7 @@ const integrationEmployeeUser = {
   email: "employee@burial-link-history.integration.test",
   role: USER_ROLE.EMPLOYEE,
   status: USER_STATUS.ACTIVE,
+  mustChangePassword: false,
 } as const satisfies UserDto;
 
 const singleSepulturaId = "00000000-0000-4000-8000-000000005601";
@@ -148,6 +149,7 @@ async function seedBurialLinkHistory(): Promise<void> {
       passwordHash: "integration-test-password-hash",
       role: USER_ROLE.EMPLOYEE,
       status: USER_STATUS.ACTIVE,
+      mustChangePassword: false,
     },
   });
 

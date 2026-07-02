@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useRouter } from "next/navigation"
 import { useState, type FormEvent } from "react"
@@ -13,6 +13,7 @@ type LoginResponse = Readonly<{
   success: boolean
   data?: {
     role?: UserRole
+    mustChangePassword?: boolean
   }
 }>
 
@@ -54,6 +55,12 @@ export function LoginForm() {
 
       const payload = (await response.json()) as LoginResponse
       const role = payload.data?.role
+      const mustChangePassword = payload.data?.mustChangePassword === true
+
+      if (mustChangePassword) {
+        router.replace("/change-password")
+        return
+      }
 
       router.replace(
         role === USER_ROLE.ADMIN || role === USER_ROLE.EMPLOYEE

@@ -6,6 +6,8 @@ const ARGON2_MEMORY_COST = 65_536
 const ARGON2_TIME_COST = 3
 const ARGON2_PARALLELISM = 1
 
+export const DEFAULT_FIRST_ACCESS_PASSWORD = "J@z1gg0_2026#" as const
+
 export async function hashPassword(password: string): Promise<string> {
   if (password.length === 0) {
     throw new TypeError("Password must not be empty")

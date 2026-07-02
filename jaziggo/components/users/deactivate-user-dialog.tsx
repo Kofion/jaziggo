@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useState } from "react"
 
@@ -95,7 +95,7 @@ export function DeactivateUserDialog({
         {errorMessage ? (
           <ErrorMessage
             message={errorMessage}
-            title="Desativacao não concluída"
+            title="Desativação não concluída"
           />
         ) : null}
 

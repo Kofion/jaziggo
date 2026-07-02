@@ -15,6 +15,10 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
     redirect("/login")
   }
 
+  if (user.mustChangePassword) {
+    redirect("/change-password")
+  }
+
   return (
     <div className="jaziggo-admin-theme min-h-screen bg-slate-950 text-slate-100">
       <AdminNav role={user.role} userName={user.name} />

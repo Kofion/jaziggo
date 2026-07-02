@@ -1,4 +1,4 @@
-﻿import { loadEnvConfig } from "@next/env";
+import { loadEnvConfig } from "@next/env";
 import type { PrismaClient } from "@prisma/client";
 import { NextRequest } from "next/server";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
@@ -72,6 +72,7 @@ const integrationEmployeeUser = {
   email: "employee@responsibles-api.integration.test",
   role: USER_ROLE.EMPLOYEE,
   status: USER_STATUS.ACTIVE,
+  mustChangePassword: false,
 } as const satisfies UserDto;
 
 const existingResponsibleId = "00000000-0000-4000-8000-000000003301";
@@ -79,7 +80,7 @@ const linkedResponsibleId = "00000000-0000-4000-8000-000000003302";
 const linkedDeceasedId = "00000000-0000-4000-8000-000000006301";
 const linkedBurialSpaceId = "00000000-0000-4000-8000-000000005301";
 const activeResponsibleLinkId = "00000000-0000-4000-8000-000000008301";
-const existingResponsibleDocument = "14330199001";
+const existingResponsibleDocument = "14330199068";
 const existingResponsiblePhone = "5511993010001";
 const seededResponsibleIds = [existingResponsibleId, linkedResponsibleId] as const;
 
@@ -171,6 +172,7 @@ async function seedResponsibles(): Promise<void> {
       passwordHash: "integration-test-password-hash",
       role: USER_ROLE.EMPLOYEE,
       status: USER_STATUS.ACTIVE,
+      mustChangePassword: false,
     },
   });
 
@@ -180,6 +182,7 @@ async function seedResponsibles(): Promise<void> {
         id: existingResponsibleId,
         fullName: "INT-T143 Existing Responsible",
         searchName: "int-t143 existing responsible",
+        documentType: "CPF",
         document: existingResponsibleDocument,
         phone: existingResponsiblePhone,
         email: "existing@responsibles-api.integration.test",
@@ -189,7 +192,7 @@ async function seedResponsibles(): Promise<void> {
         id: linkedResponsibleId,
         fullName: "INT-T143 Linked Responsible",
         searchName: "int-t143 linked responsible",
-        document: "14330299002",
+        document: "14330299011",
         phone: "5511993020002",
       },
     ],
@@ -281,7 +284,8 @@ describe("responsibles API integration", () => {
     const createResponse = await routes.responsiblesPost(
       jsonRequest("/api/v1/responsibles", "POST", {
         fullName: " INT-T143 Created Responsible ",
-        document: " 14330399003 ",
+        documentType: "CPF",
+        document: " 14330399075 ",
         phone: " (11) 99303-0003 ",
         email: "CREATED@responsibles-api.integration.test",
         address: " Created Address T143 ",
@@ -295,7 +299,7 @@ describe("responsibles API integration", () => {
       success: true,
       data: {
         fullName: "INT-T143 Created Responsible",
-        documentMasked: expect.stringContaining("9003"),
+        documentMasked: expect.stringContaining("9075"),
       },
     });
     expectRequestId(createBody);
@@ -308,7 +312,7 @@ describe("responsibles API integration", () => {
     ).resolves.toMatchObject({
       fullName: "INT-T143 Created Responsible",
       searchName: "int-t143 created responsible",
-      document: "14330399003",
+      document: "14330399075",
       phone: "11993030003",
       email: "created@responsibles-api.integration.test",
       address: "Created Address T143",
@@ -336,7 +340,7 @@ describe("responsibles API integration", () => {
         expect.objectContaining({
           id: createBody.data.id,
           fullName: "INT-T143 Created Responsible",
-          documentMasked: expect.stringContaining("9003"),
+          documentMasked: expect.stringContaining("9075"),
         }),
       ]),
     );
@@ -369,6 +373,7 @@ describe("responsibles API integration", () => {
     const searchPath = "/api/v1/responsibles/search-sensitive";
     const searchResponse = await routes.responsibleSensitiveSearchPost(
       jsonRequest(searchPath, "POST", {
+        documentType: "CPF",
         document: existingResponsibleDocument,
       }),
     );
@@ -386,7 +391,7 @@ describe("responsibles API integration", () => {
           {
             id: existingResponsibleId,
             fullName: "INT-T143 Existing Responsible",
-            documentMasked: expect.stringContaining("9001"),
+            documentMasked: expect.stringContaining("9068"),
           },
         ],
       },
@@ -468,4 +473,3 @@ describe("responsibles API integration", () => {
     });
   });
 });
-

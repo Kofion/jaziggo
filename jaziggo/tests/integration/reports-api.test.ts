@@ -61,6 +61,7 @@ const integrationAdminUser = {
   email: "admin@reports-api.integration.test",
   role: USER_ROLE.ADMIN,
   status: USER_STATUS.ACTIVE,
+  mustChangePassword: false,
 } as const satisfies UserDto;
 
 const integrationEmployeeUser = {
@@ -69,6 +70,7 @@ const integrationEmployeeUser = {
   email: "employee@reports-api.integration.test",
   role: USER_ROLE.EMPLOYEE,
   status: USER_STATUS.ACTIVE,
+  mustChangePassword: false,
 } as const satisfies UserDto;
 
 const deceasedIds = [
@@ -154,6 +156,7 @@ async function seedReports(): Promise<void> {
         passwordHash: "integration-test-password-hash",
         role: USER_ROLE.ADMIN,
         status: USER_STATUS.ACTIVE,
+        mustChangePassword: false,
       },
       {
         id: integrationEmployeeUser.id,
@@ -162,6 +165,7 @@ async function seedReports(): Promise<void> {
         passwordHash: "integration-test-password-hash",
         role: USER_ROLE.EMPLOYEE,
         status: USER_STATUS.ACTIVE,
+        mustChangePassword: false,
       },
     ],
   });

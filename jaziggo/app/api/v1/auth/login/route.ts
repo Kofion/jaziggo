@@ -115,6 +115,7 @@ export async function POST(request: Request) {
         email: user.email,
         role: user.role,
         status: user.status,
+        mustChangePassword: user.mustChangePassword,
       },
       requestId,
     }

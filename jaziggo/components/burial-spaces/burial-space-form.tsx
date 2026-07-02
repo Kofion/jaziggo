@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -48,7 +48,7 @@ const LOCATION_FIELDS = [
   { label: "Bloco", name: "block" },
   { label: "Rua", name: "street" },
   { label: "Quadra/Fila", name: "row" },
-  { label: "Numero", name: "number" },
+  { label: "Número", name: "number" },
   { label: "Complemento", name: "complement" },
 ] as const satisfies ReadonlyArray<{ label: string; name: LocationField }>
 
@@ -163,7 +163,7 @@ export function BurialSpaceForm({
 
     if (!endpoint) {
       setSuccessMessage(null)
-      setErrorMessage("Selecione um espaço valido antes de editar.")
+      setErrorMessage("Selecione um espaço válido antes de editar.")
       return
     }
 

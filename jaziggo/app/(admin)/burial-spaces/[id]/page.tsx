@@ -83,7 +83,7 @@ function formatLocation(space: BurialSpaceListItemDto) {
     ["Bloco", space.block],
     ["Rua", space.street],
     ["Quadra/Fila", space.row],
-    ["Numero", space.number],
+    ["Número", space.number],
     ["Complemento", space.complement],
   ].filter((row): row is [string, string] => typeof row[1] === "string" && row[1].length > 0)
 

@@ -12,6 +12,7 @@ interface UserDtoSource {
   email: string
   role: UserRole
   status: UserStatus
+  mustChangePassword: boolean
 }
 
 export function toUserDto(user: UserDtoSource): UserDto {
@@ -21,5 +22,6 @@ export function toUserDto(user: UserDtoSource): UserDto {
     email: user.email,
     role: user.role,
     status: user.status,
+    mustChangePassword: user.mustChangePassword,
   }
 }

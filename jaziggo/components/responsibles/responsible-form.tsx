@@ -137,7 +137,7 @@ export function ResponsibleForm({
 
     if (!endpoint) {
       setSuccessMessage(null)
-      setErrorMessage("Selecione um responsável valido antes de editar.")
+      setErrorMessage("Selecione um responsável válido antes de editar.")
       return
     }
 

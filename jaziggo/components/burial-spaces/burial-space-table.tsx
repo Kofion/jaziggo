@@ -1,4 +1,4 @@
-﻿import { ActionLink } from "@/components/ui/action-link"
+import { ActionLink } from "@/components/ui/action-link"
 import type {
   BurialSpaceListItemDto,
   BurialSpaceStatus,
@@ -43,7 +43,7 @@ function formatLocation(space: BurialSpaceListItemDto) {
     space.block ? `Bloco ${space.block}` : null,
     space.street ? `Rua ${space.street}` : null,
     space.row ? `Quadra/Fila ${space.row}` : null,
-    space.number ? `Numero ${space.number}` : null,
+    space.number ? `Número ${space.number}` : null,
     space.complement,
   ].filter(Boolean)
 

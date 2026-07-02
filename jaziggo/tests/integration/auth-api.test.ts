@@ -126,6 +126,7 @@ async function seedAuthUsers(): Promise<void> {
         passwordHash: fixturePasswordHash,
         role: USER_ROLE.ADMIN,
         status: USER_STATUS.ACTIVE,
+        mustChangePassword: false,
       },
       {
         id: activeEmployeeUserFixture.id,
@@ -134,6 +135,7 @@ async function seedAuthUsers(): Promise<void> {
         passwordHash: fixturePasswordHash,
         role: USER_ROLE.EMPLOYEE,
         status: USER_STATUS.ACTIVE,
+        mustChangePassword: false,
       },
       {
         id: inactiveEmployeeUserFixture.id,
@@ -142,6 +144,7 @@ async function seedAuthUsers(): Promise<void> {
         passwordHash: fixturePasswordHash,
         role: USER_ROLE.EMPLOYEE,
         status: USER_STATUS.INACTIVE,
+        mustChangePassword: false,
       },
     ],
   });
@@ -205,6 +208,7 @@ describe("auth API integration", () => {
         email: adminUserFixture.email,
         role: USER_ROLE.ADMIN,
         status: USER_STATUS.ACTIVE,
+        mustChangePassword: false,
       },
     });
     expect(body.requestId).toEqual(expect.any(String));
@@ -251,6 +255,7 @@ describe("auth API integration", () => {
         id: adminUserFixture.id,
         role: USER_ROLE.ADMIN,
         status: USER_STATUS.ACTIVE,
+        mustChangePassword: false,
       },
     });
     expect(activeBody.data).not.toHaveProperty("passwordHash");

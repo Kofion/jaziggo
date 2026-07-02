@@ -66,10 +66,11 @@ const integrationEmployeeUser = {
   email: "employee@deceased-api.integration.test",
   role: USER_ROLE.EMPLOYEE,
   status: USER_STATUS.ACTIVE,
+  mustChangePassword: false,
 } as const satisfies UserDto;
 
 const duplicateCandidateId = "00000000-0000-4000-8000-000000006401";
-const duplicateCandidateDocument = "14440199001";
+const duplicateCandidateDocument = "14440199020";
 
 let prisma: PrismaClient;
 let routes: DeceasedRoutes;
@@ -138,7 +139,7 @@ async function seedDeceased(): Promise<void> {
         { id: duplicateCandidateId },
         { fullName: { startsWith: "INT-T144" } },
         { internalCode: { startsWith: "INT-T144" } },
-        { document: { in: [duplicateCandidateDocument, "14440299002", "14440399003"] } },
+        { document: { in: [duplicateCandidateDocument, "14440299083", "14440399037"] } },
       ],
     },
   });
@@ -154,6 +155,7 @@ async function seedDeceased(): Promise<void> {
       passwordHash: "integration-test-password-hash",
       role: USER_ROLE.EMPLOYEE,
       status: USER_STATUS.ACTIVE,
+      mustChangePassword: false,
     },
   });
 
@@ -163,7 +165,8 @@ async function seedDeceased(): Promise<void> {
       internalCode: "INT-T144-DUPLICATE-1",
       fullName: "INT-T144 Duplicate Candidate",
       searchName: "int-t144 duplicate candidate",
-      document: duplicateCandidateDocument,
+      documentType: "CPF",
+        document: duplicateCandidateDocument,
       birthDate: new Date("1940-01-05T00:00:00.000Z"),
       deathDate: new Date("2025-04-10T00:00:00.000Z"),
       burialDate: new Date("2025-04-12T00:00:00.000Z"),
@@ -218,7 +221,8 @@ describe("deceased API integration", () => {
     const createResponse = await routes.deceasedPost(
       jsonRequest("/api/v1/deceased", "POST", {
         fullName: " INT-T144 Complete Deceased ",
-        document: " 144.402.990-02 ",
+        documentType: "CPF",
+        document: " 144.402.990-83 ",
         birthDate: "1942-02-03",
         deathDate: "2025-05-10",
         burialDate: "2025-05-12",
@@ -233,7 +237,7 @@ describe("deceased API integration", () => {
       success: true,
       data: {
         fullName: "INT-T144 Complete Deceased",
-        documentMasked: expect.stringContaining("9002"),
+        documentMasked: expect.stringContaining("9083"),
         birthDate: "1942-02-03",
         deathDate: "2025-05-10",
         burialDate: "2025-05-12",
@@ -254,7 +258,7 @@ describe("deceased API integration", () => {
       internalCode: createBody.data.internalCode,
       fullName: "INT-T144 Complete Deceased",
       searchName: "int-t144 complete deceased",
-      document: "14440299002",
+      document: "14440299083",
       birthDate: new Date("1942-02-03T00:00:00.000Z"),
       deathDate: new Date("2025-05-10T00:00:00.000Z"),
       burialDate: new Date("2025-05-12T00:00:00.000Z"),
@@ -278,7 +282,7 @@ describe("deceased API integration", () => {
           id: createBody.data.id,
           internalCode: createBody.data.internalCode,
           fullName: "INT-T144 Complete Deceased",
-          documentMasked: expect.stringContaining("9002"),
+          documentMasked: expect.stringContaining("9083"),
           deathDate: "2025-05-10",
           burialDate: "2025-05-12",
           historicalDataIncomplete: false,
@@ -390,6 +394,7 @@ describe("deceased API integration", () => {
     const duplicateResponse = await routes.deceasedDuplicatePost(
       jsonRequest("/api/v1/deceased/check-duplicates", "POST", {
         fullName: " INT-T144 Duplicate Candidate ",
+        documentType: "CPF",
         document: duplicateCandidateDocument,
         deathDate: "2025-04-10",
       }),
@@ -411,7 +416,7 @@ describe("deceased API integration", () => {
             id: duplicateCandidateId,
             internalCode: "INT-T144-DUPLICATE-1",
             fullName: "INT-T144 Duplicate Candidate",
-            documentMasked: expect.stringContaining("9001"),
+            documentMasked: expect.stringContaining("9020"),
             birthDate: "1940-01-05",
             deathDate: "2025-04-10",
             burialDate: "2025-04-12",
@@ -427,7 +432,8 @@ describe("deceased API integration", () => {
     const homonymCreateResponse = await routes.deceasedPost(
       jsonRequest("/api/v1/deceased", "POST", {
         fullName: "INT-T144 Duplicate Candidate",
-        document: "14440399003",
+        documentType: "CPF",
+        document: "14440399037",
         deathDate: "2025-04-10",
       }),
     );
@@ -437,7 +443,7 @@ describe("deceased API integration", () => {
     expect(homonymCreateResponse.status).toBe(HTTP_STATUS.CREATED);
     expect(homonymCreateBody.data).toMatchObject({
       fullName: "INT-T144 Duplicate Candidate",
-      documentMasked: expect.stringContaining("9003"),
+      documentMasked: expect.stringContaining("9037"),
       deathDate: "2025-04-10",
       historicalDataIncomplete: false,
     });

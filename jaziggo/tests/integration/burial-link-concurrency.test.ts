@@ -47,6 +47,7 @@ const integrationEmployeeUser = {
   email: "employee@burial-link-concurrency.integration.test",
   role: USER_ROLE.EMPLOYEE,
   status: USER_STATUS.ACTIVE,
+  mustChangePassword: false,
 } as const satisfies UserDto;
 
 const contestedJazigoId = "00000000-0000-4000-8000-000000005501";
@@ -132,6 +133,7 @@ async function seedBurialLinkConcurrency(): Promise<void> {
       passwordHash: "integration-test-password-hash",
       role: USER_ROLE.EMPLOYEE,
       status: USER_STATUS.ACTIVE,
+      mustChangePassword: false,
     },
   });
 

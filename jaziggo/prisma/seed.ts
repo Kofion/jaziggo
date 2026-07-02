@@ -61,9 +61,9 @@ async function main(): Promise<void> {
       role: UserRole.ADMIN,
       status: UserStatus.ACTIVE,
     },
+    // Preserve the password of an existing administrator; seed only sets the initial password on create.
     update: {
       name: "Initial Administrator",
-      passwordHash,
       role: UserRole.ADMIN,
       status: UserStatus.ACTIVE,
     },
