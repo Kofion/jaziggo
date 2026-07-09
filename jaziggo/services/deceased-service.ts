@@ -160,11 +160,25 @@ async function assertUniqueDeceasedDocument(
   }
 }
 
+function shouldMarkDatesUnknown(input: {
+  deathDate?: string
+  burialDate?: string
+  datesUnknown?: boolean
+}): boolean {
+  return input.datesUnknown === true || (!input.deathDate && !input.burialDate)
+}
+
 function calculateHistoricalDataIncomplete(
   document: string | undefined,
+  deathDate: string | undefined,
+  burialDate: string | undefined,
   datesUnknown: boolean | undefined,
 ): boolean {
-  return document === undefined || datesUnknown === true
+  return (
+    document === undefined ||
+    datesUnknown === true ||
+    (deathDate === undefined && burialDate === undefined)
+  )
 }
 
 function toDateFilter(value: string): Date {
@@ -395,9 +409,11 @@ export async function createDeceased(
       burialDate: toOptionalDate(parsedInput.data.burialDate),
       internalCode,
       searchName: normalizeSearchName(parsedInput.data.fullName),
-      datesUnknown: parsedInput.data.datesUnknown === true,
+      datesUnknown: shouldMarkDatesUnknown(parsedInput.data),
       historicalDataIncomplete: calculateHistoricalDataIncomplete(
         parsedInput.data.document,
+        parsedInput.data.deathDate,
+        parsedInput.data.burialDate,
         parsedInput.data.datesUnknown,
       ),
     },
@@ -452,9 +468,11 @@ export async function updateDeceased(
         birthDate: toNullableDate(parsedInput.data.birthDate),
         deathDate: toNullableDate(parsedInput.data.deathDate),
         burialDate: toNullableDate(parsedInput.data.burialDate),
-        datesUnknown: parsedInput.data.datesUnknown === true,
+        datesUnknown: shouldMarkDatesUnknown(parsedInput.data),
         historicalDataIncomplete: calculateHistoricalDataIncomplete(
           nextDocument,
+          parsedInput.data.deathDate,
+          parsedInput.data.burialDate,
           parsedInput.data.datesUnknown,
         ),
         notes: parsedInput.data.notes ?? null,

@@ -14,7 +14,6 @@ export const createBurialLinkSchema = z
     deceasedId: uuidSchema,
     burialSpaceId: uuidSchema,
     responsibleId: uuidSchema.optional(),
-    burialDate: optionalIsoDateSchema,
     confirmation: z.literal(true).optional(),
   })
   .strict()

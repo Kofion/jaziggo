@@ -75,7 +75,6 @@ export interface CreateActiveBurialLinkCommand {
   deceasedId: string
   burialSpaceId: string
   responsibleId?: string
-  burialDate?: IsoDateString
   confirmation?: true
 }
 

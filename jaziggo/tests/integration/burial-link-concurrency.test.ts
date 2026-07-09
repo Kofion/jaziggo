@@ -209,12 +209,11 @@ describe("burial link concurrency integration", () => {
     getServerSessionMock.mockResolvedValue(sessionFor(integrationEmployeeUser));
 
     const responses = await Promise.all(
-      contenderDeceasedIds.map((deceasedId, index) =>
+      contenderDeceasedIds.map((deceasedId) =>
         routes.burialLinksPost(
           jsonRequest("/api/v1/burial-links", "POST", {
             deceasedId,
             burialSpaceId: contestedJazigoId,
-            burialDate: `2025-05-${11 + index}`,
           }),
         ),
       ),
@@ -281,10 +280,15 @@ describe("burial link concurrency integration", () => {
         burialSpaceId: contestedJazigoId,
         status: BURIAL_LINK_STATUS.ACTIVE,
       },
-      select: { deceasedId: true },
+      select: { deceasedId: true, burialDate: true },
     });
 
     expect(linkedContenderIds).toHaveLength(1);
     expect(linkedContenderIds[0]?.deceasedId).toBe(successBody.data.deceasedId);
+    expect(successBody.data.burialDate).toBe(
+      successBody.data.deceasedId === contenderDeceasedIds[0]
+        ? "2025-05-11"
+        : "2025-05-12",
+    );
   });
 });

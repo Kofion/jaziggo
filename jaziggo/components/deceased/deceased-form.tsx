@@ -152,13 +152,6 @@ function validatePayload(payload: DeceasedFormPayload) {
       : "Informe um RG válido usando apenas números."
   }
 
-  if (payload.datesUnknown === true) {
-    return null
-  }
-
-  if (!payload.deathDate && !payload.burialDate) {
-    return "Informe uma data de falecimento, uma data de sepultamento ou marque datas desconhecidas."
-  }
 
   if (payload.birthDate && payload.deathDate && payload.birthDate > payload.deathDate) {
     return "A data de nascimento não pode ser posterior ao falecimento."
@@ -411,7 +404,7 @@ export function DeceasedForm({
             className="mb-2 block text-sm font-medium text-zinc-800"
             htmlFor={`${formId}-deathDate`}
           >
-            Falecimento<RequiredMark />
+            Falecimento
           </label>
           <input
             className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20 disabled:bg-zinc-100 disabled:text-zinc-500"
@@ -428,7 +421,7 @@ export function DeceasedForm({
             className="mb-2 block text-sm font-medium text-zinc-800"
             htmlFor={`${formId}-burialDate`}
           >
-            Sepultamento<RequiredMark />
+            Sepultamento
           </label>
           <input
             className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20 disabled:bg-zinc-100 disabled:text-zinc-500"
@@ -452,7 +445,7 @@ export function DeceasedForm({
           type="checkbox"
         />
         <span>
-          Datas de falecimento e sepultamento desconhecidas para registro histórico.<RequiredMark />
+          Datas de falecimento e sepultamento desconhecidas para registro histórico.
         </span>
       </label>
 

@@ -244,16 +244,41 @@ describe("DeceasedService", () => {
     expect(result).not.toHaveProperty("documentMasked")
   })
 
-  it("rejects invalid date combinations before generating a code or writing", async () => {
+  it("creates records without death or burial dates when they are not available", async () => {
+    prismaMock.deceased.create.mockResolvedValue(
+      deceasedRecord({
+        deathDate: null,
+        burialDate: null,
+        historicalDataIncomplete: true,
+        datesUnknown: true,
+      }),
+    )
+
     await expect(
       createDeceased({
         fullName: "Sem Datas",
-      } as Parameters<typeof createDeceased>[0]),
-    ).rejects.toMatchObject({
-      code: DOMAIN_ERROR_CODE.VALIDATION_ERROR,
-      status: HTTP_STATUS.UNPROCESSABLE_ENTITY,
+        documentType: "CPF",
+        document: "52998224725",
+      }),
+    ).resolves.toMatchObject({
+      id: deceasedId,
+      historicalDataIncomplete: true,
+      datesUnknown: true,
     })
 
+    expect(prismaMock.deceased.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          deathDate: undefined,
+          burialDate: undefined,
+          datesUnknown: true,
+          historicalDataIncomplete: true,
+        }),
+      }),
+    )
+  })
+
+  it("rejects invalid date combinations before generating a code or writing", async () => {
     await expect(
       createDeceased({
         fullName: "Datas Invertidas",

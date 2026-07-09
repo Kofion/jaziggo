@@ -184,11 +184,6 @@ function toIsoDate(value: Date | null): string | undefined {
   return value?.toISOString().slice(0, 10)
 }
 
-function toOptionalDate(value: string | undefined): Date | undefined {
-  return value === undefined
-    ? undefined
-    : new Date(`${value}T00:00:00.000Z`)
-}
 
 function toActiveBurialLink(link: {
   id: string
@@ -424,15 +419,25 @@ export async function createBurialLink(
       throw BurialLinkServiceError.conflict(availability.reasonCode)
     }
 
-    if (parsedInput.data.responsibleId) {
-      const responsible = await transaction.responsible.findUnique({
-        where: { id: parsedInput.data.responsibleId },
-        select: { id: true },
-      })
+    const [deceased, responsible] = await Promise.all([
+      transaction.deceased.findUnique({
+        where: { id: parsedInput.data.deceasedId },
+        select: { burialDate: true },
+      }),
+      parsedInput.data.responsibleId
+        ? transaction.responsible.findUnique({
+            where: { id: parsedInput.data.responsibleId },
+            select: { id: true },
+          })
+        : Promise.resolve(null),
+    ])
 
-      if (!responsible) {
-        throw BurialLinkServiceError.responsibleNotFound()
-      }
+    if (!deceased) {
+      throw BurialLinkServiceError.deceasedNotFound()
+    }
+
+    if (parsedInput.data.responsibleId && !responsible) {
+      throw BurialLinkServiceError.responsibleNotFound()
     }
 
     const burialLink = await transaction.burialLink.create({
@@ -440,7 +445,7 @@ export async function createBurialLink(
         deceasedId: parsedInput.data.deceasedId,
         burialSpaceId: parsedInput.data.burialSpaceId,
         responsibleId: parsedInput.data.responsibleId,
-        burialDate: toOptionalDate(parsedInput.data.burialDate),
+        burialDate: deceased.burialDate,
         status: "ACTIVE",
       },
       select: {

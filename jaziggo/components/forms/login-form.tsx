@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation"
 import { useState, type FormEvent } from "react"
 
-import { RequiredMark } from "@/components/ui/required-mark"
 import { getHomePathForRole } from "@/lib/auth/routes"
 import { USER_ROLE, type UserRole } from "@/types/user"
 
@@ -86,7 +85,7 @@ export function LoginForm() {
           htmlFor="email"
           className="mb-2 block text-sm font-medium text-slate-100"
         >
-          E-mail<RequiredMark />
+          E-mail
         </label>
         <input
           id="email"
@@ -107,7 +106,7 @@ export function LoginForm() {
           htmlFor="password"
           className="mb-2 block text-sm font-medium text-slate-100"
         >
-          Senha<RequiredMark />
+          Senha
         </label>
         <input
           id="password"

@@ -67,6 +67,7 @@ const burialLinkId = "00000000-0000-4000-8000-000000000137"
 function mockDeceased(activeLinkCount = 0): void {
   transactionMock.deceased.findUnique.mockResolvedValue({
     id: deceasedId,
+    burialDate: new Date("2026-01-12T00:00:00.000Z"),
     burialLinks: Array.from({ length: activeLinkCount }, (_, index) => ({
       id: `active-link-${index}`,
     })),
@@ -219,7 +220,6 @@ describe("BurialLinkService capacity and active-link rules", () => {
       createBurialLink({
         deceasedId,
         burialSpaceId,
-        burialDate: "2026-01-12",
       }),
     ).rejects.toMatchObject({
       code: DOMAIN_ERROR_CODE.CONFLICT,
@@ -242,7 +242,6 @@ describe("BurialLinkService capacity and active-link rules", () => {
         deceasedId,
         burialSpaceId,
         responsibleId,
-        burialDate: "2026-01-12",
       }),
     ).resolves.toEqual({
       id: burialLinkId,

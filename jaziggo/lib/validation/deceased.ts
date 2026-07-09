@@ -44,14 +44,6 @@ function validateDeceasedDates(
 ): void {
   const { birthDate, deathDate, burialDate, datesUnknown } = dates
 
-  if (!deathDate && !burialDate && datesUnknown !== true) {
-    context.addIssue({
-      code: "custom",
-      message: "Provide deathDate, burialDate, or set datesUnknown to true",
-      path: ["datesUnknown"],
-    })
-  }
-
   if (datesUnknown === true && (deathDate || burialDate)) {
     context.addIssue({
       code: "custom",

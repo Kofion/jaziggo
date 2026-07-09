@@ -135,12 +135,6 @@ export const homonymDeceasedWithDifferentDatesCandidateFixture = {
   historicalDataIncomplete: false,
 } as const satisfies DeceasedDuplicateCandidateDto
 
-export const missingDatesDeceasedInputFixture = {
-  input: {
-    fullName: "Missing Dates Fixture",
-  },
-  invalidField: "datesUnknown",
-} as const satisfies InvalidDeceasedInputFixture
 
 export const unknownDatesWithKnownDateInputFixture = {
   input: {
@@ -195,7 +189,6 @@ export const deceasedDuplicateCandidateFixtures = [
 ] as const
 
 export const invalidDeceasedInputFixtures = [
-  missingDatesDeceasedInputFixture,
   unknownDatesWithKnownDateInputFixture,
   birthAfterDeathInputFixture,
   birthAfterBurialInputFixture,

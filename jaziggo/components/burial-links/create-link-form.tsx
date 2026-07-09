@@ -64,11 +64,6 @@ function cx(...classes: Array<string | false | undefined>) {
   return classes.filter(Boolean).join(" ")
 }
 
-function optionalValue(value: string) {
-  const trimmedValue = value.trim()
-
-  return trimmedValue.length > 0 ? trimmedValue : undefined
-}
 
 function errorMessageForCreateResponse(
   body: ApiEnvelope<ActiveBurialLink> | null,
@@ -83,7 +78,7 @@ function errorMessageForCreateResponse(
     }
 
     if (body.error.code === DOMAIN_ERROR_CODE.VALIDATION_ERROR) {
-      return "Revise os identificadores e a data de sepultamento antes de tentar novamente."
+      return "Revise os identificadores antes de tentar novamente."
     }
   }
 
@@ -119,7 +114,6 @@ export function CreateLinkForm({
   const [deceasedId, setDeceasedId] = useState(initialDeceasedId ?? "")
   const [burialSpaceId, setBurialSpaceId] = useState(initialBurialSpaceId ?? "")
   const [responsibleId, setResponsibleId] = useState(initialResponsibleId ?? "")
-  const [burialDate, setBurialDate] = useState("")
   const [availability, setAvailability] = useState<SpaceAvailability | null>(null)
   const [pending, setPending] = useState(false)
   const [checkingAvailability, setCheckingAvailability] = useState(false)
@@ -185,8 +179,7 @@ export function CreateLinkForm({
     return {
       deceasedId: deceasedId.trim(),
       burialSpaceId: burialSpaceId.trim(),
-      responsibleId: optionalValue(responsibleId),
-      burialDate: optionalValue(burialDate),
+      responsibleId: responsibleId.trim() || undefined,
       confirmation: true,
     }
   }
@@ -349,25 +342,6 @@ export function CreateLinkForm({
             />
           </div>
         )}
-
-        <div>
-          <label
-            className="mb-2 block text-sm font-medium text-zinc-800"
-            htmlFor={`${formId}-burialDate`}
-          >
-            Data de sepultamento
-          </label>
-          <input
-            className="min-h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
-            id={`${formId}-burialDate`}
-            name="burialDate"
-            onChange={(event) => {
-              setBurialDate(event.currentTarget.value)
-            }}
-            type="date"
-            value={burialDate}
-          />
-        </div>
       </div>
 
       <div className="rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3">

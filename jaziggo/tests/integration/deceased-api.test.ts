@@ -356,18 +356,34 @@ describe("deceased API integration", () => {
     });
   });
 
-  it("returns 422 for invalid date combinations without writing invalid deceased records", async () => {
+  it("creates a deceased record without death or burial dates", async () => {
     getServerSessionMock.mockResolvedValue(sessionFor(integrationEmployeeUser));
 
-    const missingDatesResponse = await routes.deceasedPost(
+    const createResponse = await routes.deceasedPost(
       jsonRequest("/api/v1/deceased", "POST", {
-        fullName: "INT-T144 Invalid Missing Dates",
+        fullName: " INT-T144 No Dates Deceased ",
+        documentType: "CPF",
+        document: "144.403.990-37",
       }),
     );
-    const missingDatesBody = await responseJson<ErrorEnvelope>(missingDatesResponse);
+    const createBody =
+      await responseJson<SuccessEnvelope<DeceasedDetailDto>>(createResponse);
 
-    expect(missingDatesResponse.status).toBe(HTTP_STATUS.UNPROCESSABLE_ENTITY);
-    expectErrorEnvelope(missingDatesBody, DOMAIN_ERROR_CODE.VALIDATION_ERROR);
+    expect(createResponse.status).toBe(HTTP_STATUS.CREATED);
+    expect(createBody.data).toMatchObject({
+      fullName: "INT-T144 No Dates Deceased",
+      documentMasked: expect.stringContaining("9037"),
+      historicalDataIncomplete: true,
+      datesUnknown: true,
+    });
+    expect(createBody.data).not.toHaveProperty("deathDate");
+    expect(createBody.data).not.toHaveProperty("burialDate");
+    expectRequestId(createBody);
+    expectNoFullDocument(createBody.data);
+  });
+
+  it("returns 422 for invalid date combinations without writing invalid deceased records", async () => {
+    getServerSessionMock.mockResolvedValue(sessionFor(integrationEmployeeUser));
 
     const invertedDatesResponse = await routes.deceasedPost(
       jsonRequest("/api/v1/deceased", "POST", {

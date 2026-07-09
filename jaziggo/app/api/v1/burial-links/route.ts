@@ -7,7 +7,6 @@ import {
 } from "../../../../lib/dto/burial-link"
 import {
   createBurialLinkSchema,
-  type CreateBurialLinkInput,
 } from "../../../../lib/validation/burial-link"
 import {
   BurialLinkServiceError,
@@ -90,9 +89,12 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const burialLink = await createBurialLink(
-      input as CreateBurialLinkInput,
-)
+    const burialLink = await createBurialLink({
+      deceasedId: parsedInput.data.deceasedId,
+      burialSpaceId: parsedInput.data.burialSpaceId,
+      responsibleId: parsedInput.data.responsibleId,
+      confirmation: parsedInput.data.confirmation,
+    })
     const body: SuccessEnvelope<BurialLinkDto> = {
       success: true,
       data: toBurialLinkDto(burialLink),
