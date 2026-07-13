@@ -83,7 +83,7 @@ export function LoginForm() {
       <div>
         <label
           htmlFor="email"
-          className="mb-2 block text-sm font-medium text-slate-100"
+          className="mb-2 block text-sm font-medium text-black"
         >
           E-mail
         </label>
@@ -97,14 +97,14 @@ export function LoginForm() {
           required
           disabled={pending}
           aria-describedby={errorMessage ? "login-error" : undefined}
-          className="block min-h-11 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-base text-white outline-none transition placeholder:text-slate-400 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/30 disabled:cursor-not-allowed disabled:bg-slate-800"
+          className="block min-h-11 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base text-black outline-none transition placeholder:text-zinc-500 focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20 disabled:cursor-not-allowed disabled:bg-zinc-100"
         />
       </div>
 
       <div>
         <label
           htmlFor="password"
-          className="mb-2 block text-sm font-medium text-slate-100"
+          className="mb-2 block text-sm font-medium text-black"
         >
           Senha
         </label>
@@ -117,7 +117,7 @@ export function LoginForm() {
           required
           disabled={pending}
           aria-describedby={errorMessage ? "login-error" : undefined}
-          className="block min-h-11 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-base text-white outline-none transition placeholder:text-slate-400 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/30 disabled:cursor-not-allowed disabled:bg-slate-800"
+          className="block min-h-11 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base text-black outline-none transition placeholder:text-zinc-500 focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20 disabled:cursor-not-allowed disabled:bg-zinc-100"
         />
       </div>
 
@@ -128,7 +128,7 @@ export function LoginForm() {
         aria-atomic="true"
         className={
           errorMessage
-            ? "rounded-lg border border-red-900 bg-red-950 px-3 py-2 text-sm text-red-200"
+            ? "rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900"
             : "sr-only"
         }
       >
@@ -138,7 +138,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={pending}
-        className="flex min-h-11 w-full items-center justify-center rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-700"
+        className="flex min-h-11 w-full items-center justify-center rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 disabled:cursor-not-allowed disabled:bg-zinc-400"
       >
         {pending ? "Entrando..." : "Entrar"}
       </button>

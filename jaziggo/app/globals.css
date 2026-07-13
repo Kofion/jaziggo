@@ -25,6 +25,88 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) {
+  color-scheme: light;
+}
+
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) main {
+  background: white;
+}
+
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) main > div > header {
+  background-color: white;
+  color: black;
+}
+
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) main > div > header .text-zinc-950,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) main > div > header .text-zinc-900,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) main > div > header .text-zinc-800,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) main > div > header .text-zinc-700,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) main > div > header .text-zinc-600,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) main > div > header .text-zinc-500,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) main > div > header .text-zinc-400 {
+  color: black !important;
+}
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) > header {
+  border-color: rgb(4 120 87) !important;
+  background-color: rgb(16 185 129) !important;
+  color: black !important;
+}
+
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) > header .text-emerald-400,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) > header .text-slate-400,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) > header .text-slate-200,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) > header .text-slate-100,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) > header .text-emerald-100,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) > header .group-hover\:text-emerald-100 {
+  color: black !important;
+}
+
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) > header button,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) .admin-nav-link,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) button.bg-zinc-950,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) a.bg-zinc-950 {
+  border-color: rgb(4 120 87) !important;
+  background-color: rgb(5 150 105) !important;
+  color: black !important;
+}
+
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) > header button:hover,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) > header button:focus-visible,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) .admin-nav-link:hover,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) .admin-nav-link:focus-visible,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) .admin-nav-link-active,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) .admin-nav-link-active:hover,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) .admin-nav-link-active:focus-visible,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) button.bg-zinc-950:hover,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) a.bg-zinc-950:hover,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) .hover\:bg-zinc-800:hover {
+  border-color: rgb(6 95 70) !important;
+  background-color: rgb(4 120 87) !important;
+  color: black !important;
+}
+
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) .admin-nav-link:hover .text-slate-400,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) .admin-nav-link-active .text-emerald-100,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) .admin-nav-link-active .text-slate-400 {
+  color: black !important;
+}
+
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) .hover\:bg-zinc-100:hover,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) .hover\:bg-zinc-50:hover,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) tr.hover\:bg-zinc-50:hover,
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) .hover\:bg-white:hover {
+  background-color: rgb(209 250 229) !important;
+  color: black !important;
+}
+
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) .hover\:border-zinc-300:hover {
+  border-color: rgb(4 120 87) !important;
+}
+
+.jaziggo-admin-shell:not(.jaziggo-admin-theme) .focus-visible\:outline-zinc-950:focus-visible {
+  outline-color: rgb(4 120 87) !important;
+}
 
 .jaziggo-admin-theme {
   color-scheme: dark;

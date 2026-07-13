@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -66,6 +66,8 @@ const ADMIN_NAV_ITEMS: readonly AdminNavItem[] = [
 ]
 
 type AdminNavProps = Readonly<{
+  isDarkMode: boolean
+  onToggleDarkMode: () => void
   role: UserRole
   userName: string
   className?: string
@@ -93,7 +95,13 @@ export function getAdminNavItems(role: UserRole) {
   return ADMIN_NAV_ITEMS.filter((item) => canViewItem(role, item))
 }
 
-export function AdminNav({ role, userName, className }: AdminNavProps) {
+export function AdminNav({
+  isDarkMode,
+  onToggleDarkMode,
+  role,
+  userName,
+  className,
+}: AdminNavProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
@@ -137,15 +145,26 @@ export function AdminNav({ role, userName, className }: AdminNavProps) {
             </span>
           </Link>
 
-          <button
-            aria-label={isLoggingOut ? "Saindo do sistema" : "Sair do sistema"}
-            className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm font-medium text-slate-100 transition hover:border-emerald-500 hover:bg-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={isLoggingOut}
-            onClick={handleLogout}
-            type="button"
-          >
-            {isLoggingOut ? "Saindo..." : "Sair"}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              aria-label={isDarkMode ? "Ativar modo claro" : "Ativar modo escuro"}
+              aria-pressed={isDarkMode}
+              className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm font-medium text-slate-100 transition hover:border-emerald-500 hover:bg-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"
+              onClick={onToggleDarkMode}
+              type="button"
+            >
+              {isDarkMode ? "Modo claro" : "Modo escuro"}
+            </button>
+            <button
+              aria-label={isLoggingOut ? "Saindo do sistema" : "Sair do sistema"}
+              className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm font-medium text-slate-100 transition hover:border-emerald-500 hover:bg-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={isLoggingOut}
+              onClick={handleLogout}
+              type="button"
+            >
+              {isLoggingOut ? "Saindo..." : "Sair"}
+            </button>
+          </div>
         </div>
 
         <nav aria-label="Navegação principal">
