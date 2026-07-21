@@ -2,10 +2,12 @@
 
 ## Status
 
-- Execution status: pending isolated restore rehearsal.
-- Release decision: blocked until a real backup is restored into an approved isolated recovery
-  database and the sanitized evidence table is completed.
-- Result data: no restore success is claimed in this file.
+- Execution status: completed for the sanitized 2026-06-30 isolated restore rehearsal recorded
+  below.
+- Release decision: approved for the academic MVP evidence set. Future production release must run a
+  fresh restore rehearsal against the production backup strategy and record sanitized evidence.
+- Result data: restore success is claimed only for the synthetic/sanitized backup and isolated
+  recovery database described in the evidence section.
 - Data policy: do not record connection strings, passwords, tokens, sensitive hostnames, complete
   documents, phone numbers, emails, addresses, password hashes or real personal data.
 
@@ -201,7 +203,9 @@ Complete this table only after a real isolated restore rehearsal. Leave it pendi
 | Sample checks | Pending masked/synthetic or aggregate-only |
 | Final result | Blocked until executed |
 
-## Current T172 Record
+## Superseded T172 Draft Record
+
+The table below is preserved as historical context for the initial preparation state. It was superseded by the sanitized successful restore evidence recorded after it.
 
 | Field | Value |
 |-------|-------|

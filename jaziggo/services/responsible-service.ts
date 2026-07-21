@@ -1,4 +1,4 @@
-﻿import "server-only"
+import "server-only"
 
 import { Prisma } from "@prisma/client"
 
@@ -629,77 +629,4 @@ export async function listResponsibleLinks(
   }
 
   return responsible.links.map(toResponsibleLinkDto)
-}
-
-function validateConfirmationText(confirmationText: string | undefined): void {
-  if (confirmationText?.trim().toLowerCase() !== "confirmo") {
-    throw ResponsibleServiceError.validation()
-  }
-}
-
-export async function countResponsibleLinks(responsibleId: string): Promise<number> {
-  await requirePermission(PERMISSION.MANAGE_OPERATIONAL_RECORDS)
-
-  const parsedId = uuidSchema.safeParse(responsibleId)
-
-  if (!parsedId.success) {
-    throw ResponsibleServiceError.validation()
-  }
-
-  const [responsibleLinks, burialLinks] = await prisma.$transaction([
-    prisma.responsibleLink.count({ where: { responsibleId: parsedId.data } }),
-    prisma.burialLink.count({ where: { responsibleId: parsedId.data } }),
-  ])
-
-  return responsibleLinks + burialLinks
-}
-
-export async function unlinkResponsible(
-  responsibleId: string,
-  confirmationText: string | undefined,
-): Promise<void> {
-  await requirePermission(PERMISSION.MANAGE_OPERATIONAL_RECORDS)
-  validateConfirmationText(confirmationText)
-
-  const parsedId = uuidSchema.safeParse(responsibleId)
-
-  if (!parsedId.success) {
-    throw ResponsibleServiceError.validation()
-  }
-
-  await prisma.$transaction([
-    prisma.responsibleLink.deleteMany({ where: { responsibleId: parsedId.data } }),
-    prisma.burialLink.updateMany({
-      where: { responsibleId: parsedId.data },
-      data: { responsibleId: null },
-    }),
-  ])
-}
-
-export async function deleteResponsible(
-  responsibleId: string,
-  confirmationText: string | undefined,
-): Promise<void> {
-  await requirePermission(PERMISSION.MANAGE_OPERATIONAL_RECORDS)
-  validateConfirmationText(confirmationText)
-
-  const parsedId = uuidSchema.safeParse(responsibleId)
-
-  if (!parsedId.success) {
-    throw ResponsibleServiceError.validation()
-  }
-
-  if ((await countResponsibleLinks(parsedId.data)) > 0) {
-    throw ResponsibleServiceError.conflict()
-  }
-
-  try {
-    await prisma.responsible.delete({ where: { id: parsedId.data } })
-  } catch (error) {
-    if (isRecordNotFoundError(error)) {
-      throw ResponsibleServiceError.notFound()
-    }
-
-    throw error
-  }
 }

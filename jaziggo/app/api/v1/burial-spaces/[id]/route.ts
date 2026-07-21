@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 
 import {
   AuthorizationError,
@@ -8,7 +8,6 @@ import { updateBurialSpaceSchema } from "../../../../../lib/validation/burial-sp
 import { uuidSchema } from "../../../../../lib/validation/common"
 import {
   BurialSpaceServiceError,
-  deleteBurialSpace,
   getBurialSpaceById,
   updateBurialSpace,
 } from "../../../../../services/burial-space-service"
@@ -31,10 +30,6 @@ const NO_STORE_HEADERS = { "Cache-Control": "no-store" }
 interface BurialSpaceRouteContext {
   params: Promise<{ id: string }>
 }
-
-type DeleteRequestBody = Readonly<{
-  confirmationText?: unknown
-}>
 
 function errorResponse(
   requestId: string,
@@ -61,19 +56,6 @@ function successResponse(
   const body: SuccessEnvelope<BurialSpaceListItemDto> = {
     success: true,
     data: space,
-    requestId,
-  }
-
-  return NextResponse.json(body, {
-    status: HTTP_STATUS.OK,
-    headers: NO_STORE_HEADERS,
-  })
-}
-
-function deleteSuccessResponse(requestId: string) {
-  const body: SuccessEnvelope<{ completed: true }> = {
-    success: true,
-    data: { completed: true },
     requestId,
   }
 
@@ -117,14 +99,6 @@ async function authorizeAndParseId(
   }
 
   return parsedId.data
-}
-
-async function readDeleteBody(request: NextRequest) {
-  const input = (await request.json().catch(() => null)) as DeleteRequestBody | null
-
-  return typeof input?.confirmationText === "string"
-    ? input.confirmationText
-    : undefined
 }
 
 export async function GET(
@@ -182,25 +156,6 @@ export async function PUT(
 
     return successResponse(space, requestId)
   } catch (error) {
-    return handleError(error, requestId)
-  }
-}
-
-export async function DELETE(
-  request: NextRequest,
-  context: BurialSpaceRouteContext,
-) {
-  const requestId = crypto.randomUUID()
-
-  try {
-    const burialSpaceId = await authorizeAndParseId(context)
-    const confirmationText = await readDeleteBody(request)
-
-    await deleteBurialSpace(burialSpaceId, confirmationText)
-
-    return deleteSuccessResponse(requestId)
-  } catch (error) {
-
     return handleError(error, requestId)
   }
 }

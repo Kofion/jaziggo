@@ -1,4 +1,4 @@
-﻿import "server-only"
+import "server-only"
 
 import { Prisma } from "@prisma/client"
 
@@ -121,12 +121,6 @@ function isUniqueConstraintError(error: unknown): boolean {
   )
 }
 
-function isRecordNotFoundError(error: unknown): boolean {
-  return (
-    error instanceof Prisma.PrismaClientKnownRequestError &&
-    error.code === "P2025"
-  )
-}
 
 export async function createBurialSpace(
   input: CreateBurialSpaceInput,
@@ -364,79 +358,4 @@ export async function updateBurialSpaceStatus(
       activeLinkCount: updatedSpace._count.burialLinks,
     })
   })
-}
-
-function validateConfirmationText(confirmationText: string | undefined): void {
-  if (confirmationText?.trim().toLowerCase() !== "confirmo") {
-    throw BurialSpaceServiceError.validation()
-  }
-}
-
-export async function countBurialSpaceLinks(burialSpaceId: string): Promise<number> {
-  await requirePermission(PERMISSION.MANAGE_OPERATIONAL_RECORDS)
-
-  const parsedId = uuidSchema.safeParse(burialSpaceId)
-
-  if (!parsedId.success) {
-    throw BurialSpaceServiceError.validation()
-  }
-
-  const [burialLinks, responsibleLinks] = await prisma.$transaction([
-    prisma.burialLink.count({ where: { burialSpaceId: parsedId.data } }),
-    prisma.responsibleLink.count({ where: { burialSpaceId: parsedId.data } }),
-  ])
-
-  return burialLinks + responsibleLinks
-}
-
-export async function unlinkBurialSpace(
-  burialSpaceId: string,
-  confirmationText: string | undefined,
-): Promise<void> {
-  await requirePermission(PERMISSION.MANAGE_OPERATIONAL_RECORDS)
-  validateConfirmationText(confirmationText)
-
-  const parsedId = uuidSchema.safeParse(burialSpaceId)
-
-  if (!parsedId.success) {
-    throw BurialSpaceServiceError.validation()
-  }
-
-  await prisma.$transaction([
-    prisma.responsibleLink.deleteMany({ where: { burialSpaceId: parsedId.data } }),
-    prisma.burialLink.deleteMany({ where: { burialSpaceId: parsedId.data } }),
-    prisma.burialSpace.update({
-      where: { id: parsedId.data },
-      data: { status: "AVAILABLE" },
-      select: { id: true },
-    }),
-  ])
-}
-
-export async function deleteBurialSpace(
-  burialSpaceId: string,
-  confirmationText: string | undefined,
-): Promise<void> {
-  await requirePermission(PERMISSION.MANAGE_OPERATIONAL_RECORDS)
-  validateConfirmationText(confirmationText)
-
-  const parsedId = uuidSchema.safeParse(burialSpaceId)
-
-  if (!parsedId.success) {
-    throw BurialSpaceServiceError.validation()
-  }
-
-  if ((await countBurialSpaceLinks(parsedId.data)) > 0) {
-    throw BurialSpaceServiceError.statusConflict()
-  }
-
-  try {
-    await prisma.burialSpace.delete({ where: { id: parsedId.data } })
-  } catch (error) {
-    if (isRecordNotFoundError(error)) {
-      throw BurialSpaceServiceError.notFound()
-    }
-
-    throw error
-  }
 }

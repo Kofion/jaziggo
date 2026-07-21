@@ -7,11 +7,9 @@ import { BurialSpaceForm } from "@/components/burial-spaces/burial-space-form"
 import { ActionLink } from "@/components/ui/action-link"
 import { EmptyState } from "@/components/ui/empty-state"
 import { ErrorMessage } from "@/components/ui/error-message"
-import { RecordDangerActions } from "@/components/ui/record-danger-actions"
 import { getCurrentActiveUser } from "@/lib/auth/session"
 import {
   BurialSpaceServiceError,
-  countBurialSpaceLinks,
   getBurialSpaceById,
 } from "@/services/burial-space-service"
 import {
@@ -262,7 +260,6 @@ async function BurialSpaceDetail({
   }
 
   if (isEditing) {
-    const linkCount = await countBurialSpaceLinks(id)
 
     return (
       <div className="space-y-6">
@@ -276,14 +273,6 @@ async function BurialSpaceDetail({
           description="Crie um vínculo para este espaço ou encerre um vínculo ativo antes de registrar a correção. O histórico permanece preservado."
           links={links}
           title="Vínculos de sepultamento"
-        />
-        <RecordDangerActions
-          afterDeleteHref="/burial-spaces"
-          deleteEndpoint={`/api/v1/burial-spaces/${id}`}
-          entityLabel="sepultura ou jazigo"
-          entityName={space.identifier}
-          hasLinks={linkCount > 0}
-          unlinkEndpoint={`/api/v1/burial-spaces/${id}/links`}
         />
       </div>
     )

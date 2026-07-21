@@ -321,6 +321,15 @@ T167 documents the critical query-plan targets and decisions without executing r
 workspace because no performance database URL is configured. T168 remains the task that may apply a
 minimal migration after real `EXPLAIN ANALYZE` evidence exists.
 
+## Current Performance Validation Boundary
+
+The performance benchmark scripts for T165 and T166 exist and enforce isolated execution through
+`PERFORMANCE_DATABASE_URL` plus explicit confirmation flags. However, this repository snapshot does
+not contain a successful real benchmark run or captured `EXPLAIN ANALYZE` output against the T164
+baseline. Therefore SC-003 and SC-008 are supported by executable tooling, not by current measured
+evidence in this workspace. A production or pre-production approval must run the benchmark commands
+against an isolated performance database and record sanitized aggregate results before claiming the
+3s search and 10s report targets as measured.
 ## T168 Index Adjustment Decision
 
 T168 reviewed this analysis, the Prisma schema, and the existing initial migration. No new migration

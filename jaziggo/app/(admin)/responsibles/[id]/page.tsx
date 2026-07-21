@@ -7,10 +7,8 @@ import { ResponsibleLinkManagement } from "@/components/responsibles/responsible
 import { ActionLink } from "@/components/ui/action-link"
 import { EmptyState } from "@/components/ui/empty-state"
 import { ErrorMessage } from "@/components/ui/error-message"
-import { RecordDangerActions } from "@/components/ui/record-danger-actions"
 import { getCurrentActiveUser } from "@/lib/auth/session"
 import {
-  countResponsibleLinks,
   getResponsibleById,
   ResponsibleServiceError,
 } from "@/services/responsible-service"
@@ -195,7 +193,6 @@ async function ResponsibleDetail({
   }
 
   if (isEditing) {
-    const linkCount = await countResponsibleLinks(id)
 
     return (
       <div className="space-y-6">
@@ -209,14 +206,6 @@ async function ResponsibleDetail({
           links={responsible.links}
           responsibleId={id}
           title="Vínculos administrativos"
-        />
-        <RecordDangerActions
-          afterDeleteHref="/responsibles"
-          deleteEndpoint={`/api/v1/responsibles/${id}`}
-          entityLabel="responsável"
-          entityName={responsible.fullName}
-          hasLinks={linkCount > 0}
-          unlinkEndpoint={`/api/v1/responsibles/${id}/links`}
         />
       </div>
     )

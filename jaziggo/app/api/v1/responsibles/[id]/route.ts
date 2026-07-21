@@ -1,9 +1,8 @@
-﻿import { NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 
 import { AuthorizationError } from "../../../../../lib/auth/permissions"
 import { updateResponsibleSchema } from "../../../../../lib/validation/responsible"
 import {
-  deleteResponsible,
   getResponsibleById,
   ResponsibleServiceError,
   updateResponsible,
@@ -23,10 +22,6 @@ const NO_STORE_HEADERS = { "Cache-Control": "no-store" }
 interface ResponsibleRouteContext {
   params: Promise<{ id: string }>
 }
-
-type DeleteRequestBody = Readonly<{
-  confirmationText?: unknown
-}>
 
 function errorResponse(
   requestId: string,
@@ -53,19 +48,6 @@ function successResponse(
   const body: SuccessEnvelope<ResponsibleDetailDto> = {
     success: true,
     data: responsible,
-    requestId,
-  }
-
-  return NextResponse.json(body, {
-    status: HTTP_STATUS.OK,
-    headers: NO_STORE_HEADERS,
-  })
-}
-
-function deleteSuccessResponse(requestId: string) {
-  const body: SuccessEnvelope<{ completed: true }> = {
-    success: true,
-    data: { completed: true },
     requestId,
   }
 
@@ -102,14 +84,6 @@ async function getResponsibleId(
   const { id } = await context.params
 
   return id
-}
-
-async function readDeleteBody(request: NextRequest) {
-  const input = (await request.json().catch(() => null)) as DeleteRequestBody | null
-
-  return typeof input?.confirmationText === "string"
-    ? input.confirmationText
-    : undefined
 }
 
 export async function GET(
@@ -165,25 +139,6 @@ export async function PUT(
 
     return successResponse(responsible, requestId)
   } catch (error) {
-    return handleError(error, requestId)
-  }
-}
-
-export async function DELETE(
-  request: NextRequest,
-  context: ResponsibleRouteContext,
-) {
-  const requestId = crypto.randomUUID()
-
-  try {
-    const responsibleId = await getResponsibleId(context)
-    const confirmationText = await readDeleteBody(request)
-
-    await deleteResponsible(responsibleId, confirmationText)
-
-    return deleteSuccessResponse(requestId)
-  } catch (error) {
-
     return handleError(error, requestId)
   }
 }

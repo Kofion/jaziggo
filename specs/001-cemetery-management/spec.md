@@ -4,7 +4,7 @@
 
 **Created**: 2026-06-18
 
-**Status**: Draft
+**Status**: MVP implemented; production validation gates tracked in quickstart.md
 
 **Input**: User description: "Criar a especificação funcional oficial do Jaziggo com base no PRD,
 preservando os módulos e os requisitos RF001 a RF042."

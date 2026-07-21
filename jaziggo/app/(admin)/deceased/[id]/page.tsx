@@ -8,11 +8,9 @@ import { redirect } from "next/navigation"
 import { ActionLink } from "@/components/ui/action-link"
 import { EmptyState } from "@/components/ui/empty-state"
 import { ErrorMessage } from "@/components/ui/error-message"
-import { RecordDangerActions } from "@/components/ui/record-danger-actions"
 import { getCurrentActiveUser } from "@/lib/auth/session"
 import {
   DeceasedServiceError,
-  countDeceasedLinks,
   getDeceasedById,
   type DeceasedDetailWithBurialLinksDto,
 } from "@/services/deceased-service"
@@ -251,7 +249,6 @@ async function DeceasedDetail({
   }
 
   if (isEditing) {
-    const linkCount = await countDeceasedLinks(id)
 
     return (
       <div className="space-y-6">
@@ -265,14 +262,6 @@ async function DeceasedDetail({
           description="Crie um vínculo para este falecido ou encerre um vínculo ativo antes de registrar a correção. O histórico permanece preservado."
           links={deceased.links}
           title="Vínculos de sepultamento"
-        />
-        <RecordDangerActions
-          afterDeleteHref="/deceased"
-          deleteEndpoint={`/api/v1/deceased/${id}`}
-          entityLabel="falecido"
-          entityName={deceased.fullName}
-          hasLinks={linkCount > 0}
-          unlinkEndpoint={`/api/v1/deceased/${id}/links`}
         />
       </div>
     )
